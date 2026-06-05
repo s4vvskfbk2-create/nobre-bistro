@@ -260,7 +260,18 @@ function CardapioTab(props){
 }
 
 function CaixaTab(props){
-  var orders=props.orders;
+  var orders=props.orders,reloadOrders=props.reloadOrders;
+  var s1=us(false),refreshing=s1[0],setRefreshing=s1[1];
+  ue(function(){
+    var timer=setInterval(function(){
+      sbGet("nb_bA_orders").then(function(o){if(o)props.setOrders(o);});
+    },30000);
+    return function(){clearInterval(timer);};
+  },[]);
+  function refresh(){
+    setRefreshing(true);
+    sbGet("nb_bA_orders").then(function(o){if(o)props.setOrders(o);setRefreshing(false);});
+  }
   var hoje=orders.filter(function(o){return o.status==="concluido"&&o.criadoEm&&o.criadoEm.startsWith(todayKey());});
   var total=hoje.reduce(function(s,o){return s+o.total;},0);
   var byPay={};hoje.forEach(function(o){var k=o.fiado?"fiado":(o.payment||"outro");byPay[k]=(byPay[k]||0)+o.total;});
@@ -268,7 +279,10 @@ function CaixaTab(props){
   var emCaixa=total-fiadoHoje;
   var PAY={pix:"PIX",cartao_credito:"Credito",cartao_debito:"Debito",dinheiro:"Dinheiro",fiado:"Fiado"};
   return h("div",{style:{padding:14}},
-    h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 12px",fontFamily:"Georgia,serif"}},"Caixa - "+todayKey()),
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
+      h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Caixa - "+todayKey()),
+      h("button",{onClick:refresh,style:{background:refreshing?"#ccc":R,color:"#fff",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}},refreshing?"...":"Atualizar")
+    ),
     h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:12}},
       [["Faturamento",fmt(total),"#22c55e"],["Pedidos",String(hoje.length),"#3b82f6"],["Em caixa",fmt(emCaixa),R],["Fiado",fmt(fiadoHoje),"#f59e0b"]].map(function(arr){return h("div",{key:arr[0],style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:11}},h("p",{style:{margin:"0 0 2px",fontSize:9,fontWeight:700,color:"#aaa",textTransform:"uppercase"}},arr[0]),h("p",{style:{margin:0,fontWeight:900,fontSize:17,color:arr[2],fontFamily:"Georgia,serif"}},arr[1]));})
     ),
@@ -655,7 +669,7 @@ function App(){
       tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders}),
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
-      tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders}):null),
+      tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
       tab==="historico"&&(nivel==="gerente"?h(HistoricoTab,{orders:orders,profs:profs}):null),
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
