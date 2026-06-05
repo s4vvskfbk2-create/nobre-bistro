@@ -362,7 +362,12 @@ function EquipeTab(props){
     var n=modal==="new"?profs.concat([p]):profs.map(function(x){return x.id===p.id?p:x;});
     setProfs(n);sbSet("nb_bA_profs",n);setModal(null);
   }
-  var ranking=profs.map(function(p){var ps=orders.filter(function(o){return o.status==="concluido"&&o.profissional===p.name;});return Object.assign({},p,{pedidos:ps.length,total:ps.reduce(function(s,o){return s+o.total;},0)});}).sort(function(a,b){return b.total-a.total;});
+  var ranking=profs.map(function(p){
+    var ps=orders.filter(function(o){
+      return o.status==="concluido"&&o.profissional===p.name&&!o.fiado;
+    });
+    return Object.assign({},p,{pedidos:ps.length,total:ps.reduce(function(s,o){return s+o.total;},0)});
+  }).sort(function(a,b){return b.total-a.total;});
   return h("div",{style:{padding:14}},
     h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
       h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Equipe"),
