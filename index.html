@@ -2,45 +2,72 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Nobre Bistro</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}</style>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}@keyframes spin{to{transform:rotate(360deg)}}</style>
 </head>
-<body>
-<div id="root"></div>
+<body><div id="root"></div>
 <script>
-var R="#8B1A1A",C="#faf8f5",B="#ede9e3";
-var h=React.createElement;
-var us=React.useState;
-var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
-var P=[
-{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8},
-{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6},
-{id:3,cat:"prato",name:"Risoto Pera Gorgonzola",price:65,tag:"Chef Indica",img:"https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400",stock:3},
-{id:4,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4},
-{id:5,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6},
-{id:6,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5},
-{id:7,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12},
-{id:8,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15},
-{id:9,cat:"bebidas",name:"Suco Natural",price:15,tag:"Chef Indica",img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10},
-{id:10,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10},
-{id:11,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15}
-];
+var h=React.createElement,us=React.useState,ue=React.useEffect;
+var R="#8B1A1A",B="#ede9e3",C="#faf8f5",G="#C9A84C";
 var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
 var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
 function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
+function sbGet(k){return fetch(SBU+"/rest/v1/config?key=eq."+k+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}}).then(function(r){return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});}
+
+var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
+var PRODS_DEFAULT=[
+{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8,active:true,desc:"Pure de mandioca com carne seca."},
+{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6,active:true,desc:"Panqueca artesanal."},
+{id:3,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4,active:true,desc:"Massa artesanal."},
+{id:4,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6,active:true,desc:"Folhas frescas."},
+{id:5,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5,active:true,desc:"Frango grelhado."},
+{id:6,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12,active:true,desc:"Crocante por fora."},
+{id:7,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15,active:true,desc:"Chocolate belga."},
+{id:8,cat:"bebidas",name:"Suco Natural",price:15,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Feito na hora."},
+{id:9,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10,active:true,desc:"Gin premium."},
+{id:10,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."}
+];
+
 function App(){
-  var s1=us("prato"),cat=s1[0],setCat=s1[1];
-  var s2=us([]),cart=s2[0],setCart=s2[1];
-  var s3=us(null),sel=s3[0],setSel=s3[1];
-  var s4=us(false),sc=s4[0],setSc=s4[1];
-  var prods=P.filter(function(p){return p.cat===cat;});
+  var s1=us(PRODS_DEFAULT),prods=s1[0],setProds=s1[1];
+  var s2=us(true),loading=s2[0],setLoading=s2[1];
+  var s3=us("prato"),cat=s3[0],setCat=s3[1];
+  var s4=us([]),cart=s4[0],setCart=s4[1];
+  var s5=us(null),sel=s5[0],setSel=s5[1];
+  var s6=us(false),showCart=s6[0],setShowCart=s6[1];
+
+  ue(function(){
+    sbGet("nb_bA_products").then(function(p){
+      if(p&&p.length)setProds(p);
+      setLoading(false);
+    });
+  },[]);
+
   var cc=cart.reduce(function(s,i){return s+i.qty;},0);
   var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
-  function add(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
-  return h("div",{style:{width:"100%",minHeight:"100vh",background:C}},
+  var catProds=prods.filter(function(p){return p.active&&p.cat===cat;});
+
+  function addCart(p){
+    setCart(function(prev){
+      var ex=prev.find(function(i){return i.id===p.id;});
+      if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});
+      return prev.concat([Object.assign({},p,{qty:1})]);
+    });
+    setSel(null);
+  }
+  function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
+  function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
+
+  if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
+    h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:3,color:R,textTransform:"uppercase"}},"Nobre Bistro"),
+    h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}})
+  );
+
+  return h("div",{style:{background:C,minHeight:"100vh",width:"100%"}},
     h("div",{style:{background:R,padding:"28px 20px 20px",textAlign:"center"}},
       h("div",{style:{color:"rgba(255,255,255,.6)",fontSize:10,letterSpacing:4,textTransform:"uppercase",fontWeight:700}},"Nobre"),
       h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
@@ -51,51 +78,59 @@ function App(){
         h("span",{style:{width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block"}}),
         h("span",{style:{fontSize:11,fontWeight:700,color:"#16a34a"}},"Aberto")
       ),
-      cc>0&&h("button",{onClick:function(){setSc(true);},style:{background:R,color:"#fff",border:"none",borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}},"Pedido ("+cc+")")
+      cc>0&&h("button",{onClick:function(){setShowCart(true);},style:{background:R,color:"#fff",border:"none",borderRadius:20,padding:"6px 14px",fontSize:12,fontWeight:700,cursor:"pointer"}},"Pedido ("+cc+")")
     ),
     h("div",{style:{display:"flex",overflowX:"auto",gap:6,padding:"10px 14px",background:"#fff",borderBottom:"1px solid "+B}},
       CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})
     ),
     h("div",{style:{padding:"0 16px 100px",background:"#fff"}},
-      prods.map(function(p){return h("div",{key:p.id,onClick:function(){setSel(p);},style:{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid "+B,cursor:"pointer"}},
+      catProds.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum prato nesta categoria"),
+      catProds.map(function(p){return h("div",{key:p.id,onClick:function(){setSel(p);},style:{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid "+B,cursor:"pointer"}},
         h("div",{style:{flex:1}},
           p.tag&&h("span",{style:{color:R,fontSize:9,fontWeight:800,display:"block",marginBottom:3,textTransform:"uppercase"}},"* "+p.tag),
           h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108"}},p.name),
+          p.desc&&h("p",{style:{margin:"3px 0 0",fontSize:12,color:"#999",lineHeight:1.4}},p.desc),
           h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:15,color:"#1a1108",fontFamily:"Georgia,serif"}},fmt(p.price))
         ),
         h("div",{style:{position:"relative",flexShrink:0}},
-          h("div",{style:{width:100,height:80,borderRadius:12,overflow:"hidden"}},
-            h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover"},loading:"lazy"})
+          h("div",{style:{width:100,height:80,borderRadius:12,overflow:"hidden",background:"#f5f5f5"}},
+            p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover"},loading:"lazy"})
           ),
-          h("button",{onClick:function(e){e.stopPropagation();add(p);},style:{position:"absolute",bottom:-8,right:4,width:26,height:26,borderRadius:"50%",background:R,border:"2px solid #fff",color:"#fff",fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}},"+")
+          h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-8,right:4,width:26,height:26,borderRadius:"50%",background:R,border:"2px solid #fff",color:"#fff",fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}},"+")
         )
       );})
     ),
-    sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end"}},
-      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480,margin:"0 auto"}},
-        h("div",{style:{height:180,overflow:"hidden",borderRadius:"20px 20px 0 0"}},h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}})),
+    sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:500}},
+        h("div",{style:{height:180,overflow:"hidden",borderRadius:"20px 20px 0 0",background:"#f5f5f5"}},
+          sel.img&&h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}})
+        ),
         h("div",{style:{padding:"16px 20px 28px"}},
-          h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 14px"}},sel.name),
+          h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 6px"}},sel.name),
+          sel.desc&&h("p",{style:{fontSize:13,color:"#888",margin:"0 0 14px"}},sel.desc),
           h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
             h("span",{style:{fontFamily:"Georgia,serif",fontSize:20,fontWeight:900,color:R}},fmt(sel.price)),
-            h("button",{onClick:function(){add(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar")
+            h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar")
           )
         )
       )
     ),
-    sc&&h("div",{onClick:function(){setSc(false);},style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end"}},
-      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480,margin:"0 auto",maxHeight:"80vh",display:"flex",flexDirection:"column"}},
+    showCart&&h("div",{onClick:function(){setShowCart(false);},style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:500,maxHeight:"80vh",display:"flex",flexDirection:"column"}},
         h("div",{style:{padding:"14px 20px",borderBottom:"1px solid "+B,display:"flex",justifyContent:"space-between"}},
           h("span",{style:{fontWeight:800,fontSize:16}},"Meu Pedido"),
-          h("button",{onClick:function(){setSc(false);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")
+          h("button",{onClick:function(){setShowCart(false);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888"}},"x")
         ),
         h("div",{style:{flex:1,overflowY:"auto",padding:"12px 20px"}},
-          cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",marginBottom:10,paddingBottom:10,borderBottom:"1px solid "+B}},
-            h("div",null,h("p",{style:{margin:0,fontWeight:700}},i.qty+"x "+i.name),h("p",{style:{margin:"2px 0 0",color:R,fontWeight:800}},fmt(i.price*i.qty))),
-            h("div",{style:{display:"flex",gap:6,alignItems:"center"}},
-              h("button",{onClick:function(){setCart(function(prev){return prev.map(function(x){return x.id===i.id&&x.qty>1?Object.assign({},x,{qty:x.qty-1}):x;}).filter(function(x){return x.qty>0;});});},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer"}},"-"),
-              h("span",{style:{fontWeight:700}},i.qty),
-              h("button",{onClick:function(){setCart(function(prev){return prev.map(function(x){return x.id===i.id?Object.assign({},x,{qty:x.qty+1}):x;});});},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer"}},"+")
+          cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,paddingBottom:10,borderBottom:"1px solid "+B}},
+            h("div",null,
+              h("p",{style:{margin:0,fontWeight:700,fontSize:13}},i.name),
+              h("p",{style:{margin:"2px 0 0",color:R,fontWeight:800,fontSize:12}},fmt(i.price*i.qty))
+            ),
+            h("div",{style:{display:"flex",alignItems:"center",gap:8}},
+              h("button",{onClick:function(){decCart(i.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}}," - "),
+              h("span",{style:{fontWeight:700,minWidth:20,textAlign:"center"}},i.qty),
+              h("button",{onClick:function(){incCart(i.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}}," + ")
             )
           );}),
           h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"2px solid "+B,paddingTop:10}},
@@ -104,7 +139,11 @@ function App(){
           )
         ),
         h("div",{style:{padding:"12px 20px 28px"}},
-          h("button",{onClick:function(){var lines=cart.map(function(i){return "- "+i.qty+"x "+i.name;}).join("\n");var msg="PEDIDO - Nobre Bistro\n\n"+lines+"\n\nTotal: "+fmt(ct)+"\nPIX: nobre@bistro.com.br";window.open("https://wa.me/5511914195567?text="+encodeURIComponent(msg),"_blank");},style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Enviar pelo WhatsApp")
+          h("button",{onClick:function(){
+            var lines=cart.map(function(i){return "- "+i.qty+"x "+i.name;}).join("\n");
+            var msg="PEDIDO - Nobre Bistro\n\n"+lines+"\n\nTotal: "+fmt(ct)+"\nPIX: nobre@bistro.com.br";
+            window.open("https://wa.me/5511914195567?text="+encodeURIComponent(msg),"_blank");
+          },style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Enviar pelo WhatsApp")
         )
       )
     )
