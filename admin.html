@@ -334,6 +334,17 @@ function CardapioTab(props){
   );
 }
 
+function isHoje(criadoEm){
+  if(!criadoEm)return false;
+  var d=new Date();
+  var dd=String(d.getDate()).padStart(2,"0");
+  var mm=String(d.getMonth()+1).padStart(2,"0");
+  var yyyy=d.getFullYear();
+  var pat1=dd+"/"+mm+"/"+yyyy;
+  var pat2=dd+"/"+mm+",";
+  var pat3=dd+"/"+mm+" ";
+  return criadoEm.indexOf(pat1)===0||criadoEm.indexOf(pat2)===0||criadoEm.indexOf(pat3)===0;
+}
 function CaixaTab(props){
   var orders=props.orders,setOrders=props.setOrders;
   var s1=us(false),refreshing=s1[0],setRefreshing=s1[1];
