@@ -6,7 +6,7 @@
 <title>Nobre Bistro</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:sans-serif}</style>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}</style>
 </head>
 <body>
 <div id="root"></div>
@@ -38,7 +38,7 @@ function App(){
   var cc=cart.reduce(function(s,i){return s+i.qty;},0);
   var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
   function add(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
-  return h("div",{style:{maxWidth:480,margin:"0 auto",minHeight:"100vh",background:C}},
+  return h("div",{style:{width:"100%",minHeight:"100vh",background:C}},
     h("div",{style:{background:R,padding:"28px 20px 20px",textAlign:"center"}},
       h("div",{style:{color:"rgba(255,255,255,.6)",fontSize:10,letterSpacing:4,textTransform:"uppercase",fontWeight:700}},"Nobre"),
       h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
