@@ -15,8 +15,26 @@ var R="#8B1A1A",B="#ede9e3",C="#faf8f5",BG="#f4f6f9";
 var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
 var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
 function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
-function nowStr(){return new Date().toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});}
-function todayKey(){return new Date().toLocaleDateString("pt-BR");}
+function nowStr(){
+  var d=new Date();
+  var dd=String(d.getDate()).padStart(2,"0");
+  var mm=String(d.getMonth()+1).padStart(2,"0");
+  var yyyy=d.getFullYear();
+  var hh=String(d.getHours()).padStart(2,"0");
+  var mi=String(d.getMinutes()).padStart(2,"0");
+  return dd+"/"+mm+"/"+yyyy+" "+hh+":"+mi;
+}
+function todayKey(){
+  var d=new Date();
+  var dd=String(d.getDate()).padStart(2,"0");
+  var mm=String(d.getMonth()+1).padStart(2,"0");
+  var yyyy=d.getFullYear();
+  return dd+"/"+mm+"/"+yyyy;
+}
+function isHoje(criadoEm){
+  if(!criadoEm)return false;
+  return criadoEm.indexOf(todayKey())===0;
+}
 async function sbGet(k){try{var r=await fetch(SBU+"/rest/v1/config?key=eq."+k+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}});var d=await r.json();return d&&d.length?d[0].value:null;}catch(e){return null;}}
 async function sbSet(k,v){try{await fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})});}catch(e){}}
 async function uploadFoto(file){var fname=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"-");var buf=await file.arrayBuffer();var r=await fetch(SBU+"/storage/v1/object/produtos/"+fname,{method:"POST",headers:{"Authorization":"Bearer "+SBK,"Content-Type":file.type,"x-upsert":"true"},body:buf});if(r.ok)return SBU+"/storage/v1/object/public/produtos/"+fname;return null;}
@@ -195,7 +213,7 @@ function CozinhaTab(props){
   var orders=props.orders,setOrders=props.setOrders,setProds=props.setProds;
   var s1=us("fila"),aba=s1[0],setAba=s1[1];
   var fila=orders.filter(function(o){return o.status==="em_curso";});
-  var concluidos=orders.filter(function(o){return o.status==="concluido"&&o.criadoEm&&o.criadoEm.startsWith(todayKey());}).slice().reverse().slice(0,20);
+  var concluidos=orders.filter(function(o){return o.status==="concluido"&&isHoje(o.criadoEm);}).slice().reverse().slice(0,20);
 
   ue(function(){
     var i=setInterval(function(){sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});},10000);
@@ -330,7 +348,7 @@ function CaixaTab(props){
 
   function refresh(){setRefreshing(true);sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);setRefreshing(false);});}
 
-  var hoje=orders.filter(function(o){return o.criadoEm&&o.criadoEm.startsWith(todayKey());});
+  var hoje=orders.filter(function(o){return isHoje(o.criadoEm);});
   var pagos=hoje.filter(function(o){return o.status==="concluido"&&!o.fiado;});
   var fiadoHoje=hoje.filter(function(o){return o.fiado&&o.status!=="cancelado";});
   var totalPago=pagos.reduce(function(s,o){return s+o.total;},0);
@@ -560,7 +578,8 @@ function HorariosTab(props){
 }
 
 function HistoricoTab(props){
-  var orders=props.orders,profs=props.profs;
+  var orders=props.orders,profs=props.profs,setOrders=props.setOrders;
+  ue(function(){var i=setInterval(function(){sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
   var s1=us("clientes"),tipo=s1[0],setTipo=s1[1];
   var s2=us(null),selNome=s2[0],setSelNome=s2[1];
   var s3=us("atual"),periodo=s3[0],setPeriodo=s3[1];
@@ -782,7 +801,7 @@ function App(){
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
-      tab==="historico"&&(nivel==="gerente"?h(HistoricoTab,{orders:orders,profs:profs}):null),
+      tab==="historico"&&(nivel==="gerente"?h(HistoricoTab,{orders:orders,profs:profs,setOrders:setOrders}):null),
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
       tab==="equipe"&&(nivel==="gerente"?h(EquipeTab,{profs:profs,setProfs:setProfs,orders:orders}):null),
