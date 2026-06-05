@@ -1,0 +1,3397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Nobre Bistro - Admin</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f4f6f9;width:100%;overflow-x:hidden;font-family:sans-serif}</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+"use strict";
+
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = App;
+var _react = require("react");
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
+function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
+function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+var R = "#8B1A1A",
+  CREAM = "#faf8f5",
+  BORDER = "#ede9e3",
+  BG = "#f4f6f9",
+  GOLD = "#C9A84C";
+var _FU = "https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap";
+var CSS = "@import url(" + _FU + ");*{box-sizing:border-box;margin:0;padding:0;font-family:Nunito,sans-serif;}::-webkit-scrollbar{display:none;}body{background:" + BG + ";}@keyframes spin{to{transform:rotate(360deg)}}";
+var fmt = function fmt(v) {
+  return "R$ " + Number(v || 0).toLocaleString("pt-BR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+var nowStr = function nowStr() {
+  return new Date().toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+};
+var todayKey = function todayKey() {
+  return new Date().toLocaleDateString("pt-BR");
+};
+var _SB_URL = "https://zxpnguynjrsixsomaieg.supabase.co";
+var _SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+function sbFetch(_x, _x2, _x3) {
+  return _sbFetch.apply(this, arguments);
+}
+function _sbFetch() {
+  _sbFetch = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee4(method, path, body) {
+    var res, text;
+    return _regenerator().w(function (_context4) {
+      while (1) switch (_context4.n) {
+        case 0:
+          _context4.n = 1;
+          return fetch(_SB_URL + "/rest/v1/" + path, {
+            method: method,
+            headers: {
+              "apikey": _SB_KEY,
+              "Authorization": "Bearer " + _SB_KEY,
+              "Content-Type": "application/json",
+              "Prefer": method === "POST" ? "resolution=merge-duplicates" : ""
+            },
+            body: body ? JSON.stringify(body) : undefined
+          });
+        case 1:
+          res = _context4.v;
+          if (res.ok) {
+            _context4.n = 2;
+            break;
+          }
+          return _context4.a(2, null);
+        case 2:
+          _context4.n = 3;
+          return res.text();
+        case 3:
+          text = _context4.v;
+          return _context4.a(2, text ? JSON.parse(text) : null);
+      }
+    }, _callee4);
+  }));
+  return _sbFetch.apply(this, arguments);
+}
+var store = {
+  get: function () {
+    var _get = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(k) {
+      var rows, _t;
+      return _regenerator().w(function (_context) {
+        while (1) switch (_context.p = _context.n) {
+          case 0:
+            _context.p = 0;
+            _context.n = 1;
+            return sbFetch("GET", "config?key=eq." + encodeURIComponent(k) + "&select=value");
+          case 1:
+            rows = _context.v;
+            if (!(rows && rows.length > 0)) {
+              _context.n = 2;
+              break;
+            }
+            return _context.a(2, rows[0].value);
+          case 2:
+            return _context.a(2, null);
+          case 3:
+            _context.p = 3;
+            _t = _context.v;
+            return _context.a(2, null);
+        }
+      }, _callee, null, [[0, 3]]);
+    }));
+    function get(_x4) {
+      return _get.apply(this, arguments);
+    }
+    return get;
+  }(),
+  set: function () {
+    var _set = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(k, v) {
+      var _t2;
+      return _regenerator().w(function (_context2) {
+        while (1) switch (_context2.p = _context2.n) {
+          case 0:
+            _context2.p = 0;
+            _context2.n = 1;
+            return sbFetch("POST", "config", {
+              key: k,
+              value: v
+            });
+          case 1:
+            _context2.n = 3;
+            break;
+          case 2:
+            _context2.p = 2;
+            _t2 = _context2.v;
+          case 3:
+            return _context2.a(2);
+        }
+      }, _callee2, null, [[0, 2]]);
+    }));
+    function set(_x5, _x6) {
+      return _set.apply(this, arguments);
+    }
+    return set;
+  }()
+};
+var DIAS = ["Domingo", "Segunda", "Terca", "Quarta", "Quinta", "Sexta", "Sabado"];
+var HORARIOS_DEFAULT = {
+  0: {
+    aberto: false,
+    abre: "",
+    fecha: ""
+  },
+  1: {
+    aberto: false,
+    abre: "",
+    fecha: ""
+  },
+  2: {
+    aberto: true,
+    abre: "09:00",
+    fecha: "18:30"
+  },
+  3: {
+    aberto: true,
+    abre: "09:00",
+    fecha: "18:30"
+  },
+  4: {
+    aberto: true,
+    abre: "09:00",
+    fecha: "18:30"
+  },
+  5: {
+    aberto: true,
+    abre: "09:00",
+    fecha: "18:30"
+  },
+  6: {
+    aberto: true,
+    abre: "09:00",
+    fecha: "18:30"
+  }
+};
+var INIT_CATS = [{
+  id: "prato",
+  label: "Prato do Dia"
+}, {
+  id: "tortas",
+  label: "Tortas"
+}, {
+  id: "salada",
+  label: "Saladas"
+}, {
+  id: "lanches",
+  label: "Lanches"
+}, {
+  id: "salgados",
+  label: "Salgados"
+}, {
+  id: "sobremesa",
+  label: "Sobremesas"
+}, {
+  id: "bebidas",
+  label: "Bebidas"
+}, {
+  id: "drinks",
+  label: "Drinks"
+}, {
+  id: "cerveja",
+  label: "Cervejas"
+}];
+var INIT_PROFS = [{
+  id: 1,
+  name: "Adriana",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 2,
+  name: "Amanda",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 3,
+  name: "Bruna",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 4,
+  name: "Carol",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 5,
+  name: "Fernanda",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 6,
+  name: "Gabriela",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 7,
+  name: "Juliana",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 8,
+  name: "Larissa",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 9,
+  name: "Leticia",
+  active: true,
+  telefone: "",
+  desconto: 20
+}, {
+  id: 10,
+  name: "Mariana",
+  active: true,
+  telefone: "",
+  desconto: 20
+}];
+var INIT_PRODUCTS = [{
+  id: 1,
+  cat: "prato",
+  name: "Escondidinho",
+  desc: "Pure de mandioca cremoso recheado de carne seca.",
+  price: 48,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&q=80",
+  stock: 8,
+  minStock: 3,
+  active: true,
+  ingredients: []
+}, {
+  id: 2,
+  cat: "prato",
+  name: "Panqueca de Frango",
+  desc: "Panqueca artesanal com frango desfiado.",
+  price: 45,
+  tag: null,
+  tagColor: null,
+  img: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80",
+  stock: 6,
+  minStock: 2,
+  active: true,
+  ingredients: []
+}, {
+  id: 3,
+  cat: "prato",
+  name: "Risoto Pera Gorgonzola",
+  desc: "Arroz arboreo cremoso com pera e gorgonzola.",
+  price: 65,
+  tag: "Chef Indica",
+  tagColor: "#92400e",
+  img: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80",
+  stock: 3,
+  minStock: 2,
+  active: true,
+  ingredients: []
+}, {
+  id: 4,
+  cat: "tortas",
+  name: "Torta de Frango",
+  desc: "Massa artesanal com frango ao molho.",
+  price: 38,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400&q=80",
+  stock: 4,
+  minStock: 2,
+  active: true,
+  ingredients: []
+}, {
+  id: 5,
+  cat: "salada",
+  name: "Salada Bistro",
+  desc: "Folhas frescas, frango grelhado e molho especial.",
+  price: 45,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80",
+  stock: 6,
+  minStock: 2,
+  active: true,
+  ingredients: []
+}, {
+  id: 6,
+  cat: "lanches",
+  name: "Lanche de Frango",
+  desc: "Frango grelhado com molho especial.",
+  price: 48,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80",
+  stock: 5,
+  minStock: 2,
+  active: true,
+  ingredients: []
+}, {
+  id: 7,
+  cat: "salgados",
+  name: "Pao de Queijo Waffle",
+  desc: "Crocante por fora, derretendo por dentro.",
+  price: 12.90,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&q=80",
+  stock: 12,
+  minStock: 4,
+  active: true,
+  ingredients: []
+}, {
+  id: 8,
+  cat: "sobremesa",
+  name: "Brigadeiro",
+  desc: "Brigadeiro artesanal com chocolate belga.",
+  price: 6.50,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400&q=80",
+  stock: 15,
+  minStock: 5,
+  active: true,
+  ingredients: []
+}, {
+  id: 9,
+  cat: "bebidas",
+  name: "Suco Natural",
+  desc: "Feito na hora.",
+  price: 15,
+  tag: "Chef Indica",
+  tagColor: "#92400e",
+  img: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&q=80",
+  stock: 10,
+  minStock: 3,
+  active: true,
+  ingredients: []
+}, {
+  id: 10,
+  cat: "drinks",
+  name: "Gin e Tonica",
+  desc: "Gin premium com tonica artesanal.",
+  price: 32,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400&q=80",
+  stock: 10,
+  minStock: 3,
+  active: true,
+  ingredients: []
+}, {
+  id: 11,
+  cat: "cerveja",
+  name: "Corona Extra",
+  desc: "Long neck com limao.",
+  price: 17,
+  tag: "Mais Pedido",
+  tagColor: "#b91c1c",
+  img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&q=80",
+  stock: 15,
+  minStock: 5,
+  active: true,
+  ingredients: []
+}];
+function imprimirComanda(order) {
+  var w = window.open("", "_blank", "width=380,height=540");
+  var rows = (order.items || []).map(function (i) {
+    return "<tr><td style='padding:5px;font-weight:700'>" + i.qty + "x</td><td style='padding:5px'>" + i.name + "</td><td style='padding:5px;text-align:right;font-weight:700'>" + fmt(i.price * i.qty) + "</td></tr>";
+  }).join("");
+  var html = "<!DOCTYPE html><html><head><title>Comanda</title><style>*{font-family:monospace;}</style></head><body>";
+  html += "<h2 style='text-align:center'>COMANDA #" + order.id + "</h2>";
+  html += "<p>Cliente: " + (order.nome || "Balcao") + "</p>";
+  html += "<p>Hora: " + order.criadoEm + "</p>";
+  html += "<table style='width:100%'><tbody>" + rows + "</tbody></table>";
+  html += "<hr><p style='font-size:18px;font-weight:900'>TOTAL: " + fmt(order.total) + "</p>";
+  html += "</body></html>";
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function () {
+    w.print();
+  }, 400);
+}
+function gerarMsgFiado(prof, order, totalAcum) {
+  var nome = prof.name.split(" ")[0];
+  var itens = order.items.map(function (i) {
+    return "- " + i.qty + "x " + i.name + " " + fmt(i.price * i.qty);
+  }).join("\n");
+  return "Oi " + nome + "! Lancei no seu fiado:\n\n" + itens + "\n\nValor: " + fmt(order.total) + "\nSaldo quinzena: " + fmt(totalAcum) + "\n\nNobre Bistro";
+}
+function gerarMsgQuinzena(prof, orders, desconto) {
+  var total = orders.reduce(function (s, o) {
+    return s + o.total;
+  }, 0);
+  var desc = total * (desconto / 100);
+  var liquido = total - desc;
+  var nome = prof.name.split(" ")[0];
+  return "Oi " + nome + "! Fechamento da quinzena:\n\nTotal consumido: " + fmt(total) + "\nDesconto " + desconto + "%: -" + fmt(desc) + "\nDesconto na folha: " + fmt(liquido) + "\n\nNobre Bistro";
+}
+function abrirWpp(telefone, msg) {
+  var tel = (telefone || "").replace(/\D/g, "");
+  if (tel.length >= 10) tel = "55" + tel;
+  window.open("https://wa.me/" + (tel || "5511914195567") + "?text=" + encodeURIComponent(msg), "_blank");
+}
+function Btn(props) {
+  var c = props.color || R,
+    sx = props.style || {};
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: props.onClick,
+    disabled: props.disabled,
+    style: Object.assign({}, {
+      padding: props.sm ? "7px 13px" : props.lg ? "14px 0" : "10px 18px",
+      borderRadius: 10,
+      border: "1.5px solid " + (props.outline ? c : "transparent"),
+      background: props.outline ? "transparent" : props.disabled ? "#ccc" : c,
+      color: props.outline ? c : "#fff",
+      fontSize: props.sm ? 12 : 13,
+      fontWeight: 800,
+      cursor: props.disabled ? "not-allowed" : "pointer",
+      width: props.full ? "100%" : "auto",
+      opacity: props.disabled ? .5 : 1
+    }, sx)
+  }, props.children);
+}
+function InputF(props) {
+  var s = {
+    width: "100%",
+    border: "1.5px solid " + BORDER,
+    borderRadius: 10,
+    padding: "10px 13px",
+    fontSize: 14,
+    outline: "none",
+    background: "#fff",
+    boxSizing: "border-box",
+    fontFamily: "inherit",
+    color: "#1a1a1a",
+    resize: "none"
+  };
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 12
+    }
+  }, props.label && /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#888",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, props.label), props.textarea ? /*#__PURE__*/React.createElement("textarea", {
+    value: props.value,
+    onChange: function onChange(e) {
+      props.onChange(e.target.value);
+    },
+    rows: props.rows || 3,
+    placeholder: props.placeholder,
+    style: s
+  }) : /*#__PURE__*/React.createElement("input", {
+    type: props.type || "text",
+    value: props.value,
+    onChange: function onChange(e) {
+      props.onChange(e.target.value);
+    },
+    placeholder: props.placeholder,
+    style: s
+  }), props.hint && /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "3px 0 0",
+      fontSize: 10,
+      color: "#aaa"
+    }
+  }, props.hint));
+}
+function Modal(props) {
+  if (!props.open) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    onClick: props.onClose,
+    style: {
+      position: "fixed",
+      inset: 0,
+      zIndex: 200,
+      background: "rgba(0,0,0,.45)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: function onClick(e) {
+      e.stopPropagation();
+    },
+    style: {
+      background: "#fff",
+      borderRadius: 16,
+      width: "100%",
+      maxWidth: 440,
+      maxHeight: "90vh",
+      overflow: "auto",
+      boxShadow: "0 20px 60px rgba(0,0,0,.2)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "14px 18px",
+      borderBottom: "1px solid " + BORDER,
+      position: "sticky",
+      top: 0,
+      background: "#fff"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800,
+      fontSize: 16
+    }
+  }, props.title), /*#__PURE__*/React.createElement("button", {
+    onClick: props.onClose,
+    style: {
+      background: "none",
+      border: "none",
+      fontSize: 22,
+      cursor: "pointer",
+      color: "#aaa"
+    }
+  }, "x")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "14px 18px"
+    }
+  }, props.children)));
+}
+function Badge(props) {
+  if (!props.count) return null;
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "#ef4444",
+      color: "#fff",
+      fontSize: 9,
+      fontWeight: 800,
+      borderRadius: 10,
+      padding: "1px 5px",
+      marginLeft: 4
+    }
+  }, props.count);
+}
+function BalcaoTab(props) {
+  var products = props.products,
+    setProducts = props.setProducts,
+    profs = props.profs,
+    orders = props.orders,
+    setOrders = props.setOrders;
+  var _ci = (0, _react.useState)([]),
+    cartItems = _ci[0],
+    setCartItems = _ci[1];
+  var _cn = (0, _react.useState)(""),
+    clienteNome = _cn[0],
+    setClienteNome = _cn[1];
+  var _ps = (0, _react.useState)(""),
+    profSel = _ps[0],
+    setProfSel = _ps[1];
+  var _py = (0, _react.useState)("pix"),
+    payment = _py[0],
+    setPayment = _py[1];
+  var _fi = (0, _react.useState)(false),
+    fiado = _fi[0],
+    setFiado = _fi[1];
+  var _dn = (0, _react.useState)(null),
+    done = _dn[0],
+    setDone = _dn[1];
+  var _bq = (0, _react.useState)(""),
+    busca = _bq[0],
+    setBusca = _bq[1];
+  var total = cartItems.reduce(function (s, i) {
+    return s + i.price * i.qty;
+  }, 0);
+  var oid = (0, _react.useRef)(2000 + Math.floor(Math.random() * 9000));
+  var PAY = {
+    pix: "PIX",
+    cartao_credito: "Credito",
+    cartao_debito: "Debito",
+    dinheiro: "Dinheiro"
+  };
+  var prodsFiltrados = (0, _react.useMemo)(function () {
+    var ap = products.filter(function (p) {
+      return p.active;
+    });
+    if (!busca) return ap;
+    var q = busca.toLowerCase();
+    return ap.filter(function (p) {
+      return p.name.toLowerCase().includes(q);
+    });
+  }, [products, busca]);
+  function addItem(p) {
+    setCartItems(function (prev) {
+      var ex = prev.find(function (i) {
+        return i.id === p.id;
+      });
+      if (ex) return prev.map(function (i) {
+        return i.id === p.id ? Object.assign({}, i, {
+          qty: i.qty + 1
+        }) : i;
+      });
+      return prev.concat([Object.assign({}, p, {
+        qty: 1
+      })]);
+    });
+  }
+  function remItem(id) {
+    setCartItems(function (prev) {
+      return prev.map(function (i) {
+        return i.id === id && i.qty > 1 ? Object.assign({}, i, {
+          qty: i.qty - 1
+        }) : i;
+      }).filter(function (i) {
+        return i.qty > 0;
+      });
+    });
+  }
+  function confirmar() {
+    var order = {
+      id: oid.current,
+      nome: clienteNome || "Balcao",
+      profissional: profSel,
+      payment: fiado ? "fiado" : payment,
+      fiado: fiado,
+      profFiado: fiado ? profSel : "",
+      items: cartItems.map(function (i) {
+        return {
+          id: i.id,
+          name: i.name,
+          price: i.price,
+          qty: i.qty
+        };
+      }),
+      total: total,
+      status: "em_curso",
+      criadoEm: nowStr(),
+      canal: "balcao"
+    };
+    setOrders(function (prev) {
+      var novos = prev.concat([order]);
+      if (fiado && profSel) {
+        var profObj = props.profs.find(function (p) {
+          return p.name === profSel;
+        });
+        var fiadosAnt = prev.filter(function (o) {
+          return o.fiado && o.profFiado === profSel;
+        });
+        var totalAcum = fiadosAnt.reduce(function (s, o) {
+          return s + o.total;
+        }, 0) + order.total;
+        if (profObj) setTimeout(function () {
+          abrirWpp(profObj.telefone, gerarMsgFiado(profObj, order, totalAcum));
+        }, 800);
+      }
+      return novos;
+    });
+    setProducts(function (prev) {
+      return prev.map(function (p) {
+        var it = cartItems.find(function (i) {
+          return i.id === p.id;
+        });
+        if (!it) return p;
+        return Object.assign({}, p, {
+          stock: Math.max(0, (p.stock || 0) - it.qty)
+        });
+      });
+    });
+    setDone(order);
+    setCartItems([]);
+    setClienteNome("");
+    setProfSel("");
+    setFiado(false);
+    setPayment("pix");
+    oid.current = 2000 + Math.floor(Math.random() * 9000);
+  }
+  if (done) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 52,
+      height: 52,
+      borderRadius: "50%",
+      background: "#f0fdf4",
+      border: "2px solid #22c55e",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      margin: "0 auto 12px"
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "24",
+    height: "24",
+    viewBox: "0 0 24 24",
+    fill: "none"
+  }, /*#__PURE__*/React.createElement("path", {
+    d: "M5 13l4 4L19 7",
+    stroke: "#22c55e",
+    strokeWidth: "2.5",
+    strokeLinecap: "round"
+  }))), /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontFamily: "Georgia,serif",
+      fontSize: 18,
+      fontWeight: 700,
+      color: "#1a1a1a",
+      margin: "0 0 4px"
+    }
+  }, "Pedido #", done.id), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 900,
+      fontSize: 22,
+      color: R,
+      fontFamily: "Georgia,serif",
+      margin: "0 0 14px"
+    }
+  }, fmt(done.total)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    onClick: function onClick() {
+      imprimirComanda(done);
+    }
+  }, "Imprimir"), /*#__PURE__*/React.createElement(Btn, {
+    onClick: function onClick() {
+      setDone(null);
+    },
+    outline: true
+  }, "Novo pedido")));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      margin: "0 0 12px",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Balcao"), /*#__PURE__*/React.createElement("input", {
+    value: busca,
+    onChange: function onChange(e) {
+      setBusca(e.target.value);
+    },
+    placeholder: "Buscar produto...",
+    style: {
+      width: "100%",
+      border: "1.5px solid " + BORDER,
+      borderRadius: 10,
+      padding: "9px 13px",
+      fontSize: 14,
+      outline: "none",
+      boxSizing: "border-box",
+      marginBottom: 12
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8,
+      marginBottom: 14
+    }
+  }, prodsFiltrados.map(function (p) {
+    var esg = p.stock === 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: p.id,
+      onClick: function onClick() {
+        if (!esg) addItem(p);
+      },
+      disabled: esg,
+      style: {
+        background: esg ? "#f5f5f5" : "#fff",
+        border: "1.5px solid " + BORDER,
+        borderRadius: 11,
+        padding: "10px",
+        cursor: esg ? "not-allowed" : "pointer",
+        textAlign: "left",
+        opacity: esg ? .5 : 1
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 2px",
+        fontWeight: 700,
+        fontSize: 13,
+        color: "#1a1a1a"
+      }
+    }, p.name), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 900,
+        fontSize: 14,
+        color: R,
+        fontFamily: "Georgia,serif"
+      }
+    }, fmt(p.price)), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontSize: 9,
+        color: "#aaa"
+      }
+    }, esg ? "Esgotado" : p.stock + " un"));
+  })), cartItems.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 13,
+      border: "1px solid " + BORDER,
+      padding: 12,
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      margin: "0 0 8px"
+    }
+  }, "Itens do pedido"), cartItems.map(function (item) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: item.id,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        color: "#1a1a1a"
+      }
+    }, item.qty, "x ", item.name), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 13,
+        fontWeight: 700,
+        color: R
+      }
+    }, fmt(item.price * item.qty)), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        remItem(item.id);
+      },
+      style: {
+        background: "#fee2e2",
+        border: "none",
+        borderRadius: 6,
+        width: 22,
+        height: 22,
+        cursor: "pointer",
+        fontSize: 14,
+        color: "#b91c1c",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }
+    }, "-")));
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      borderTop: "1.5px solid " + BORDER,
+      paddingTop: 8,
+      marginTop: 4,
+      display: "flex",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 800
+    }
+  }, "Total"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 900,
+      color: R,
+      fontFamily: "Georgia,serif",
+      fontSize: 16
+    }
+  }, fmt(total)))), cartItems.length > 0 && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(InputF, {
+    label: "Cliente",
+    value: clienteNome,
+    onChange: setClienteNome,
+    placeholder: "Nome (opcional)"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#888",
+      display: "block",
+      marginBottom: 6,
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Profissional"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 5
+    }
+  }, profs.filter(function (p) {
+    return p.active;
+  }).map(function (p) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: p.id,
+      onClick: function onClick() {
+        setProfSel(profSel === p.name ? "" : p.name);
+      },
+      style: {
+        padding: "5px 10px",
+        borderRadius: 18,
+        border: "1.5px solid " + (profSel === p.name ? R : BORDER),
+        background: profSel === p.name ? "#fff5f5" : "#fff",
+        color: profSel === p.name ? R : "#666",
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, p.name);
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 6,
+      marginBottom: 10
+    }
+  }, [["pix", "PIX"], ["cartao_credito", "Credito"], ["cartao_debito", "Debito"], ["dinheiro", "Dinheiro"]].map(function (arr) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: arr[0],
+      onClick: function onClick() {
+        setPayment(arr[0]);
+        setFiado(false);
+      },
+      style: {
+        padding: "8px 0",
+        borderRadius: 9,
+        border: "1.5px solid " + (payment === arr[0] && !fiado ? R : BORDER),
+        background: payment === arr[0] && !fiado ? "#fff5f5" : "#fff",
+        color: payment === arr[0] && !fiado ? R : "#666",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, arr[1]);
+  })), profSel && /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      marginBottom: 12,
+      cursor: "pointer",
+      fontSize: 13,
+      fontWeight: fiado ? 700 : 400,
+      color: fiado ? R : "#666"
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: fiado,
+    onChange: function onChange(e) {
+      setFiado(e.target.checked);
+    },
+    style: {
+      accentColor: R,
+      width: 15,
+      height: 15
+    }
+  }), "Fiado para ", profSel), /*#__PURE__*/React.createElement(Btn, {
+    lg: true,
+    full: true,
+    onClick: confirmar
+  }, "Confirmar Pedido -- ", fmt(total))));
+}
+function PedidosTab(props) {
+  var orders = props.orders,
+    setOrders = props.setOrders;
+  var _sf = (0, _react.useState)("todos"),
+    statusFiltro = _sf[0],
+    setStatusFiltro = _sf[1];
+  var STATUS = {
+    todos: "Todos",
+    pendente: "Pendente",
+    aguardando_pagamento: "Aguard. Pgto",
+    em_curso: "Em curso",
+    concluido: "Concluido",
+    cancelado: "Cancelado"
+  };
+  var CORES = {
+    pendente: "#f59e0b",
+    aguardando_pagamento: "#3b82f6",
+    em_curso: "#8b5cf6",
+    concluido: "#22c55e",
+    cancelado: "#ef4444"
+  };
+  function upd(id, status) {
+    setOrders(function (prev) {
+      return prev.map(function (o) {
+        return o.id === id ? Object.assign({}, o, {
+          status: status
+        }) : o;
+      });
+    });
+  }
+  var lista = (0, _react.useMemo)(function () {
+    var o = orders.slice().reverse();
+    if (statusFiltro === "todos") return o;
+    return o.filter(function (x) {
+      return x.status === statusFiltro;
+    });
+  }, [orders, statusFiltro]);
+  var aguardando = orders.filter(function (o) {
+    return o.status === "aguardando_pagamento";
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      margin: "0 0 12px",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Pedidos"), aguardando.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#eff6ff",
+      border: "1.5px solid #3b82f6",
+      borderRadius: 13,
+      padding: "11px 14px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 8px",
+      fontWeight: 800,
+      fontSize: 13,
+      color: "#1d4ed8"
+    }
+  }, aguardando.length, " aguardando pagamento"), aguardando.map(function (o) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: o.id,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "#fff",
+        borderRadius: 10,
+        padding: "9px 11px",
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 700,
+        fontSize: 13
+      }
+    }, "#", o.id, " -- ", o.nome), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontSize: 11,
+        color: "#aaa"
+      }
+    }, o.items.map(function (i) {
+      return i.qty + "x " + i.name;
+    }).join(", ").slice(0, 45)), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontWeight: 800,
+        fontSize: 12,
+        color: R
+      }
+    }, fmt(o.total))), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        upd(o.id, "em_curso");
+      },
+      style: {
+        background: "#22c55e",
+        color: "#fff",
+        border: "none",
+        borderRadius: 10,
+        padding: "9px 14px",
+        fontSize: 12,
+        fontWeight: 800,
+        cursor: "pointer",
+        flexShrink: 0,
+        marginLeft: 8
+      }
+    }, "Pago"));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      overflowX: "auto",
+      gap: 6,
+      marginBottom: 12,
+      paddingBottom: 4
+    }
+  }, Object.entries(STATUS).map(function (entry) {
+    var v = entry[0],
+      l = entry[1];
+    var a = statusFiltro === v;
+    return /*#__PURE__*/React.createElement("button", {
+      key: v,
+      onClick: function onClick() {
+        setStatusFiltro(v);
+      },
+      style: {
+        flexShrink: 0,
+        padding: "5px 12px",
+        borderRadius: 18,
+        border: "1.5px solid " + (a ? R : BORDER),
+        background: a ? R : "#fff",
+        color: a ? "#fff" : "#666",
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer",
+        whiteSpace: "nowrap"
+      }
+    }, l);
+  })), lista.map(function (o) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: o.id,
+      style: {
+        background: "#fff",
+        borderRadius: 13,
+        border: "1px solid " + BORDER,
+        padding: "11px 13px",
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: 6
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 800,
+        fontSize: 13
+      }
+    }, "#", o.id, " -- ", o.nome), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontSize: 10,
+        color: "#aaa"
+      }
+    }, o.criadoEm, " -- ", o.canal === "balcao" ? "Balcao" : "App")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "right"
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        background: CORES[o.status] || "#aaa",
+        color: "#fff",
+        fontSize: 9,
+        fontWeight: 800,
+        padding: "2px 8px",
+        borderRadius: 18,
+        display: "inline-block"
+      }
+    }, STATUS[o.status] || o.status), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "4px 0 0",
+        fontWeight: 900,
+        fontSize: 13,
+        color: R,
+        fontFamily: "Georgia,serif"
+      }
+    }, fmt(o.total)))), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 8px",
+        fontSize: 11,
+        color: "#666"
+      }
+    }, o.items.map(function (i) {
+      return i.qty + "x " + i.name;
+    }).join(", ")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        gap: 6,
+        flexWrap: "wrap"
+      }
+    }, o.status === "pendente" && /*#__PURE__*/React.createElement(Btn, {
+      sm: true,
+      onClick: function onClick() {
+        upd(o.id, "em_curso");
+      }
+    }, "Aceitar"), o.status === "em_curso" && /*#__PURE__*/React.createElement(Btn, {
+      sm: true,
+      onClick: function onClick() {
+        upd(o.id, "concluido");
+      },
+      color: "#22c55e"
+    }, "Concluir"), o.status !== "cancelado" && o.status !== "concluido" && /*#__PURE__*/React.createElement(Btn, {
+      sm: true,
+      outline: true,
+      onClick: function onClick() {
+        upd(o.id, "cancelado");
+      }
+    }, "Cancelar"), (o.status === "em_curso" || o.status === "concluido") && /*#__PURE__*/React.createElement(Btn, {
+      sm: true,
+      outline: true,
+      onClick: function onClick() {
+        imprimirComanda(o);
+      }
+    }, "Imprimir")));
+  }), lista.length === 0 && /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      color: "#ccc",
+      padding: "30px 0",
+      fontSize: 14
+    }
+  }, "Nenhum pedido"));
+}
+function CozinhaTab(props) {
+  var orders = props.orders,
+    setOrders = props.setOrders;
+  var fila = orders.filter(function (o) {
+    return o.status === "em_curso";
+  });
+  function concluir(id) {
+    setOrders(function (prev) {
+      return prev.map(function (o) {
+        return o.id === id ? Object.assign({}, o, {
+          status: "concluido"
+        }) : o;
+      });
+    });
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Cozinha"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: fila.length > 0 ? "#ef4444" : "#22c55e",
+      color: "#fff",
+      fontSize: 12,
+      fontWeight: 800,
+      padding: "4px 12px",
+      borderRadius: 18
+    }
+  }, fila.length, " na fila")), fila.length === 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      padding: "40px 0"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 14,
+      color: "#ccc",
+      fontWeight: 600
+    }
+  }, "Nenhum pedido em producao")), fila.map(function (o) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: o.id,
+      style: {
+        background: "#fff",
+        borderRadius: 13,
+        border: "2px solid " + R,
+        padding: "13px",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 900,
+        fontSize: 16,
+        color: R,
+        fontFamily: "Georgia,serif"
+      }
+    }, "#", o.id), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "#888"
+      }
+    }, o.nome, " -- ", o.criadoEm)), o.items.map(function (i) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: i.id,
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "6px 0",
+          borderBottom: "1px solid " + BORDER
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 800,
+          fontSize: 15,
+          color: "#1a1a1a"
+        }
+      }, i.qty, "x"), /*#__PURE__*/React.createElement("span", {
+        style: {
+          flex: 1,
+          fontSize: 14,
+          marginLeft: 10
+        }
+      }, i.name));
+    }), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        concluir(o.id);
+      },
+      style: {
+        width: "100%",
+        marginTop: 10,
+        background: "#22c55e",
+        color: "#fff",
+        border: "none",
+        borderRadius: 10,
+        padding: "12px 0",
+        fontSize: 14,
+        fontWeight: 800,
+        cursor: "pointer"
+      }
+    }, "Concluido"));
+  }));
+}
+function CardapioTab(props) {
+  var products = props.products,
+    setProducts = props.setProducts;
+  var _mo = (0, _react.useState)(null),
+    modal = _mo[0],
+    setModal = _mo[1];
+  var _fm = (0, _react.useState)({}),
+    form = _fm[0],
+    setForm = _fm[1];
+  var TAGS = [{
+    v: "",
+    l: "Sem tag"
+  }, {
+    v: "Mais Pedido",
+    l: "Mais Pedido",
+    c: "#b91c1c"
+  }, {
+    v: "Chef Indica",
+    l: "Chef Indica",
+    c: "#92400e"
+  }, {
+    v: "Novo",
+    l: "Novo",
+    c: "#0369a1"
+  }];
+  function openNew() {
+    setForm({
+      cat: "prato",
+      name: "",
+      desc: "",
+      price: "",
+      tag: "",
+      tagColor: "",
+      img: "",
+      stock: 10,
+      minStock: 2,
+      active: true,
+      ingredients: []
+    });
+    setModal("new");
+  }
+  function openEdit(p) {
+    setForm(Object.assign({}, p, {
+      price: String(p.price),
+      stock: String(p.stock),
+      minStock: String(p.minStock)
+    }));
+    setModal("edit");
+  }
+  function save() {
+    var p = Object.assign({}, form, {
+      price: parseFloat(form.price) || 0,
+      stock: parseInt(form.stock) || 0,
+      minStock: parseInt(form.minStock) || 2,
+      id: modal === "new" ? Date.now() : form.id,
+      tag: form.tag || null,
+      tagColor: form.tagColor || null
+    });
+    if (modal === "new") setProducts(function (prev) {
+      return prev.concat([p]);
+    });else setProducts(function (prev) {
+      return prev.map(function (x) {
+        return x.id === p.id ? p : x;
+      });
+    });
+    setModal(null);
+  }
+  function toggle(id) {
+    setProducts(function (prev) {
+      return prev.map(function (p) {
+        return p.id === id ? Object.assign({}, p, {
+          active: !p.active
+        }) : p;
+      });
+    });
+  }
+  function remove(id) {
+    if (window.confirm("Remover produto?")) setProducts(function (prev) {
+      return prev.filter(function (p) {
+        return p.id !== id;
+      });
+    });
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Cardapio"), /*#__PURE__*/React.createElement(Btn, {
+    sm: true,
+    onClick: openNew
+  }, "+ Produto")), INIT_CATS.map(function (cat) {
+    var ps = products.filter(function (p) {
+      return p.cat === cat.id;
+    });
+    if (!ps.length) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      key: cat.id,
+      style: {
+        marginBottom: 16
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 10,
+        fontWeight: 800,
+        color: "#888",
+        textTransform: "uppercase",
+        letterSpacing: 2,
+        marginBottom: 6
+      }
+    }, cat.label), ps.map(function (p) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: p.id,
+        style: {
+          background: "#fff",
+          borderRadius: 11,
+          border: "1px solid " + BORDER,
+          padding: "10px 12px",
+          marginBottom: 6,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          opacity: p.active ? 1 : .5
+        }
+      }, /*#__PURE__*/React.createElement("div", {
+        style: {
+          width: 48,
+          height: 40,
+          borderRadius: 8,
+          overflow: "hidden",
+          flexShrink: 0
+        }
+      }, /*#__PURE__*/React.createElement("img", {
+        src: p.img || "https://via.placeholder.com/48x40",
+        alt: p.name,
+        style: {
+          width: "100%",
+          height: "100%",
+          objectFit: "cover"
+        }
+      })), /*#__PURE__*/React.createElement("div", {
+        style: {
+          flex: 1,
+          minWidth: 0
+        }
+      }, /*#__PURE__*/React.createElement("p", {
+        style: {
+          margin: 0,
+          fontWeight: 700,
+          fontSize: 13,
+          color: "#1a1a1a"
+        }
+      }, p.name), /*#__PURE__*/React.createElement("p", {
+        style: {
+          margin: "1px 0 0",
+          fontWeight: 800,
+          fontSize: 12,
+          color: R
+        }
+      }, fmt(p.price), " -- ", p.stock, " un")), /*#__PURE__*/React.createElement("div", {
+        style: {
+          display: "flex",
+          gap: 5,
+          flexShrink: 0
+        }
+      }, /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          openEdit(p);
+        },
+        style: {
+          background: CREAM,
+          border: "1px solid " + BORDER,
+          borderRadius: 7,
+          padding: "5px 8px",
+          fontSize: 11,
+          fontWeight: 700,
+          cursor: "pointer",
+          color: "#555"
+        }
+      }, "Edit"), /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          toggle(p.id);
+        },
+        style: {
+          background: p.active ? "#fef3c7" : "#f0fdf4",
+          border: "1px solid " + (p.active ? "#fde68a" : "#86efac"),
+          borderRadius: 7,
+          padding: "5px 8px",
+          fontSize: 11,
+          fontWeight: 700,
+          cursor: "pointer",
+          color: p.active ? "#92400e" : "#15803d"
+        }
+      }, p.active ? "Off" : "On"), /*#__PURE__*/React.createElement("button", {
+        onClick: function onClick() {
+          remove(p.id);
+        },
+        style: {
+          background: "#fee2e2",
+          border: "1px solid #fecaca",
+          borderRadius: 7,
+          padding: "5px 8px",
+          fontSize: 11,
+          fontWeight: 700,
+          cursor: "pointer",
+          color: "#b91c1c"
+        }
+      }, "Del")));
+    }));
+  }), /*#__PURE__*/React.createElement(Modal, {
+    open: !!modal,
+    onClose: function onClose() {
+      setModal(null);
+    },
+    title: modal === "new" ? "Novo Produto" : "Editar Produto"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1/-1"
+    }
+  }, /*#__PURE__*/React.createElement(InputF, {
+    label: "Nome do prato *",
+    value: form.name || "",
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        name: v
+      }));
+    },
+    placeholder: "Ex: Escondidinho"
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1/-1"
+    }
+  }, /*#__PURE__*/React.createElement(InputF, {
+    label: "Descricao",
+    value: form.desc || "",
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        desc: v
+      }));
+    },
+    placeholder: "Descricao do prato",
+    textarea: true,
+    rows: 2
+  })), /*#__PURE__*/React.createElement(InputF, {
+    label: "Preco (R$) *",
+    value: form.price || "",
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        price: v
+      }));
+    },
+    type: "number",
+    placeholder: "0.00"
+  }), /*#__PURE__*/React.createElement(InputF, {
+    label: "Estoque (un)",
+    value: String(form.stock || 0),
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        stock: v
+      }));
+    },
+    type: "number"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1/-1"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#888",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Categoria"), /*#__PURE__*/React.createElement("select", {
+    value: form.cat || "prato",
+    onChange: function onChange(e) {
+      setForm(Object.assign({}, form, {
+        cat: e.target.value
+      }));
+    },
+    style: {
+      width: "100%",
+      border: "1.5px solid " + BORDER,
+      borderRadius: 10,
+      padding: "10px 13px",
+      fontSize: 14,
+      outline: "none",
+      background: "#fff",
+      marginBottom: 12
+    }
+  }, INIT_CATS.map(function (c) {
+    return /*#__PURE__*/React.createElement("option", {
+      key: c.id,
+      value: c.id
+    }, c.label);
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1/-1"
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#888",
+      display: "block",
+      marginBottom: 4,
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Tag"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      flexWrap: "wrap",
+      marginBottom: 12
+    }
+  }, TAGS.map(function (t) {
+    return /*#__PURE__*/React.createElement("button", {
+      key: t.v,
+      onClick: function onClick() {
+        setForm(Object.assign({}, form, {
+          tag: t.v || null,
+          tagColor: t.c || null
+        }));
+      },
+      style: {
+        padding: "5px 12px",
+        borderRadius: 18,
+        border: "1.5px solid " + ((form.tag || "") === t.v ? R : BORDER),
+        background: (form.tag || "") === t.v ? "#fff5f5" : "#fff",
+        color: (form.tag || "") === t.v ? R : "#666",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, t.l);
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      gridColumn: "1/-1"
+    }
+  }, /*#__PURE__*/React.createElement(InputF, {
+    label: "URL da foto",
+    value: form.img || "",
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        img: v
+      }));
+    },
+    placeholder: "https://..."
+  }), form.img && /*#__PURE__*/React.createElement("img", {
+    src: form.img,
+    alt: "",
+    style: {
+      width: "100%",
+      height: 100,
+      objectFit: "cover",
+      borderRadius: 10,
+      marginTop: -6,
+      marginBottom: 12
+    },
+    onError: function onError(e) {
+      e.target.style.display = "none";
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#eff6ff",
+      borderRadius: 10,
+      padding: "9px 12px",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 4px",
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#1d4ed8"
+    }
+  }, "Como adicionar foto:"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontSize: 11,
+      color: "#1e40af",
+      lineHeight: 1.6
+    }
+  }, "1. Fotografe o prato", /*#__PURE__*/React.createElement("br", null), "2. Abra imgbb.com", /*#__PURE__*/React.createElement("br", null), "3. Faca upload gratis", /*#__PURE__*/React.createElement("br", null), "4. Cole o link acima"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      window.open("https://imgbb.com", "_blank");
+    },
+    style: {
+      marginTop: 7,
+      background: "#1d4ed8",
+      color: "#fff",
+      border: "none",
+      borderRadius: 8,
+      padding: "6px 12px",
+      fontSize: 11,
+      fontWeight: 700,
+      cursor: "pointer",
+      width: "100%"
+    }
+  }, "Abrir imgbb.com")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    full: true,
+    onClick: save,
+    disabled: !form.name || !form.price
+  }, "Salvar"), /*#__PURE__*/React.createElement(Btn, {
+    full: true,
+    outline: true,
+    onClick: function onClick() {
+      setModal(null);
+    }
+  }, "Cancelar"))));
+}
+function CaixaTab(props) {
+  var orders = props.orders;
+  var hoje = orders.filter(function (o) {
+    return o.status === "concluido" && o.criadoEm && o.criadoEm.startsWith(todayKey());
+  });
+  var totalHoje = hoje.reduce(function (s, o) {
+    return s + o.total;
+  }, 0);
+  var byPay = {};
+  hoje.forEach(function (o) {
+    var k = o.fiado ? "fiado" : o.payment || "outro";
+    byPay[k] = (byPay[k] || 0) + o.total;
+  });
+  var fiadoHoje = byPay.fiado || 0;
+  var emCaixa = totalHoje - fiadoHoje;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      margin: "0 0 14px",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Caixa -- ", todayKey()), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 8,
+      marginBottom: 14
+    }
+  }, [["Faturamento", fmt(totalHoje), "#22c55e"], ["Pedidos", String(hoje.length), "#3b82f6"], ["Em caixa", fmt(emCaixa), R], ["Fiado", fmt(fiadoHoje), "#f59e0b"]].map(function (arr) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: arr[0],
+      style: {
+        background: "#fff",
+        borderRadius: 12,
+        border: "1px solid " + BORDER,
+        padding: "12px"
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "0 0 3px",
+        fontSize: 10,
+        fontWeight: 700,
+        color: "#aaa",
+        textTransform: "uppercase",
+        letterSpacing: .4
+      }
+    }, arr[0]), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 900,
+        fontSize: 18,
+        color: arr[2],
+        fontFamily: "Georgia,serif"
+      }
+    }, arr[1]));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 13,
+      border: "1px solid " + BORDER,
+      padding: 13,
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      margin: "0 0 8px"
+    }
+  }, "Por forma de pagamento"), Object.entries(byPay).map(function (entry) {
+    var k = entry[0],
+      v = entry[1];
+    var labels = {
+      pix: "PIX",
+      cartao_credito: "Credito",
+      cartao_debito: "Debito",
+      dinheiro: "Dinheiro",
+      fiado: "Fiado"
+    };
+    return /*#__PURE__*/React.createElement("div", {
+      key: k,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "#555"
+      }
+    }, labels[k] || k), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 700,
+        fontSize: 12
+      }
+    }, fmt(v)));
+  }), Object.keys(byPay).length === 0 && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: "#ccc"
+    }
+  }, "Nenhum pedido hoje")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 13,
+      border: "1px solid " + BORDER,
+      padding: 13
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 800,
+      fontSize: 13,
+      margin: "0 0 8px"
+    }
+  }, "Ultimos pedidos"), hoje.slice(-5).reverse().map(function (o) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: o.id,
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: "#555"
+      }
+    }, "#", o.id, " ", o.nome), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 700,
+        fontSize: 12,
+        color: R
+      }
+    }, fmt(o.total)));
+  }), hoje.length === 0 && /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: "#ccc"
+    }
+  }, "Nenhum pedido concluido hoje")));
+}
+function FiadoTab(props) {
+  var profs = props.profs,
+    orders = props.orders;
+  var fiadoAberto = orders.filter(function (o) {
+    return o.fiado && o.status !== "cancelado";
+  });
+  var porProf = {};
+  fiadoAberto.forEach(function (o) {
+    if (!o.profFiado) return;
+    if (!porProf[o.profFiado]) porProf[o.profFiado] = {
+      orders: [],
+      total: 0
+    };
+    porProf[o.profFiado].orders.push(o);
+    porProf[o.profFiado].total += o.total;
+  });
+  var lista = Object.entries(porProf).sort(function (a, b) {
+    return b[1].total - a[1].total;
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      margin: "0 0 12px",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Fiado em aberto"), !lista.length && /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      color: "#ccc",
+      padding: "30px 0",
+      fontSize: 14
+    }
+  }, "Nenhum fiado em aberto"), lista.map(function (entry) {
+    var nome = entry[0],
+      dados = entry[1];
+    var profObj = profs.find(function (p) {
+      return p.name === nome;
+    });
+    return /*#__PURE__*/React.createElement("div", {
+      key: nome,
+      style: {
+        background: "#fff",
+        borderRadius: 13,
+        border: "1px solid " + BORDER,
+        padding: "12px 14px",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        marginBottom: 8
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 800,
+        fontSize: 14
+      }
+    }, nome), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontSize: 11,
+        color: "#aaa"
+      }
+    }, dados.orders.length, " pedidos")), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 900,
+        fontSize: 16,
+        color: R,
+        fontFamily: "Georgia,serif"
+      }
+    }, fmt(dados.total))), dados.orders.slice(-3).map(function (o) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: o.id,
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 11,
+          marginBottom: 3,
+          color: "#666"
+        }
+      }, /*#__PURE__*/React.createElement("span", null, o.criadoEm, " -- ", o.items.map(function (i) {
+        return i.qty + "x " + i.name;
+      }).join(", ").slice(0, 35)), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 700,
+          color: R,
+          flexShrink: 0,
+          marginLeft: 6
+        }
+      }, fmt(o.total)));
+    }), profObj && profObj.telefone && /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        abrirWpp(profObj.telefone, gerarMsgFiado(profObj, dados.orders[dados.orders.length - 1], dados.total));
+      },
+      style: {
+        width: "100%",
+        marginTop: 8,
+        background: "#25D366",
+        color: "#fff",
+        border: "none",
+        borderRadius: 9,
+        padding: "8px 0",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "Enviar saldo WPP"), (!profObj || !profObj.telefone) && /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 10,
+        color: "#aaa",
+        textAlign: "center",
+        margin: "6px 0 0"
+      }
+    }, "Cadastre o telefone na aba Equipe"));
+  }));
+}
+function QuinzenaTab(props) {
+  var profs = props.profs,
+    orders = props.orders;
+  var hoje = new Date(),
+    dia = hoje.getDate();
+  var inicioQ = new Date(hoje.getFullYear(), hoje.getMonth(), dia <= 15 ? 1 : 16);
+  var fimQ = new Date(hoje.getFullYear(), hoje.getMonth(), dia <= 15 ? 15 : new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate(), 23, 59, 59);
+  var quinzenaLabel = dia <= 15 ? "1a quinzena (1-15)" : "2a quinzena (16-" + new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate() + ")";
+  function isNaQ(o) {
+    if (!o.criadoEm) return false;
+    var partes = o.criadoEm.split(" ")[0].split("/");
+    if (partes.length < 3) return false;
+    var d = new Date(parseInt(partes[2]), parseInt(partes[1]) - 1, parseInt(partes[0]));
+    return d >= inicioQ && d <= fimQ;
+  }
+  var metricas = profs.map(function (p) {
+    var fiados = orders.filter(function (o) {
+      return o.fiado && o.profFiado === p.name && o.status !== "cancelado" && isNaQ(o);
+    });
+    var total = fiados.reduce(function (s, o) {
+      return s + o.total;
+    }, 0);
+    var desc = p.desconto || 20;
+    return Object.assign({}, p, {
+      fiadosQ: fiados,
+      totalQ: total,
+      desconto: desc,
+      descValor: total * (desc / 100),
+      liquido: total - total * (desc / 100)
+    });
+  }).filter(function (p) {
+    return p.totalQ > 0;
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      margin: "0 0 4px",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Quinzena"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 11,
+      color: "#888",
+      margin: "0 0 12px"
+    }
+  }, quinzenaLabel), !metricas.length && /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      color: "#ccc",
+      padding: "30px 0",
+      fontSize: 14
+    }
+  }, "Nenhum fiado nesta quinzena"), metricas.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: R,
+      borderRadius: 12,
+      padding: "12px 14px",
+      marginBottom: 12,
+      color: "#fff"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 2px",
+      fontSize: 10,
+      fontWeight: 700,
+      opacity: .75,
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Total a descontar"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontWeight: 900,
+      fontSize: 22,
+      fontFamily: "Georgia,serif"
+    }
+  }, fmt(metricas.reduce(function (s, p) {
+    return s + p.liquido;
+  }, 0)))), metricas.map(function (p) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      style: {
+        background: "#fff",
+        borderRadius: 13,
+        border: "1px solid " + BORDER,
+        padding: "12px 14px",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 800,
+        fontSize: 14
+      }
+    }, p.name), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontSize: 11,
+        color: "#aaa"
+      }
+    }, p.fiadosQ.length, " pedidos")), /*#__PURE__*/React.createElement("div", {
+      style: {
+        textAlign: "right"
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 900,
+        fontSize: 16,
+        color: R,
+        fontFamily: "Georgia,serif"
+      }
+    }, fmt(p.liquido)), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "2px 0 0",
+        fontSize: 10,
+        color: "#aaa"
+      }
+    }, "a descontar"))), /*#__PURE__*/React.createElement("div", {
+      style: {
+        background: CREAM,
+        borderRadius: 9,
+        padding: "8px 10px",
+        marginBottom: 10
+      }
+    }, [["Consumo bruto", fmt(p.totalQ), "#555"], ["Desconto " + p.desconto + "%", "-" + fmt(p.descValor), "#22c55e"], ["Desconto na folha", fmt(p.liquido), R]].map(function (arr, i) {
+      return /*#__PURE__*/React.createElement("div", {
+        key: i,
+        style: {
+          display: "flex",
+          justifyContent: "space-between",
+          fontSize: 12,
+          marginBottom: i < 2 ? 3 : 0,
+          borderTop: i === 2 ? "1px solid " + BORDER : "none",
+          paddingTop: i === 2 ? 5 : 0,
+          marginTop: i === 2 ? 3 : 0
+        }
+      }, /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: i === 2 ? 800 : 400,
+          color: "#555"
+        }
+      }, arr[0]), /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 700,
+          color: arr[2]
+        }
+      }, arr[1]));
+    })), p.telefone && /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        abrirWpp(p.telefone, gerarMsgQuinzena(p, p.fiadosQ, p.desconto));
+      },
+      style: {
+        width: "100%",
+        background: "#25D366",
+        color: "#fff",
+        border: "none",
+        borderRadius: 9,
+        padding: "9px 0",
+        fontSize: 12,
+        fontWeight: 700,
+        cursor: "pointer"
+      }
+    }, "Enviar resumo WPP"), !p.telefone && /*#__PURE__*/React.createElement("p", {
+      style: {
+        fontSize: 10,
+        color: "#aaa",
+        textAlign: "center",
+        margin: 0
+      }
+    }, "Sem telefone cadastrado"));
+  }));
+}
+function EquipeTab(props) {
+  var profs = props.profs,
+    setProfs = props.setProfs,
+    orders = props.orders;
+  var _mo = (0, _react.useState)(null),
+    modal = _mo[0],
+    setModal = _mo[1];
+  var _fm = (0, _react.useState)({}),
+    form = _fm[0],
+    setForm = _fm[1];
+  var _tb = (0, _react.useState)("lista"),
+    tab = _tb[0],
+    setTab = _tb[1];
+  function openEdit(p) {
+    setForm(Object.assign({}, p));
+    setModal("edit");
+  }
+  function openNew() {
+    setForm({
+      name: "",
+      active: true,
+      telefone: "",
+      desconto: 20
+    });
+    setModal("new");
+  }
+  function save() {
+    var p = Object.assign({}, form, {
+      id: modal === "new" ? Date.now() : form.id,
+      desconto: parseInt(form.desconto) || 20
+    });
+    if (modal === "new") setProfs(function (prev) {
+      return prev.concat([p]);
+    });else setProfs(function (prev) {
+      return prev.map(function (x) {
+        return x.id === p.id ? p : x;
+      });
+    });
+    setModal(null);
+  }
+  var ranking = profs.map(function (p) {
+    var ps = orders.filter(function (o) {
+      return o.status === "concluido" && o.profissional === p.name;
+    });
+    return Object.assign({}, p, {
+      pedidos: ps.length,
+      total: ps.reduce(function (s, o) {
+        return s + o.total;
+      }, 0)
+    });
+  }).sort(function (a, b) {
+    return b.total - a.total;
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Equipe"), /*#__PURE__*/React.createElement(Btn, {
+    sm: true,
+    onClick: openNew
+  }, "+ Profissional")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 6,
+      marginBottom: 12
+    }
+  }, [["lista", "Equipe"], ["ranking", "Ranking"]].map(function (arr) {
+    var a = tab === arr[0];
+    return /*#__PURE__*/React.createElement("button", {
+      key: arr[0],
+      onClick: function onClick() {
+        setTab(arr[0]);
+      },
+      style: {
+        flex: 1,
+        padding: "7px 0",
+        borderRadius: 10,
+        border: "1.5px solid " + (a ? R : BORDER),
+        background: a ? R : "#fff",
+        color: a ? "#fff" : "#666",
+        fontSize: 12,
+        fontWeight: 800,
+        cursor: "pointer"
+      }
+    }, arr[1]);
+  })), tab === "lista" && profs.map(function (p) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      style: {
+        background: "#fff",
+        borderRadius: 11,
+        border: "1px solid " + BORDER,
+        padding: "10px 12px",
+        marginBottom: 7,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        opacity: p.active ? 1 : .5
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 38,
+        height: 38,
+        borderRadius: "50%",
+        background: CREAM,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: 900,
+        fontSize: 16,
+        color: R,
+        flexShrink: 0
+      }
+    }, p.name[0]), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 700,
+        fontSize: 13
+      }
+    }, p.name), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "1px 0 0",
+        fontSize: 10,
+        color: "#aaa"
+      }
+    }, p.telefone || "Sem telefone", " -- Desc ", p.desconto || 20, "%")), /*#__PURE__*/React.createElement("button", {
+      onClick: function onClick() {
+        openEdit(p);
+      },
+      style: {
+        background: CREAM,
+        border: "1px solid " + BORDER,
+        borderRadius: 7,
+        padding: "5px 10px",
+        fontSize: 11,
+        fontWeight: 700,
+        cursor: "pointer",
+        color: "#555"
+      }
+    }, "Edit"));
+  }), tab === "ranking" && ranking.map(function (p, idx) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: p.id,
+      style: {
+        background: "#fff",
+        borderRadius: 11,
+        border: "1px solid " + BORDER,
+        padding: "10px 12px",
+        marginBottom: 7,
+        display: "flex",
+        alignItems: "center",
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontWeight: 900,
+        fontSize: 16,
+        color: idx < 3 ? GOLD : "#ccc",
+        width: 24,
+        flexShrink: 0
+      }
+    }, "#", idx + 1), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 700,
+        fontSize: 13
+      }
+    }, p.name), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: "1px 0 0",
+        fontSize: 11,
+        color: "#aaa"
+      }
+    }, p.pedidos, " pedidos")), /*#__PURE__*/React.createElement("p", {
+      style: {
+        margin: 0,
+        fontWeight: 900,
+        fontSize: 14,
+        color: R,
+        fontFamily: "Georgia,serif"
+      }
+    }, fmt(p.total)));
+  }), /*#__PURE__*/React.createElement(Modal, {
+    open: !!modal,
+    onClose: function onClose() {
+      setModal(null);
+    },
+    title: modal === "new" ? "Nova Profissional" : "Editar Profissional"
+  }, /*#__PURE__*/React.createElement(InputF, {
+    label: "Nome *",
+    value: form.name || "",
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        name: v
+      }));
+    },
+    placeholder: "Nome da profissional"
+  }), /*#__PURE__*/React.createElement(InputF, {
+    label: "Telefone WhatsApp",
+    value: form.telefone || "",
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        telefone: v
+      }));
+    },
+    placeholder: "(11) 99999-9999",
+    hint: "Para receber notificacoes de fiado"
+  }), /*#__PURE__*/React.createElement(InputF, {
+    label: "Desconto (%)",
+    value: String(form.desconto || 20),
+    onChange: function onChange(v) {
+      setForm(Object.assign({}, form, {
+        desconto: v
+      }));
+    },
+    type: "number"
+  }), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 7,
+      cursor: "pointer",
+      fontSize: 13,
+      fontWeight: 700,
+      color: "#555",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: form.active !== false,
+    onChange: function onChange(e) {
+      setForm(Object.assign({}, form, {
+        active: e.target.checked
+      }));
+    },
+    style: {
+      width: 14,
+      height: 14
+    }
+  }), "Ativa"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    full: true,
+    onClick: save,
+    disabled: !form.name
+  }, "Salvar"), /*#__PURE__*/React.createElement(Btn, {
+    full: true,
+    outline: true,
+    onClick: function onClick() {
+      setModal(null);
+    }
+  }, "Cancelar"))));
+}
+function HorariosTab(props) {
+  var horarios = props.horarios,
+    setHorarios = props.setHorarios,
+    fechamentoManual = props.fechamentoManual,
+    setFechamentoManual = props.setFechamentoManual;
+  function updDia(dia, campo, valor) {
+    setHorarios(function (prev) {
+      var n = Object.assign({}, prev);
+      n[dia] = Object.assign({}, n[dia], _defineProperty({}, campo, valor));
+      return n;
+    });
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 14
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      fontSize: 18,
+      color: "#1a1a1a",
+      margin: "0 0 14px",
+      fontFamily: "Georgia,serif"
+    }
+  }, "Horarios"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: fechamentoManual ? "#fee2e2" : "#f0fdf4",
+      border: "1.5px solid " + (fechamentoManual ? "#fecaca" : "#22c55e"),
+      borderRadius: 13,
+      padding: "12px 14px",
+      marginBottom: 14,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      fontWeight: 800,
+      fontSize: 13,
+      color: fechamentoManual ? "#b91c1c" : "#15803d"
+    }
+  }, fechamentoManual ? "Fechado manualmente" : "Aberto"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "2px 0 0",
+      fontSize: 11,
+      color: "#888"
+    }
+  }, "Controle de emergencia")), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setFechamentoManual(!fechamentoManual);
+    },
+    style: {
+      background: fechamentoManual ? "#22c55e" : "#ef4444",
+      color: "#fff",
+      border: "none",
+      borderRadius: 10,
+      padding: "8px 14px",
+      fontSize: 12,
+      fontWeight: 800,
+      cursor: "pointer"
+    }
+  }, fechamentoManual ? "Reabrir" : "Fechar agora")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 13,
+      border: "1px solid " + BORDER,
+      overflow: "hidden",
+      marginBottom: 14
+    }
+  }, Object.entries(horarios).map(function (entry) {
+    var dia = parseInt(entry[0]),
+      h = entry[1];
+    var isHoje = new Date().getDay() === dia;
+    return /*#__PURE__*/React.createElement("div", {
+      key: dia,
+      style: {
+        padding: "11px 14px",
+        borderBottom: "1px solid " + BORDER,
+        background: isHoje ? "#fafaf8" : "#fff"
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 10
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 68,
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: isHoje ? 800 : 600,
+        color: isHoje ? R : "#555"
+      }
+    }, DIAS[dia]), isHoje && /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 9,
+        color: R,
+        fontWeight: 700,
+        marginLeft: 4
+      }
+    }, "hoje")), /*#__PURE__*/React.createElement("label", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 5,
+        cursor: "pointer",
+        flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "checkbox",
+      checked: h.aberto || false,
+      onChange: function onChange(e) {
+        updDia(dia, "aberto", e.target.checked);
+      },
+      style: {
+        width: 15,
+        height: 15,
+        accentColor: R
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "#666",
+        fontWeight: h.aberto ? 700 : 400
+      }
+    }, h.aberto ? "Aberto" : "Fechado")), h.aberto && /*#__PURE__*/React.createElement("div", {
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("input", {
+      type: "time",
+      value: h.abre || "",
+      onChange: function onChange(e) {
+        updDia(dia, "abre", e.target.value);
+      },
+      style: {
+        border: "1px solid " + BORDER,
+        borderRadius: 7,
+        padding: "4px 7px",
+        fontSize: 12,
+        outline: "none",
+        width: 80
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "#aaa"
+      }
+    }, "ate"), /*#__PURE__*/React.createElement("input", {
+      type: "time",
+      value: h.fecha || "",
+      onChange: function onChange(e) {
+        updDia(dia, "fecha", e.target.value);
+      },
+      style: {
+        border: "1px solid " + BORDER,
+        borderRadius: 7,
+        padding: "4px 7px",
+        fontSize: 12,
+        outline: "none",
+        width: 80
+      }
+    }))));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 13,
+      border: "1px solid " + BORDER,
+      padding: 13
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13,
+      margin: "0 0 10px"
+    }
+  }, "Links do restaurante"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("a", {
+    href: "https://wa.me/5511914195567",
+    target: "_blank",
+    rel: "noreferrer",
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#25D366",
+      color: "#fff",
+      padding: "10px 0",
+      borderRadius: 10,
+      fontSize: 12,
+      fontWeight: 700,
+      textDecoration: "none"
+    }
+  }, "WhatsApp"), /*#__PURE__*/React.createElement("a", {
+    href: "https://instagram.com/nobrebistro",
+    target: "_blank",
+    rel: "noreferrer",
+    style: {
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#e1306c",
+      color: "#fff",
+      padding: "10px 0",
+      borderRadius: 10,
+      fontSize: 12,
+      fontWeight: 700,
+      textDecoration: "none"
+    }
+  }, "Instagram"))));
+}
+function Admin(props) {
+  var products = props.products,
+    setProducts = props.setProducts,
+    orders = props.orders,
+    setOrders = props.setOrders,
+    profs = props.profs,
+    setProfs = props.setProfs,
+    horarios = props.horarios,
+    setHorarios = props.setHorarios,
+    fechamentoManual = props.fechamentoManual,
+    setFechamentoManual = props.setFechamentoManual,
+    nivel = props.nivel,
+    onLogout = props.onLogout;
+  var _tb = (0, _react.useState)("balcao"),
+    tab = _tb[0],
+    setTab = _tb[1];
+  var pending = orders.filter(function (o) {
+    return o.status === "pendente" || o.status === "aguardando_pagamento";
+  }).length;
+  var cooking = orders.filter(function (o) {
+    return o.status === "em_curso";
+  }).length;
+  var TABS_GERENTE = [["balcao", "Balcao", 0], ["pedidos", "Pedidos", pending], ["cozinha", "Cozinha", cooking], ["cardapio", "Cardapio", 0], ["caixa", "Caixa", 0], ["fiado", "Fiado", 0], ["quinzena", "Quinzena", 0], ["equipe", "Equipe", 0], ["horarios", "Horarios", 0]];
+  var TABS_ATENDENTE = [["balcao", "Balcao", 0], ["pedidos", "Pedidos", pending], ["cozinha", "Cozinha", cooking]];
+  var tabs = nivel === "gerente" ? TABS_GERENTE : TABS_ATENDENTE;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BG,
+      minHeight: "100vh",
+      maxWidth: 480,
+      margin: "0 auto",
+      display: "flex",
+      flexDirection: "column"
+    }
+  }, /*#__PURE__*/React.createElement("style", null, CSS), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: R,
+      padding: "11px 15px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      color: "rgba(255,255,255,.65)",
+      fontSize: 9,
+      fontWeight: 700,
+      letterSpacing: .5,
+      textTransform: "uppercase"
+    }
+  }, "Nobre Bistro"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      color: "#fff",
+      fontSize: 15,
+      fontWeight: 900,
+      fontFamily: "Georgia,serif"
+    }
+  }, "Painel Admin")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      background: "rgba(255,255,255,.15)",
+      color: "rgba(255,255,255,.85)",
+      fontSize: 9,
+      fontWeight: 700,
+      padding: "3px 8px",
+      borderRadius: 18,
+      textTransform: "uppercase"
+    }
+  }, nivel), /*#__PURE__*/React.createElement("button", {
+    onClick: onLogout,
+    style: {
+      background: "rgba(255,255,255,.18)",
+      border: "none",
+      color: "#fff",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "5px 10px",
+      borderRadius: 9,
+      cursor: "pointer"
+    }
+  }, "Sair"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      overflowX: "auto",
+      gap: 0,
+      background: "#fff",
+      borderBottom: "1px solid " + BORDER,
+      flexShrink: 0
+    }
+  }, tabs.map(function (arr) {
+    var id = arr[0],
+      label = arr[1],
+      badge = arr[2];
+    var a = tab === id;
+    return /*#__PURE__*/React.createElement("button", {
+      key: id,
+      onClick: function onClick() {
+        setTab(id);
+      },
+      style: {
+        flexShrink: 0,
+        padding: "10px 12px",
+        border: "none",
+        borderBottom: "2.5px solid " + (a ? R : "transparent"),
+        background: "#fff",
+        color: a ? R : "#666",
+        fontSize: 11,
+        fontWeight: a ? 800 : 600,
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        display: "flex",
+        alignItems: "center",
+        gap: 3
+      }
+    }, label, badge > 0 && /*#__PURE__*/React.createElement(Badge, {
+      count: badge
+    }));
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto"
+    }
+  }, tab === "balcao" && /*#__PURE__*/React.createElement(BalcaoTab, {
+    products: products,
+    setProducts: setProducts,
+    profs: profs,
+    orders: orders,
+    setOrders: setOrders
+  }), tab === "pedidos" && /*#__PURE__*/React.createElement(PedidosTab, {
+    orders: orders,
+    setOrders: setOrders
+  }), tab === "cozinha" && /*#__PURE__*/React.createElement(CozinhaTab, {
+    orders: orders,
+    setOrders: setOrders
+  }), tab === "cardapio" && (nivel === "gerente" ? /*#__PURE__*/React.createElement(CardapioTab, {
+    products: products,
+    setProducts: setProducts
+  }) : /*#__PURE__*/React.createElement(AcessoBloqueado, null)), tab === "caixa" && (nivel === "gerente" ? /*#__PURE__*/React.createElement(CaixaTab, {
+    orders: orders
+  }) : /*#__PURE__*/React.createElement(AcessoBloqueado, null)), tab === "fiado" && (nivel === "gerente" ? /*#__PURE__*/React.createElement(FiadoTab, {
+    profs: profs,
+    orders: orders
+  }) : /*#__PURE__*/React.createElement(AcessoBloqueado, null)), tab === "quinzena" && (nivel === "gerente" ? /*#__PURE__*/React.createElement(QuinzenaTab, {
+    profs: profs,
+    orders: orders
+  }) : /*#__PURE__*/React.createElement(AcessoBloqueado, null)), tab === "equipe" && (nivel === "gerente" ? /*#__PURE__*/React.createElement(EquipeTab, {
+    profs: profs,
+    setProfs: setProfs,
+    orders: orders
+  }) : /*#__PURE__*/React.createElement(AcessoBloqueado, null)), tab === "horarios" && (nivel === "gerente" ? /*#__PURE__*/React.createElement(HorariosTab, {
+    horarios: horarios,
+    setHorarios: setHorarios,
+    fechamentoManual: fechamentoManual,
+    setFechamentoManual: setFechamentoManual
+  }) : /*#__PURE__*/React.createElement(AcessoBloqueado, null))));
+}
+function AcessoBloqueado() {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "60px 24px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 48,
+      height: 48,
+      borderRadius: "50%",
+      background: "#fee2e2",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 12
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    width: "22",
+    height: "22",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "#b91c1c",
+    strokeWidth: "2",
+    strokeLinecap: "round"
+  }, /*#__PURE__*/React.createElement("rect", {
+    x: "3",
+    y: "11",
+    width: "18",
+    height: "11",
+    rx: "2"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: "M7 11V7a5 5 0 0110 0v4"
+  }))), /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 800,
+      fontSize: 16,
+      color: "#1a1a1a",
+      margin: "0 0 6px"
+    }
+  }, "Acesso Restrito"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: "#888",
+      margin: 0
+    }
+  }, "Area exclusiva para o gerente."));
+}
+function Login(props) {
+  var _p = (0, _react.useState)(""),
+    pass = _p[0],
+    setPass = _p[1];
+  var _e = (0, _react.useState)(false),
+    err = _e[0],
+    setErr = _e[1];
+  function go() {
+    if (pass === "nobre2025") {
+      props.onLogin("gerente");
+    } else if (pass === "balcao") {
+      props.onLogin("atendente");
+    } else if (pass === "cozinha") {
+      props.onLogin("cozinha");
+    } else {
+      setErr(true);
+      setTimeout(function () {
+        setErr(false);
+      }, 2000);
+    }
+    setPass("");
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: CREAM,
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 22,
+      maxWidth: 480,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("style", null, CSS), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: "100%",
+      maxWidth: 300
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "Georgia,serif",
+      fontSize: 12,
+      fontWeight: 700,
+      letterSpacing: 4,
+      color: R,
+      textTransform: "uppercase"
+    }
+  }, "Nobre"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 1,
+      background: R,
+      margin: "4px 34px 14px"
+    }
+  }), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontSize: 18,
+      fontWeight: 900,
+      color: "#1a1a1a",
+      margin: 0
+    }
+  }, "Admin")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#fff",
+      borderRadius: 16,
+      padding: 22,
+      border: "1px solid " + BORDER,
+      boxShadow: "0 4px 24px rgba(0,0,0,.07)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: "#888",
+      display: "block",
+      marginBottom: 5,
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Senha"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: pass,
+    onChange: function onChange(e) {
+      setPass(e.target.value);
+    },
+    onKeyDown: function onKeyDown(e) {
+      if (e.key === "Enter") go();
+    },
+    placeholder: "Digite sua senha",
+    autoFocus: true,
+    style: {
+      width: "100%",
+      border: "1.5px solid " + (err ? "#fca5a5" : BORDER),
+      borderRadius: 10,
+      padding: "11px 13px",
+      fontSize: 16,
+      outline: "none",
+      boxSizing: "border-box",
+      fontFamily: "inherit",
+      letterSpacing: 2
+    }
+  }), err && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#ef4444",
+      fontSize: 12,
+      margin: "5px 0 0",
+      fontWeight: 600
+    }
+  }, "Senha incorreta")), /*#__PURE__*/React.createElement("button", {
+    onClick: go,
+    style: {
+      width: "100%",
+      background: R,
+      color: "#fff",
+      border: "none",
+      borderRadius: 11,
+      padding: "13px 0",
+      fontSize: 14,
+      fontWeight: 800,
+      cursor: "pointer"
+    }
+  }, "Entrar")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16,
+      background: "#fff",
+      borderRadius: 12,
+      padding: "12px 14px",
+      border: "1px solid " + BORDER
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: "0 0 7px",
+      fontSize: 10,
+      fontWeight: 700,
+      color: "#aaa",
+      textTransform: "uppercase",
+      letterSpacing: .5
+    }
+  }, "Niveis"), [[R, "Gerente", "nobre2025"], ["#3b82f6", "Atendente", "balcao"], ["#22c55e", "Cozinha", "cozinha"]].map(function (arr) {
+    return /*#__PURE__*/React.createElement("div", {
+      key: arr[1],
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 7,
+        marginBottom: 5
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        width: 7,
+        height: 7,
+        borderRadius: "50%",
+        background: arr[0],
+        flexShrink: 0
+      }
+    }), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        fontWeight: 700,
+        color: "#1a1a1a"
+      }
+    }, arr[1]), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "#aaa"
+      }
+    }, "-- senha: ", arr[2]));
+  }))));
+}
+function App() {
+  var _au = (0, _react.useState)(false),
+    auth = _au[0],
+    setAuth = _au[1];
+  var _nv = (0, _react.useState)(null),
+    nivel = _nv[0],
+    setNivel = _nv[1];
+  var _pr = (0, _react.useState)([]),
+    products = _pr[0],
+    setProducts = _pr[1];
+  var _or = (0, _react.useState)([]),
+    orders = _or[0],
+    setOrders = _or[1];
+  var _pf = (0, _react.useState)(INIT_PROFS),
+    profs = _pf[0],
+    setProfs = _pf[1];
+  var _hr = (0, _react.useState)(HORARIOS_DEFAULT),
+    horarios = _hr[0],
+    setHorarios = _hr[1];
+  var _fm = (0, _react.useState)(false),
+    fechamentoManual = _fm[0],
+    setFechamentoManual = _fm[1];
+  var _ld = (0, _react.useState)(true),
+    loading = _ld[0],
+    setLoading = _ld[1];
+  var _sv = (0, _react.useState)(false),
+    saving = _sv[0],
+    setSaving = _sv[1];
+  (0, _react.useEffect)(function () {
+    _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
+      var p, o, pf, h, fm;
+      return _regenerator().w(function (_context3) {
+        while (1) switch (_context3.n) {
+          case 0:
+            _context3.n = 1;
+            return store.get("nb_bA_products");
+          case 1:
+            p = _context3.v;
+            _context3.n = 2;
+            return store.get("nb_bA_orders");
+          case 2:
+            o = _context3.v;
+            _context3.n = 3;
+            return store.get("nb_bA_profs");
+          case 3:
+            pf = _context3.v;
+            _context3.n = 4;
+            return store.get("nb_bA_horarios");
+          case 4:
+            h = _context3.v;
+            _context3.n = 5;
+            return store.get("nb_bA_fechamento");
+          case 5:
+            fm = _context3.v;
+            setProducts(p && p.length ? p : INIT_PRODUCTS);
+            if (o) setOrders(o);
+            if (pf && pf.length) setProfs(pf);
+            if (h) setHorarios(h);
+            if (fm !== null) setFechamentoManual(!!fm);
+            setLoading(false);
+          case 6:
+            return _context3.a(2);
+        }
+      }, _callee3);
+    }))();
+  }, []);
+  (0, _react.useEffect)(function () {
+    if (!loading) {
+      setSaving(true);
+      store.set("nb_bA_products", products).then(function () {
+        setSaving(false);
+      });
+    }
+  }, [products]);
+  (0, _react.useEffect)(function () {
+    if (!loading) store.set("nb_bA_orders", orders);
+  }, [orders]);
+  (0, _react.useEffect)(function () {
+    if (!loading) store.set("nb_bA_profs", profs);
+  }, [profs]);
+  (0, _react.useEffect)(function () {
+    if (!loading) store.set("nb_bA_horarios", horarios);
+  }, [horarios]);
+  (0, _react.useEffect)(function () {
+    if (!loading) store.set("nb_bA_fechamento", fechamentoManual);
+  }, [fechamentoManual]);
+  if (loading) return /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      background: CREAM
+    }
+  }, /*#__PURE__*/React.createElement("style", null, CSS), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "Georgia,serif",
+      fontSize: 13,
+      letterSpacing: 3,
+      color: R,
+      marginBottom: 12,
+      textTransform: "uppercase"
+    }
+  }, "Nobre Bistro"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 28,
+      height: 28,
+      border: "2.5px solid " + BORDER,
+      borderTop: "2.5px solid " + R,
+      borderRadius: "50%",
+      animation: "spin .7s linear infinite"
+    }
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      marginTop: 12,
+      fontSize: 11,
+      color: "#aaa"
+    }
+  }, "Carregando dados..."));
+  if (!auth) return /*#__PURE__*/React.createElement(Login, {
+    onLogin: function onLogin(n) {
+      setAuth(true);
+      setNivel(n);
+    }
+  });
+  if (nivel === "cozinha") return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: BG,
+      minHeight: "100vh",
+      maxWidth: 480,
+      margin: "0 auto"
+    }
+  }, /*#__PURE__*/React.createElement("style", null, CSS), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#1d4ed8",
+      padding: "11px 15px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      margin: 0,
+      color: "#fff",
+      fontSize: 15,
+      fontWeight: 900,
+      fontFamily: "Georgia,serif"
+    }
+  }, "Cozinha"), /*#__PURE__*/React.createElement("button", {
+    onClick: function onClick() {
+      setAuth(false);
+      setNivel(null);
+    },
+    style: {
+      background: "rgba(255,255,255,.18)",
+      border: "none",
+      color: "#fff",
+      fontSize: 11,
+      fontWeight: 700,
+      padding: "5px 10px",
+      borderRadius: 9,
+      cursor: "pointer"
+    }
+  }, "Sair")), /*#__PURE__*/React.createElement(CozinhaTab, {
+    orders: orders,
+    setOrders: setOrders
+  }));
+  return /*#__PURE__*/React.createElement(Admin, {
+    products: products,
+    setProducts: setProducts,
+    orders: orders,
+    setOrders: setOrders,
+    profs: profs,
+    setProfs: setProfs,
+    horarios: horarios,
+    setHorarios: setHorarios,
+    fechamentoManual: fechamentoManual,
+    setFechamentoManual: setFechamentoManual,
+    nivel: nivel,
+    onLogout: function onLogout() {
+      setAuth(false);
+      setNivel(null);
+    }
+  });
+}
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
