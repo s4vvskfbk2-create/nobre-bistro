@@ -139,8 +139,7 @@ function App(){
           )
         ),
         h("div",{style:{padding:"12px 20px 28px"}},
-          h("div",{style:{display:"flex",flexDirection:"column",gap:8}},
-            h("button",{onClick:function(){
+          h("button",{onClick:function(){
               var pedidoId=Date.now();
               var body=JSON.stringify({pedidoId:pedidoId,itens:cart,total:ct,nome:"Cliente"});
               fetch("https://zxpnguynjrsixsomaieg.supabase.co/functions/v1/criar-pagamento",{
@@ -151,13 +150,7 @@ function App(){
                 if(d.url)window.location.href=d.url;
                 else alert("Erro ao gerar pagamento. Tente novamente.");
               }).catch(function(){alert("Erro de conexao. Tente novamente.");});
-            },style:{width:"100%",background:"#8B1A1A",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Pagar com Cartao ou PIX"),
-            h("button",{onClick:function(){
-              var lines=cart.map(function(i){return "- "+i.qty+"x "+i.name;}).join("\n");
-              var msg="PEDIDO - Nobre Bistro\n\n"+lines+"\n\nTotal: "+fmt(ct)+"\nPIX: nobre@bistro.com.br";
-              window.open("https://wa.me/5511914195567?text="+encodeURIComponent(msg),"_blank");
-            },style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"11px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Confirmar pelo WhatsApp")
-          )
+            },style:{width:"100%",background:"#8B1A1A",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Pagar com Cartao ou PIX")
         )
       )
     )
