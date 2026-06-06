@@ -60,56 +60,19 @@ var fmt = function fmt(v) {
   });
 };
 var store = {
-  get: function () {
-    var _get = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee(k) {
-      var r, _t;
-      return _regenerator().w(function (_context) {
-        while (1) switch (_context.p = _context.n) {
-          case 0:
-            _context.p = 0;
-            _context.n = 1;
-            return window.storage.get(k);
-          case 1:
-            r = _context.v;
-            return _context.a(2, r ? JSON.parse(r.value) : null);
-          case 2:
-            _context.p = 2;
-            _t = _context.v;
-            return _context.a(2, null);
-        }
-      }, _callee, null, [[0, 2]]);
-    }));
-    function get(_x) {
-      return _get.apply(this, arguments);
-    }
-    return get;
-  }(),
-  set: function () {
-    var _set = _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee2(k, v) {
-      var _t2;
-      return _regenerator().w(function (_context2) {
-        while (1) switch (_context2.p = _context2.n) {
-          case 0:
-            _context2.p = 0;
-            _context2.n = 1;
-            return window.storage.set(k, JSON.stringify(v));
-          case 1:
-            _context2.n = 3;
-            break;
-          case 2:
-            _context2.p = 2;
-            _t2 = _context2.v;
-          case 3:
-            return _context2.a(2);
-        }
-      }, _callee2, null, [[0, 2]]);
-    }));
-    function set(_x2, _x3) {
-      return _set.apply(this, arguments);
-    }
-    return set;
-  }()
-};
+  get: function(k){
+    return fetch("https://zxpnguynjrsixsomaieg.supabase.co/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{
+      headers:{"apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q"}
+    }).then(function(r){return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});
+  },
+  set: function(k,v){
+    return fetch("https://zxpnguynjrsixsomaieg.supabase.co/rest/v1/config",{
+      method:"POST",
+      headers:{"apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q","Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},
+      body:JSON.stringify({key:k,value:v})
+    }).catch(function(){});
+  }
+}
 
 // ── Dados ─────────────────────────────────────────
 var CATS = [{
