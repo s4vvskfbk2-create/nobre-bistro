@@ -8,2013 +8,331 @@
 <title>Nobre Bistro</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;width:100%;overflow-x:hidden}</style>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
 </head>
 <body><div id="root"></div>
 <script>
-var useState=React.useState;
-var _SB_URL="https://zxpnguynjrsixsomaieg.supabase.co";
-var _SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
-var useEffect=React.useEffect;
-var useRef=React.useRef;
-var useMemo=React.useMemo;
-var useCallback=React.useCallback;
-var useContext=React.useContext;
-var useReducer=React.useReducer;
-var createContext=React.createContext;
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
-function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
-function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
-function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
-function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
-function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
-function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
-function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
-// ═══════════════════════════════════════════════════
-// NOBRE BISTRÔ — CARDÁPIO DIGITAL v2
-// Design moderno: hero animado, carrossel de destaques,
-// categorias com ícone, cards imersivos, modal premium
-// ═══════════════════════════════════════════════════
+var h=React.createElement,us=React.useState,ue=React.useEffect,um=React.useMemo,ur=React.useRef;
+var R="#8B1A1A",B="#ede9e3",C="#faf8f5",G="#C9A84C";
+var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
+var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+function sbGet(k){return fetch(SBU+"/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}}).then(function(r){return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});}
+function sbSet(k,v){return fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})}).catch(function(){});}
+function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
+function nowStr(){var d=new Date();return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
 
-var R = "#8B1A1A";
-var GOLD = "#C9A84C";
-var CREAM = "#faf8f5";
-var DARK = "#1a1108";
-var BORDER = "#ede9e3";
-var fmt = function fmt(v) {
-  return "R$ " + Number(v || 0).toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-};
-var store = {
-  get: function(k){
-    return fetch("https://zxpnguynjrsixsomaieg.supabase.co/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{
-      headers:{"apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q"}
-    }).then(function(r){return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});
+var DIAS=["Domingo","Segunda","Terca","Quarta","Quinta","Sexta","Sabado"];
+var HORARIOS_DEF={0:{aberto:false,abre:"",fecha:""},1:{aberto:false,abre:"",fecha:""},2:{aberto:true,abre:"09:00",fecha:"18:30"},3:{aberto:true,abre:"09:00",fecha:"18:30"},4:{aberto:true,abre:"09:00",fecha:"18:30"},5:{aberto:true,abre:"09:00",fecha:"18:30"},6:{aberto:true,abre:"09:00",fecha:"18:30"}};
+
+function getStatus(hor,fec){
+  if(fec)return{aberto:false,motivo:"Fechado temporariamente",proximo:null};
+  var n=new Date(),dia=n.getDay(),hh=n.getHours()*60+n.getMinutes();
+  var h=(hor||HORARIOS_DEF)[dia];
+  if(!h||!h.aberto){var p=null;for(var d=1;d<=7;d++){var nx=(dia+d)%7;var hn=(hor||HORARIOS_DEF)[nx];if(hn&&hn.aberto){p=DIAS[nx]+" as "+hn.abre;break;}}return{aberto:false,motivo:"Fechado hoje",proximo:p};}
+  var pa=h.abre.split(":"),pf=h.fecha.split(":");
+  var ma=parseInt(pa[0])*60+parseInt(pa[1]||0),mf=parseInt(pf[0])*60+parseInt(pf[1]||0);
+  if(hh>=ma&&hh<mf)return{aberto:true,motivo:"Aberto ate "+h.fecha};
+  if(hh<ma)return{aberto:false,motivo:"Abre hoje as "+h.abre,proximo:"Hoje as "+h.abre};
+  var p2=null;for(var d2=1;d2<=7;d2++){var nx2=(dia+d2)%7;var hn2=(hor||HORARIOS_DEF)[nx2];if(hn2&&hn2.aberto){p2=DIAS[nx2]+" as "+hn2.abre;break;}}
+  return{aberto:false,motivo:"Encerrado por hoje",proximo:p2};
+}
+
+var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
+var PRODS_DEF=[
+{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8,active:true,desc:"Pure de mandioca com carne seca."},
+{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6,active:true,desc:"Panqueca artesanal."},
+{id:3,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4,active:true,desc:"Massa artesanal."},
+{id:4,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6,active:true,desc:"Folhas frescas."},
+{id:5,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5,active:true,desc:"Frango grelhado."},
+{id:6,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12,active:true,desc:"Crocante por fora."},
+{id:7,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15,active:true,desc:"Chocolate belga."},
+{id:8,cat:"bebidas",name:"Suco Natural",price:15,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Feito na hora."},
+{id:9,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10,active:true,desc:"Gin premium."},
+{id:10,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."}
+];
+var PROFS_DEF=[{id:1,name:"Adriana",active:true},{id:2,name:"Amanda",active:true},{id:3,name:"Bruna",active:true},{id:4,name:"Carol",active:true},{id:5,name:"Fernanda",active:true},{id:6,name:"Gabriela",active:true},{id:7,name:"Juliana",active:true},{id:8,name:"Larissa",active:true},{id:9,name:"Leticia",active:true},{id:10,name:"Mariana",active:true}];
+
+function Hero(props){
+  var prods=props.prods;
+  var dest=prods.filter(function(p){return p.tag&&p.active&&p.stock>0;}).slice(0,5);
+  var s1=us(0),idx=s1[0],setIdx=s1[1];
+  var timer=ur(null);var tS=ur(null);
+  ue(function(){
+    if(!dest.length)return;
+    timer.current=setInterval(function(){setIdx(function(i){return(i+1)%dest.length;});},3500);
+    return function(){clearInterval(timer.current);};
+  },[dest.length]);
+  function goTo(i){clearInterval(timer.current);setIdx(i);timer.current=setInterval(function(){setIdx(function(x){return(x+1)%dest.length;});},3500);}
+  if(!dest.length)return h("div",{style:{background:"linear-gradient(135deg,"+R+",#7a1515)",padding:"40px 20px 30px",textAlign:"center"}},
+    h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:4,color:"rgba(255,255,255,.6)",textTransform:"uppercase"}},"Nobre"),
+    h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
+    h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase"}},"Bistro")
+  );
+  var p=dest[idx]||dest[0];
+  return h("div",{
+    style:{position:"relative",height:240,overflow:"hidden",background:"#1a1108"},
+    onTouchStart:function(e){tS.current=e.touches[0].clientX;},
+    onTouchEnd:function(e){if(tS.current===null)return;var diff=tS.current-e.changedTouches[0].clientX;if(Math.abs(diff)>40)goTo(diff>0?(idx+1)%dest.length:(idx-1+dest.length)%dest.length);tS.current=null;}
   },
-  set: function(k,v){
-    return fetch("https://zxpnguynjrsixsomaieg.supabase.co/rest/v1/config",{
-      method:"POST",
-      headers:{"apikey":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q","Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},
-      body:JSON.stringify({key:k,value:v})
-    }).catch(function(){});
-  }
+    dest.map(function(d,i){return h("div",{key:d.id,style:{position:"absolute",inset:0,transition:"opacity .6s",opacity:i===idx?1:0}},
+      h("img",{src:d.img,alt:d.name,style:{width:"100%",height:"100%",objectFit:"cover"},loading:"lazy"}),
+      h("div",{style:{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(10,6,2,.85) 40%,transparent)"}})
+    );}),
+    h("div",{style:{position:"absolute",bottom:0,left:0,right:0,padding:"0 20px 16px"}},
+      p.tag&&h("span",{style:{fontSize:9,fontWeight:800,color:"#fff",letterSpacing:1.5,textTransform:"uppercase",background:"rgba(255,255,255,.12)",padding:"3px 10px",borderRadius:4,display:"inline-block",marginBottom:6}},p.tag),
+      h("h2",{style:{margin:"0 0 3px",fontSize:20,fontWeight:900,color:"#fff",fontFamily:"Georgia,serif"}},p.name),
+      h("span",{style:{fontFamily:"Georgia,serif",fontSize:17,fontWeight:700,color:G}},fmt(p.price))
+    ),
+    h("div",{style:{position:"absolute",bottom:16,right:16,display:"flex",gap:5}},
+      dest.map(function(_,i){return h("button",{key:i,onClick:function(){goTo(i);},style:{width:i===idx?18:6,height:6,borderRadius:3,background:i===idx?"#fff":"rgba(255,255,255,.35)",border:"none",cursor:"pointer",padding:0,transition:"width .3s"}});})
+    )
+  );
 }
 
-// ── Dados ─────────────────────────────────────────
-var CATS = [{
-  id: "prato",
-  label: "Prato do Dia",
-  icon: "🍽️"
-}, {
-  id: "tortas",
-  label: "Tortas",
-  icon: "🥧"
-}, {
-  id: "salada",
-  label: "Saladas",
-  icon: "🥗"
-}, {
-  id: "lanches",
-  label: "Lanches",
-  icon: "🥪"
-}, {
-  id: "salgados",
-  label: "Salgados",
-  icon: "🫓"
-}, {
-  id: "sobremesa",
-  label: "Sobremesas",
-  icon: "🍮"
-}, {
-  id: "bebidas",
-  label: "Bebidas",
-  icon: "🥤"
-}, {
-  id: "drinks",
-  label: "Drinks",
-  icon: "🍹"
-}, {
-  id: "cerveja",
-  label: "Cervejas",
-  icon: "🍺"
-}];
-
-// Produtos padrão (fallback se storage vazio)
-var PRODUTOS_PADRAO = [{
-  id: 1,
-  cat: "prato",
-  name: "Escondidinho",
-  desc: "Purê de mandioca cremoso recheado de carne seca desfiada, gratinado com queijo coalho.",
-  price: 48,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1574484284002-952d92456975?w=400&q=80",
-  stock: 8,
-  minStock: 3,
-  active: true
-}, {
-  id: 2,
-  cat: "prato",
-  name: "Panqueca de Frango",
-  desc: "Panqueca artesanal recheada com frango desfiado e molho especial da casa.",
-  price: 45,
-  tag: null,
-  tagColor: null,
-  img: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80",
-  stock: 6,
-  minStock: 2,
-  active: true
-}, {
-  id: 3,
-  cat: "prato",
-  name: "Caldo Abóbora e Carne Seca",
-  desc: "Caldo encorpado de abóbora com carne seca desfiada e azeite de cheiro.",
-  price: 28,
-  tag: "⭐ Chef Indica",
-  tagColor: "#92400e",
-  img: "https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80",
-  stock: 5,
-  minStock: 2,
-  active: true
-}, {
-  id: 4,
-  cat: "prato",
-  name: "Panqueca de Carne",
-  desc: "Panqueca artesanal com recheio suculento de carne moída ao molho.",
-  price: 45,
-  tag: null,
-  tagColor: null,
-  img: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80",
-  stock: 4,
-  minStock: 2,
-  active: true
-}, {
-  id: 5,
-  cat: "prato",
-  name: "Risoto Pera Gorgonzola",
-  desc: "Arroz arbóreo cremoso com pera caramelizada e gorgonzola.",
-  price: 65,
-  tag: "⭐ Chef Indica",
-  tagColor: "#92400e",
-  img: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=400&q=80",
-  stock: 3,
-  minStock: 2,
-  active: true
-}, {
-  id: 6,
-  cat: "tortas",
-  name: "Torta de Frango",
-  desc: "Massa artesanal com recheio generoso de frango ao molho barbecue.",
-  price: 38,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400&q=80",
-  stock: 4,
-  minStock: 2,
-  active: true
-}, {
-  id: 9,
-  cat: "salada",
-  name: "Salada Bistrô",
-  desc: "Folhas frescas, tomate cereja, frango grelhado, sementes e molho especial.",
-  price: 45,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&q=80",
-  stock: 6,
-  minStock: 2,
-  active: true
-}, {
-  id: 15,
-  cat: "salgados",
-  name: "Pão de Queijo Waffle",
-  desc: "Crocante por fora, derretendo por dentro. Nossa especialidade.",
-  price: 12.90,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400&q=80",
-  stock: 12,
-  minStock: 4,
-  active: true
-}, {
-  id: 16,
-  cat: "sobremesa",
-  name: "Brigadeiro",
-  desc: "Brigadeiro artesanal com chocolate belga. Feito com amor.",
-  price: 6.50,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400&q=80",
-  stock: 15,
-  minStock: 5,
-  active: true
-}, {
-  id: 22,
-  cat: "bebidas",
-  name: "Suco Natural",
-  desc: "Feito na hora. Pergunte os sabores disponíveis.",
-  price: 15,
-  tag: "⭐ Chef Indica",
-  tagColor: "#92400e",
-  img: "https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&q=80",
-  stock: 10,
-  minStock: 3,
-  active: true
-}, {
-  id: 24,
-  cat: "drinks",
-  name: "Gin e Tônica",
-  desc: "Gin premium com tônica artesanal e especiarias selecionadas.",
-  price: 32,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400&q=80",
-  stock: 10,
-  minStock: 3,
-  active: true
-}, {
-  id: 27,
-  cat: "cerveja",
-  name: "Corona Extra",
-  desc: "Long neck com limão. A pedida certa.",
-  price: 17,
-  tag: "🔥 Mais Pedido",
-  tagColor: "#b91c1c",
-  img: "https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400&q=80",
-  stock: 15,
-  minStock: 5,
-  active: true
-}];
-
-// ── Cart hook ─────────────────────────────────────
-function useCart() {
-  var _useState = useState([]),
-    _useState2 = _slicedToArray(_useState, 2),
-    items = _useState2[0],
-    setItems = _useState2[1];
-  var add = function add(p) {
-    var qty = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-    var obs = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : "";
-    setItems(function (prev) {
-      var k = p.id + "_" + (obs || "");
-      var ex = prev.find(function (i) {
-        return i._key === k;
-      });
-      if (ex) return prev.map(function (i) {
-        return i._key === k ? _objectSpread(_objectSpread({}, i), {}, {
-          qty: i.qty + qty
-        }) : i;
-      });
-      return [].concat(_toConsumableArray(prev), [_objectSpread(_objectSpread({}, p), {}, {
-        qty: qty,
-        obs: obs,
-        _key: k
-      })]);
-    });
-  };
-  var inc = function inc(k) {
-    return setItems(function (prev) {
-      return prev.map(function (i) {
-        return i._key === k ? _objectSpread(_objectSpread({}, i), {}, {
-          qty: i.qty + 1
-        }) : i;
-      });
-    });
-  };
-  var dec = function dec(k) {
-    return setItems(function (prev) {
-      return prev.map(function (i) {
-        return i._key === k && i.qty > 1 ? _objectSpread(_objectSpread({}, i), {}, {
-          qty: i.qty - 1
-        }) : i;
-      }).filter(function (i) {
-        return i.qty > 0;
-      });
-    });
-  };
-  var clear = function clear() {
-    return setItems([]);
-  };
-  var total = items.reduce(function (s, i) {
-    return s + i.price * i.qty;
-  }, 0);
-  var count = items.reduce(function (s, i) {
-    return s + i.qty;
-  }, 0);
-  return {
-    items: items,
-    add: add,
-    inc: inc,
-    dec: dec,
-    clear: clear,
-    total: total,
-    count: count
-  };
+function TelaFechada(props){
+  var st=props.status,prods=props.prods||[];
+  var dest=prods.filter(function(p){return p.tag&&p.active;}).slice(0,3);
+  return h("div",{style:{background:C,minHeight:"100vh"}},
+    h("div",{style:{background:"linear-gradient(135deg,"+R+",#7a1515)",padding:"40px 24px 32px",textAlign:"center"}},
+      h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:4,color:"rgba(255,255,255,.6)",textTransform:"uppercase"}},"Nobre"),
+      h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
+      h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase",marginBottom:20}},"Bistro"),
+      h("h2",{style:{fontFamily:"Georgia,serif",fontSize:22,fontWeight:700,color:"#fff",margin:"0 0 8px"}},st.motivo),
+      st.proximo&&h("p",{style:{fontSize:13,color:"rgba(255,255,255,.7)",margin:0}},"Retornamos: "+st.proximo)
+    ),
+    dest.length>0&&h("div",{style:{padding:"20px 16px"}},
+      h("p",{style:{fontSize:10,fontWeight:700,color:"#aaa",textTransform:"uppercase",letterSpacing:2,margin:"0 0 12px",textAlign:"center"}},"Veja nosso menu"),
+      dest.map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:12,marginBottom:8,border:"1px solid "+B,display:"flex",alignItems:"center",gap:12,padding:"10px 12px"}},
+        p.img&&h("div",{style:{width:50,height:42,borderRadius:8,overflow:"hidden",flexShrink:0}},h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover"}})),
+        h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:13}},p.name),h("p",{style:{margin:"2px 0 0",fontWeight:800,fontSize:13,color:R,fontFamily:"Georgia,serif"}},fmt(p.price)))
+      );})
+    ),
+    h("div",{style:{padding:"0 20px 30px",textAlign:"center"}},
+      h("a",{href:"https://wa.me/5511914195567",target:"_blank",style:{display:"inline-flex",alignItems:"center",gap:8,background:"#25D366",color:"#fff",padding:"12px 22px",borderRadius:25,fontSize:13,fontWeight:700,textDecoration:"none"}},"Fale conosco")
+    )
+  );
 }
 
-// ── Hero Carrossel ────────────────────────────────
-function HeroCarousel(_ref) {
-  var destaques = _ref.destaques;
-  var _useState3 = useState(0),
-    _useState4 = _slicedToArray(_useState3, 2),
-    idx = _useState4[0],
-    setIdx = _useState4[1];
-  var timer = useRef(null);
-  var touchStart = useRef(null);
-  useEffect(function () {
-    timer.current = setInterval(function () {
-      return setIdx(function (i) {
-        return (i + 1) % destaques.length;
-      });
-    }, 3500);
-    return function () {
-      return clearInterval(timer.current);
-    };
-  }, []);
-  function goTo(i) {
-    clearInterval(timer.current);
-    setIdx(i);
-    timer.current = setInterval(function () {
-      return setIdx(function (x) {
-        return (x + 1) % destaques.length;
-      });
-    }, 3500);
+function CartDrawer(props){
+  var cart=props.cart,profs=props.profs,onClose=props.onClose,onConfirm=props.onConfirm,onDec=props.onDec,onInc=props.onInc;
+  var s1=us("cart"),step=s1[0],setStep=s1[1];
+  var s2=us(""),nome=s2[0],setNome=s2[1];
+  var s3=us(""),prof=s3[0],setProf=s3[1];
+  var s4=us("pix"),pay=s4[0],setPay=s4[1];
+  var total=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
+  var steps=["cart","dados","pagamento","confirmar"];
+  var si=steps.indexOf(step);
+  var PAY=[["pix","PIX","Chave: nobre@bistro.com.br"],["cartao_credito","Cartao Credito",""],["cartao_debito","Cartao Debito",""],["dinheiro","Dinheiro",""]];
+
+  function confirmar(){
+    var oid=1000+Math.floor(Math.random()*9000);
+    var order={id:oid,nome:nome||"Cliente",profissional:prof,payment:pay,items:cart,total:total,status:"aguardando_pagamento",criadoEm:nowStr(),canal:"app"};
+    onConfirm(order);
+    setStep("enviado");
   }
-  function onTouchStart(e) {
-    touchStart.current = e.touches[0].clientX;
-  }
-  function onTouchEnd(e) {
-    if (touchStart.current === null) return;
-    var diff = touchStart.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) goTo(diff > 0 ? (idx + 1) % destaques.length : (idx - 1 + destaques.length) % DESTAQUES.length);
-    touchStart.current = null;
-  }
-  var p = destaques[idx];
-  if (!p) return null;
-  return /*#__PURE__*/React.createElement("div", {
-    onTouchStart: onTouchStart,
-    onTouchEnd: onTouchEnd,
-    style: {
-      position: "relative",
-      height: 260,
-      overflow: "hidden",
-      background: DARK
-    }
-  }, destaques.map(function (d, i) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: d.id,
-      style: {
-        position: "absolute",
-        inset: 0,
-        transition: "opacity .6s ease",
-        opacity: i === idx ? 1 : 0
-      }
-    }, /*#__PURE__*/React.createElement("img", {
-      src: d.img,
-      alt: d.name,
-      style: {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        transform: "scale(1.05)",
-        transition: "transform 4s ease"
-      }
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        position: "absolute",
-        inset: 0,
-        background: "linear-gradient(to top,rgba(10,6,2,.85) 40%,rgba(10,6,2,.1) 100%)"
-      }
-    }));
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      right: 0,
-      padding: "0 20px 20px"
-    }
-  }, p.tag && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 5,
-      background: p.tagColor,
-      borderRadius: 20,
-      padding: "3px 10px",
-      marginBottom: 7
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      fontWeight: 800,
-      color: "#fff",
-      letterSpacing: .4
-    }
-  }, p.tag)), /*#__PURE__*/React.createElement("h2", {
-    style: {
-      margin: "0 0 4px",
-      fontSize: 22,
-      fontWeight: 900,
-      color: "#fff",
-      letterSpacing: -.3,
-      textShadow: "0 2px 8px rgba(0,0,0,.4)",
-      fontFamily: "Georgia,serif"
-    }
-  }, p.name), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 10px",
-      fontSize: 12,
-      color: "rgba(255,255,255,.75)",
-      lineHeight: 1.4,
-      maxWidth: 280
-    }
-  }, p.desc), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: "Georgia,serif",
-      fontSize: 20,
-      fontWeight: 700,
-      color: GOLD
-    }
-  }, fmt(p.price))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      bottom: 18,
-      right: 20,
-      display: "flex",
-      gap: 5
-    }
-  }, destaques.map(function (_, i) {
-    return /*#__PURE__*/React.createElement("button", {
-      key: i,
-      onClick: function onClick() {
-        return goTo(i);
-      },
-      style: {
-        width: i === idx ? 20 : 6,
-        height: 6,
-        borderRadius: 3,
-        background: i === idx ? "#fff" : "rgba(255,255,255,.35)",
-        border: "none",
-        cursor: "pointer",
-        padding: 0,
-        transition: "width .3s,background .3s"
-      }
-    });
-  })));
+
+  if(step==="enviado")return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+    h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,padding:"28px 20px 36px",textAlign:"center"}},
+      h("div",{style:{width:50,height:50,borderRadius:"50%",background:"#f0fdf4",border:"2px solid #22c55e",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}},
+        h("svg",{width:22,height:22,viewBox:"0 0 24 24",fill:"none"},h("path",{d:"M5 13l4 4L19 7",stroke:"#22c55e",strokeWidth:"2.5",strokeLinecap:"round"}))
+      ),
+      h("h3",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:700,margin:"0 0 6px"}},"Pedido enviado!"),
+      h("p",{style:{fontSize:12,color:"#888",margin:"0 0 16px"}},"Aguarde a confirmacao do pagamento."),
+      h("button",{onClick:onClose,style:{background:C,border:"1px solid "+B,borderRadius:25,padding:"12px 24px",fontSize:13,fontWeight:700,cursor:"pointer",color:"#555"}},"Fechar")
+    )
+  );
+
+  return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+    h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"slideUp .28s ease"}},
+      h("div",{style:{padding:"14px 20px 10px",borderBottom:"1px solid "+B,flexShrink:0}},
+        h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8}},
+          si>0&&h("button",{onClick:function(){setStep(steps[si-1]);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888",padding:0}},"<"),
+          h("span",{style:{fontWeight:800,fontSize:16,flex:1,fontFamily:"Georgia,serif"}},step==="cart"?"Meu Pedido":step==="dados"?"Seus Dados":step==="pagamento"?"Pagamento":"Confirmar"),
+          h("button",{onClick:onClose,style:{background:"#f5f5f5",border:"none",width:28,height:28,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#888"}},"x")
+        ),
+        h("div",{style:{display:"flex",gap:4}},steps.slice(0,-1).map(function(s,i){return h("div",{key:s,style:{flex:1,height:3,borderRadius:3,background:i<=si?R:"#eee"}});}))
+      ),
+      h("div",{style:{overflowY:"auto",flex:1,padding:"14px 20px"}},
+        step==="cart"&&h("div",null,
+          cart.map(function(item){return h("div",{key:item.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:10,marginBottom:10,borderBottom:"1px solid "+B}},
+            h("div",{style:{flex:1}},h("p",{style:{margin:0,fontWeight:700,fontSize:13}},item.name),h("p",{style:{margin:"2px 0 0",fontWeight:800,fontSize:13,color:R}},fmt(item.price*item.qty))),
+            h("div",{style:{display:"flex",alignItems:"center",gap:8}},
+              h("button",{onClick:function(){onDec(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}}," - "),
+              h("span",{style:{fontWeight:700,minWidth:20,textAlign:"center"}},item.qty),
+              h("button",{onClick:function(){onInc(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}}," + ")
+            )
+          );}),
+          h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid "+B,paddingTop:10}},
+            h("span",{style:{fontWeight:800,fontSize:15}},"Total"),
+            h("span",{style:{fontWeight:900,fontSize:16,color:R,fontFamily:"Georgia,serif"}},fmt(total))
+          )
+        ),
+        step==="dados"&&h("div",null,
+          h("label",{style:{fontSize:11,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Seu nome"),
+          h("input",{value:nome,onChange:function(e){setNome(e.target.value);},placeholder:"Como prefere ser chamada?",style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"11px 13px",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:14}}),
+          profs.filter(function(p){return p.active;}).length>0&&h("div",null,
+            h("p",{style:{fontSize:11,fontWeight:700,color:"#888",textTransform:"uppercase",marginBottom:8}},"Profissional"),
+            h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},
+              profs.filter(function(p){return p.active;}).map(function(p){var a=prof===p.name;return h("button",{key:p.id,onClick:function(){setProf(a?"":p.name);},style:{padding:"6px 12px",borderRadius:18,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#666",fontSize:12,fontWeight:700,cursor:"pointer"}},p.name);})
+            )
+          )
+        ),
+        step==="pagamento"&&h("div",null,
+          PAY.map(function(arr){var v=arr[0],l=arr[1],hint=arr[2];var a=pay===v;return h("button",{key:v,onClick:function(){setPay(v);},style:{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"13px 15px",borderRadius:13,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",cursor:"pointer",textAlign:"left",marginBottom:9}},
+            h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:14,color:a?R:"#1a1108"}},l),a&&hint&&h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},hint)),
+            h("div",{style:{width:18,height:18,borderRadius:"50%",border:"2px solid "+(a?R:B),background:a?R:"#fff",display:"flex",alignItems:"center",justifyContent:"center"}},a&&h("div",{style:{width:7,height:7,borderRadius:"50%",background:"#fff"}}))
+          );}),
+          h("div",{style:{background:C,borderRadius:12,padding:"11px 14px",marginTop:4}},
+            h("div",{style:{display:"flex",justifyContent:"space-between"}},h("span",{style:{fontSize:12,color:"#888"}},"Total"),h("span",{style:{fontWeight:900,fontSize:17,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
+          )
+        ),
+        step==="confirmar"&&h("div",null,
+          pay==="pix"&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
+            h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12,color:"#1d4ed8"}},"Chave PIX"),
+            h("p",{style:{margin:"0 0 10px",fontWeight:900,fontSize:15,color:"#1d4ed8",fontFamily:"monospace"}},"nobre@bistro.com.br"),
+            h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText("nobre@bistro.com.br");},style:{background:"#1d4ed8",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer"}},"Copiar chave")
+          ),
+          h("div",{style:{background:C,borderRadius:12,padding:"12px 14px"}},
+            cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}},h("span",{style:{color:"#555"}},i.qty+"x "+i.name),h("span",{style:{fontWeight:700}},fmt(i.price*i.qty)));}),
+            h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1px solid "+B,paddingTop:8,marginTop:4}},h("span",{style:{fontWeight:800}},"Total"),h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
+          )
+        )
+      ),
+      h("div",{style:{padding:"11px 20px 28px",borderTop:"1px solid "+B,flexShrink:0}},
+        step==="cart"&&h("button",{onClick:function(){setStep("dados");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Continuar -- "+fmt(total)),
+        step==="dados"&&h("button",{onClick:function(){if(nome.trim())setStep("pagamento");},style:{width:"100%",background:nome.trim()?R:"#ccc",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Ir para Pagamento"),
+        step==="pagamento"&&h("button",{onClick:function(){setStep("confirmar");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Confirmar Pedido"),
+        step==="confirmar"&&h("button",{onClick:confirmar,style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Ja paguei -- Enviar para cozinha")
+      )
+    )
+  );
 }
 
-// ── Categorias pill scroll ────────────────────────
-function CatBar(_ref2) {
-  var cats = _ref2.cats,
-    active = _ref2.active,
-    onSelect = _ref2.onSelect;
-  var ref = useRef(null);
-  useEffect(function () {
-    var _ref$current;
-    var el = (_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.querySelector("[data-active='true']");
-    if (el) el.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center"
+function App(){
+  var s1=us(PRODS_DEF),prods=s1[0],setProds=s1[1];
+  var s2=us(PROFS_DEF),profs=s2[0],setProfs=s2[1];
+  var s3=us([]),orders=s3[0],setOrders=s3[1];
+  var s4=us(true),loading=s4[0],setLoading=s4[1];
+  var s5=us("prato"),cat=s5[0],setCat=s5[1];
+  var s6=us([]),cart=s6[0],setCart=s6[1];
+  var s7=us(null),sel=s7[0],setSel=s7[1];
+  var s8=us(false),showCart=s8[0],setShowCart=s8[1];
+  var s9=us(""),search=s9[0],setSearch=s9[1];
+  var s10=us(HORARIOS_DEF),hor=s10[0],setHor=s10[1];
+  var s11=us(false),fec=s11[0],setFec=s11[1];
+
+  ue(function(){
+    Promise.all([sbGet("nb_bA_products"),sbGet("nb_bA_orders"),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
+      if(res[0]&&res[0].length)setProds(res[0]);
+      if(res[1])setOrders(res[1]);
+      if(res[2]&&res[2].length)setProfs(res[2]);
+      if(res[3])setHor(res[3]);
+      if(res[4]!==null)setFec(!!res[4]);
+      setLoading(false);
     });
-  }, [active]);
-  return /*#__PURE__*/React.createElement("div", {
-    ref: ref,
-    style: {
-      display: "flex",
-      overflowX: "auto",
-      gap: 8,
-      padding: "12px 16px",
-      background: "#fff",
-      borderBottom: "1px solid " + BORDER
-    }
-  }, cats.map(function (c) {
-    var a = active === c.id;
-    return /*#__PURE__*/React.createElement("button", {
-      key: c.id,
-      "data-active": String(a),
-      onClick: function onClick() {
-        return onSelect(c.id);
-      },
-      style: {
-        flexShrink: 0,
-        display: "flex",
-        alignItems: "center",
-        gap: 5,
-        padding: "7px 14px",
-        borderRadius: 20,
-        border: "1.5px solid " + (a ? R : BORDER),
-        background: a ? R : "#fff",
-        color: a ? "#fff" : "#555",
-        fontSize: 12,
-        fontWeight: a ? 800 : 600,
-        cursor: "pointer",
-        transition: "all .2s",
-        whiteSpace: "nowrap"
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 14
-      }
-    }, c.icon), /*#__PURE__*/React.createElement("span", null, c.label));
-  }));
-}
+    var poll=setInterval(function(){sbGet("nb_bA_products").then(function(p){if(p&&p.length)setProds(p);});},15000);
+    return function(){clearInterval(poll);};
+  },[]);
 
-// ── Card de produto — estilo moderno ──────────────
-function ProductCard(_ref3) {
-  var p = _ref3.p,
-    onTap = _ref3.onTap;
-  var _useState5 = useState(false),
-    _useState6 = _slicedToArray(_useState5, 2),
-    pressed = _useState6[0],
-    setPressed = _useState6[1];
-  var esg = p.stock === 0;
-  return /*#__PURE__*/React.createElement("div", {
-    onClick: function onClick() {
-      return !esg && onTap(p);
-    },
-    onTouchStart: function onTouchStart() {
-      return setPressed(true);
-    },
-    onTouchEnd: function onTouchEnd() {
-      return setPressed(false);
-    },
-    style: {
-      display: "flex",
-      alignItems: "flex-start",
-      gap: 12,
-      padding: "14px 0",
-      borderBottom: "1px solid " + BORDER,
-      cursor: esg ? "default" : "pointer",
-      opacity: esg ? .55 : 1,
-      transform: pressed ? "scale(.985)" : "scale(1)",
-      transition: "transform .12s"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      minWidth: 0
-    }
-  }, esg && /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "inline-block",
-      background: "#fee2e2",
-      color: "#b91c1c",
-      fontSize: 9,
-      fontWeight: 800,
-      padding: "2px 7px",
-      borderRadius: 18,
-      marginBottom: 5,
-      letterSpacing: .3
-    }
-  }, "ESGOTADO"), !esg && p.tag && /*#__PURE__*/React.createElement("span", {
-    style: {
-      display: "inline-block",
-      background: p.tagColor,
-      color: "#fff",
-      fontSize: 9,
-      fontWeight: 800,
-      padding: "2px 8px",
-      borderRadius: 18,
-      marginBottom: 5,
-      letterSpacing: .3
-    }
-  }, p.tag), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: 0,
-      fontWeight: 800,
-      fontSize: 14,
-      color: DARK,
-      lineHeight: 1.25,
-      letterSpacing: -.1
-    }
-  }, p.name), p.desc && /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "4px 0 0",
-      fontSize: 12,
-      color: "#999",
-      lineHeight: 1.45,
-      overflow: "hidden",
-      display: "-webkit-box",
-      WebkitLineClamp: 2,
-      WebkitBoxOrient: "vertical"
-    }
-  }, p.desc), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      marginTop: 7
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 900,
-      fontSize: 15,
-      color: esg ? "#ccc" : DARK,
-      fontFamily: "Georgia,serif"
-    }
-  }, fmt(p.price)), !esg && p.stock > 0 && p.stock <= p.minStock && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 9,
-      fontWeight: 700,
-      color: "#f59e0b",
-      background: "#fffbeb",
-      border: "1px solid #fde68a",
-      padding: "1px 6px",
-      borderRadius: 18
-    }
-  }, "\u26A0\uFE0F ", p.stock, " un."))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 106,
-      height: 84,
-      borderRadius: 13,
-      overflow: "hidden",
-      boxShadow: "0 2px 12px rgba(0,0,0,.1)"
-    }
-  }, /*#__PURE__*/React.createElement("img", {
-    src: p.img,
-    alt: p.name,
-    style: {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      filter: esg ? "grayscale(70%)" : ""
-    },
-    loading: "lazy"
-  }), !esg && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      inset: 0,
-      borderRadius: 13,
-      background: "linear-gradient(135deg,transparent 60%,rgba(139,26,26,.08))"
-    }
-  })), !esg && /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick(e) {
-      e.stopPropagation();
-      onTap(p);
-    },
-    style: {
-      position: "absolute",
-      bottom: -9,
-      right: 6,
-      width: 30,
-      height: 30,
-      borderRadius: "50%",
-      background: R,
-      border: "2.5px solid #fff",
-      color: "#fff",
-      fontSize: 20,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      lineHeight: 1,
-      boxShadow: "0 3px 10px " + R + "60",
-      fontWeight: 300
-    }
-  }, "+")));
-}
+  var status=getStatus(hor,fec);
+  var cc=cart.reduce(function(s,i){return s+i.qty;},0);
+  var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
 
-// ── Modal do produto ──────────────────────────────
-function ProductModal(_ref4) {
-  var p = _ref4.p,
-    onClose = _ref4.onClose,
-    onAdd = _ref4.onAdd;
-  var _useState7 = useState(1),
-    _useState8 = _slicedToArray(_useState7, 2),
-    qty = _useState8[0],
-    setQty = _useState8[1];
-  var _useState9 = useState(""),
-    _useState0 = _slicedToArray(_useState9, 2),
-    obs = _useState0[0],
-    setObs = _useState0[1];
-  var esg = p.stock === 0;
-  var max = p.stock > 0 ? p.stock : 99;
-  return /*#__PURE__*/React.createElement("div", {
-    onClick: onClose,
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 400,
-      background: "rgba(0,0,0,.5)",
-      display: "flex",
-      alignItems: "flex-end",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function onClick(e) {
-      return e.stopPropagation();
-    },
-    style: {
-      background: "#fff",
-      borderRadius: "22px 22px 0 0",
-      width: "100%",
-      maxWidth: 480,
-      overflow: "hidden",
-      animation: "slideUp .3s cubic-bezier(.32,1,.56,1)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "relative",
-      height: 220
-    }
-  }, /*#__PURE__*/React.createElement("img", {
-    src: p.img,
-    alt: p.name,
-    style: {
-      width: "100%",
-      height: "100%",
-      objectFit: "cover",
-      filter: esg ? "grayscale(50)" : ""
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      inset: 0,
-      background: "linear-gradient(to top,rgba(0,0,0,.4),transparent 50%)"
-    }
-  }), p.tag && !esg && /*#__PURE__*/React.createElement("span", {
-    style: {
-      position: "absolute",
-      top: 14,
-      left: 14,
-      background: p.tagColor,
-      color: "#fff",
-      fontSize: 10,
-      fontWeight: 800,
-      padding: "4px 11px",
-      borderRadius: 20,
-      letterSpacing: .3
-    }
-  }, p.tag), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    style: {
-      position: "absolute",
-      top: 13,
-      right: 13,
-      background: "rgba(255,255,255,.9)",
-      border: "none",
-      width: 33,
-      height: 33,
-      borderRadius: "50%",
-      fontSize: 19,
-      cursor: "pointer",
-      color: "#333",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      boxShadow: "0 2px 8px rgba(0,0,0,.15)"
-    }
-  }, "\xD7"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "absolute",
-      bottom: 14,
-      left: 16
-    }
-  }, /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: 0,
-      fontSize: 20,
-      fontWeight: 900,
-      color: "#fff",
-      fontFamily: "Georgia,serif",
-      textShadow: "0 2px 8px rgba(0,0,0,.4)"
-    }
-  }, fmt(p.price)))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "16px 20px 30px"
-    }
-  }, /*#__PURE__*/React.createElement("h2", {
-    style: {
-      margin: "0 0 6px",
-      fontSize: 19,
-      fontWeight: 900,
-      color: DARK,
-      fontFamily: "Georgia,serif",
-      letterSpacing: -.3
-    }
-  }, p.name), p.desc && /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: "0 0 14px",
-      fontSize: 13,
-      color: "#777",
-      lineHeight: 1.6
-    }
-  }, p.desc), !esg && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("textarea", {
-    value: obs,
-    onChange: function onChange(e) {
-      return setObs(e.target.value);
-    },
-    placeholder: "Alguma observa\xE7\xE3o? (ex: sem cebola...)",
-    rows: 2,
-    style: {
-      width: "100%",
-      border: "1.5px solid " + BORDER,
-      borderRadius: 12,
-      padding: "10px 13px",
-      fontSize: 13,
-      resize: "none",
-      outline: "none",
-      boxSizing: "border-box",
-      fontFamily: "inherit",
-      background: CREAM,
-      marginBottom: 14,
-      color: DARK
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 0,
-      border: "1.5px solid " + BORDER,
-      borderRadius: 25,
-      overflow: "hidden",
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setQty(Math.max(1, qty - 1));
-    },
-    style: {
-      width: 36,
-      height: 36,
-      border: "none",
-      background: "#fff",
-      color: DARK,
-      fontSize: 20,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontWeight: 300
-    }
-  }, ""), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 15,
-      fontWeight: 800,
-      minWidth: 28,
-      textAlign: "center",
-      color: DARK
-    }
-  }, qty), /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setQty(Math.min(max, qty + 1));
-    },
-    style: {
-      width: 36,
-      height: 36,
-      border: "none",
-      background: "#fff",
-      color: DARK,
-      fontSize: 20,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontWeight: 300
-    }
-  }, "+")), /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return onAdd(p, qty, obs);
-    },
-    style: {
-      flex: 1,
-      background: R,
-      color: "#fff",
-      border: "none",
-      borderRadius: 25,
-      padding: "12px 0",
-      fontSize: 14,
-      fontWeight: 800,
-      cursor: "pointer",
-      letterSpacing: -.1
-    }
-  }, "Adicionar \xB7 ", fmt(p.price * qty))), p.stock > 0 && p.stock <= 5 && /*#__PURE__*/React.createElement("p", {
-    style: {
-      textAlign: "center",
-      fontSize: 11,
-      color: "#f59e0b",
-      fontWeight: 700,
-      marginTop: 9
-    }
-  }, "\u26A0\uFE0F Apenas ", p.stock, " restante", p.stock > 1 ? "s" : "")), esg && /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center",
-      padding: "16px 0",
-      color: "#b91c1c",
-      fontWeight: 700,
-      fontSize: 15
-    }
-  }, "Item esgotado no momento"))));
-}
+  var catProds=um(function(){
+    var ap=prods.filter(function(p){return p.active;});
+    if(search){var q=search.toLowerCase();return ap.filter(function(p){return p.name.toLowerCase().includes(q);});}
+    return ap.filter(function(p){return p.cat===cat;});
+  },[prods,cat,search]);
 
-// ── Carrinho drawer ───────────────────────────────
-function CartDrawer(_ref5) {
-  var cart = _ref5.cart,
-    onClose = _ref5.onClose,
-    profs = _ref5.profs;
-  var _useState1 = useState("cart"),
-    _useState10 = _slicedToArray(_useState1, 2),
-    step = _useState10[0],
-    setStep = _useState10[1];
-  var _useState11 = useState(""),
-    _useState12 = _slicedToArray(_useState11, 2),
-    nome = _useState12[0],
-    setNome = _useState12[1];
-  var _useState13 = useState(""),
-    _useState14 = _slicedToArray(_useState13, 2),
-    prof = _useState14[0],
-    setProf = _useState14[1];
-  var _useState15 = useState("pix"),
-    _useState16 = _slicedToArray(_useState15, 2),
-    payment = _useState16[0],
-    setPayment = _useState16[1];
-  var _useState17 = useState(""),
-    _useState18 = _slicedToArray(_useState17, 2),
-    obs = _useState18[0],
-    setObs = _useState18[1];
-  var oid = useRef(1000 + Math.floor(Math.random() * 9000));
-  var PAY = {
-    pix: "💠 PIX",
-    cartao_credito: "💳 Crédito",
-    cartao_debito: "💳 Débito",
-    dinheiro: "💵 Dinheiro"
-  };
-  var steps = ["cart", "dados", "pagamento"];
-  var si = steps.indexOf(step);
-  function nowStr() {
-    return new Date().toLocaleString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
+  function addCart(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
+  function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
+  function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
+
+  function handleConfirm(order){
+    sbGet("nb_bA_orders").then(function(existing){
+      var novos=(existing||[]).concat([order]);
+      sbSet("nb_bA_orders",novos);
+      setOrders(novos);
     });
+    setCart([]);setShowCart(false);
   }
-  function sendWpp() {
-    var lines = cart.items.map(function (i) {
-      return "• " + i.qty + "x " + i.name + (i.obs ? " (" + i.obs + ")" : "");
-    }).join("\n");
-    var msg = "🌿 *PEDIDO #" + oid.current + " — Nobre Bistrô*\n\n👤 *Cliente:* " + nome + "\n" + (prof ? "✂️ *Profissional:* " + prof + "\n" : "") + "\n*Itens:*\n" + lines + "\n\n💰 *Total:* " + fmt(cart.total) + "\n💳 *Pagamento:* " + (PAY[payment] || payment);
-    window.open("https://wa.me/5511914195567?text=" + encodeURIComponent(msg), "_blank");
-    store.set("nb_bA_orders", []);
-    onClose();
-  }
-  return /*#__PURE__*/React.createElement("div", {
-    onClick: onClose,
-    style: {
-      position: "fixed",
-      inset: 0,
-      zIndex: 300,
-      background: "rgba(0,0,0,.5)",
-      display: "flex",
-      alignItems: "flex-end",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    onClick: function onClick(e) {
-      return e.stopPropagation();
-    },
-    style: {
-      background: "#fff",
-      borderRadius: "22px 22px 0 0",
-      width: "100%",
-      maxWidth: 480,
-      maxHeight: "88vh",
-      display: "flex",
-      flexDirection: "column",
-      animation: "slideUp .3s cubic-bezier(.32,1,.56,1)"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "16px 20px 12px",
-      borderBottom: "1px solid " + BORDER,
-      flexShrink: 0
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      marginBottom: 8
-    }
-  }, si > 0 && step !== "confirmado" && /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setStep(steps[si - 1]);
-    },
-    style: {
-      background: "none",
-      border: "none",
-      fontSize: 22,
-      cursor: "pointer",
-      color: "#888",
-      padding: 0,
-      lineHeight: 1
-    }
-  }, ""), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 800,
-      fontSize: 16,
-      flex: 1,
-      fontFamily: "Georgia,serif"
-    }
-  }, step === "cart" ? "Meu Pedido" : step === "dados" ? "Seus Dados" : step === "pagamento" ? "Pagamento" : "Tudo certo! 🎉"), /*#__PURE__*/React.createElement("button", {
-    onClick: onClose,
-    style: {
-      background: "#f5f5f5",
-      border: "none",
-      width: 28,
-      height: 28,
-      borderRadius: "50%",
-      fontSize: 16,
-      cursor: "pointer",
-      color: "#888",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, "\xD7")), step !== "confirmado" && /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 4
-    }
-  }, steps.map(function (s, i) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: s,
-      style: {
-        flex: 1,
-        height: 3,
-        borderRadius: 3,
-        background: si >= i ? R : "#eee",
-        transition: "background .3s"
-      }
-    });
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      overflowY: "auto",
-      flex: 1,
-      padding: "14px 20px"
-    }
-  }, step === "cart" && /*#__PURE__*/React.createElement(React.Fragment, null, cart.items.map(function (item) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: item._key,
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        paddingBottom: 12,
-        marginBottom: 12,
-        borderBottom: "1px solid " + BORDER
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 48,
-        height: 48,
-        borderRadius: 10,
-        overflow: "hidden",
-        flexShrink: 0
-      }
-    }, /*#__PURE__*/React.createElement("img", {
-      src: item.img,
-      alt: item.name,
-      style: {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover"
-      }
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        minWidth: 0
-      }
-    }, /*#__PURE__*/React.createElement("p", {
-      style: {
-        margin: 0,
-        fontWeight: 700,
-        fontSize: 13,
-        color: DARK
-      }
-    }, item.name), item.obs && /*#__PURE__*/React.createElement("p", {
-      style: {
-        margin: "2px 0 0",
-        fontSize: 11,
-        color: "#aaa"
-      }
-    }, item.obs), /*#__PURE__*/React.createElement("p", {
-      style: {
-        margin: "3px 0 0",
-        fontWeight: 800,
-        fontSize: 13,
-        color: R
-      }
-    }, fmt(item.price * item.qty))), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 0,
-        border: "1.5px solid " + BORDER,
-        borderRadius: 20,
-        overflow: "hidden"
-      }
-    }, /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        return cart.dec(item._key);
-      },
-      style: {
-        width: 28,
-        height: 28,
-        border: "none",
-        background: "#fff",
-        color: DARK,
-        fontSize: 17,
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, ""), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontWeight: 800,
-        fontSize: 13,
-        minWidth: 22,
-        textAlign: "center",
-        color: DARK
-      }
-    }, item.qty), /*#__PURE__*/React.createElement("button", {
-      onClick: function onClick() {
-        return cart.inc(item._key);
-      },
-      style: {
-        width: 28,
-        height: 28,
-        border: "none",
-        background: "#fff",
-        color: DARK,
-        fontSize: 17,
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, "+")));
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      paddingTop: 4,
-      borderTop: "1.5px solid " + BORDER
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 800,
-      fontSize: 15,
-      color: DARK
-    }
-  }, "Total"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 900,
-      fontSize: 16,
-      color: R,
-      fontFamily: "Georgia,serif"
-    }
-  }, fmt(cart.total)))), step === "dados" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 10,
-      fontWeight: 700,
-      color: "#aaa",
-      textTransform: "uppercase",
-      letterSpacing: .5,
-      marginBottom: 5
-    }
-  }, "Seu nome *"), /*#__PURE__*/React.createElement("input", {
-    value: nome,
-    onChange: function onChange(e) {
-      return setNome(e.target.value);
-    },
-    placeholder: "Como prefere ser chamada?",
-    style: {
-      width: "100%",
-      border: "1.5px solid " + BORDER,
-      borderRadius: 12,
-      padding: "11px 13px",
-      fontSize: 14,
-      outline: "none",
-      boxSizing: "border-box",
-      fontFamily: "inherit",
-      marginBottom: 14,
-      color: DARK
-    }
-  }), profs && profs.length > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginBottom: 14
-    }
-  }, /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 10,
-      fontWeight: 700,
-      color: "#aaa",
-      textTransform: "uppercase",
-      letterSpacing: .5,
-      marginBottom: 8
-    }
-  }, "Profissional que te atende"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 6
-    }
-  }, profs.filter(function (p) {
-    return p.active;
-  }).map(function (p) {
-    return /*#__PURE__*/React.createElement("button", {
-      key: p.id,
-      onClick: function onClick() {
-        return setProf(prof === p.name ? "" : p.name);
-      },
-      style: {
-        padding: "6px 13px",
-        borderRadius: 20,
-        border: "1.5px solid " + (prof === p.name ? R : BORDER),
-        background: prof === p.name ? "#fff5f5" : "#fff",
-        color: prof === p.name ? R : "#666",
-        fontSize: 12,
-        fontWeight: 700,
-        cursor: "pointer"
-      }
-    }, p.name);
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff5f5",
-      border: "1px solid #fecaca",
-      borderRadius: 12,
-      padding: "10px 13px"
-    }
-  }, /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: 0,
-      fontSize: 11,
-      color: "#b91c1c",
-      fontWeight: 600,
-      lineHeight: 1.5
-    }
-  }, "\u26A0\uFE0F O pagamento deve ser realizado ", /*#__PURE__*/React.createElement("strong", null, "antes do envio do pedido"), "."))), step === "pagamento" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 10,
-      fontWeight: 700,
-      color: "#aaa",
-      textTransform: "uppercase",
-      letterSpacing: .5,
-      marginBottom: 10
-    }
-  }, "Como vai pagar?"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      flexDirection: "column",
-      gap: 9,
-      marginBottom: 16
-    }
-  }, [["pix", "💠 PIX", "Chave: nobre@bistro.com.br"], ["cartao_credito", "💳 Cartão de Crédito", ""], ["cartao_debito", "💳 Cartão de Débito", ""], ["dinheiro", "💵 Dinheiro", ""]].map(function (_ref6) {
-    var _ref7 = _slicedToArray(_ref6, 3),
-      v = _ref7[0],
-      l = _ref7[1],
-      hint = _ref7[2];
-    return /*#__PURE__*/React.createElement("button", {
-      key: v,
-      onClick: function onClick() {
-        return setPayment(v);
-      },
-      style: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "13px 15px",
-        borderRadius: 13,
-        border: "1.5px solid " + (payment === v ? R : BORDER),
-        background: payment === v ? "#fff5f5" : "#fff",
-        cursor: "pointer",
-        textAlign: "left"
-      }
-    }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
-      style: {
-        margin: 0,
-        fontWeight: 700,
-        fontSize: 14,
-        color: payment === v ? R : DARK
-      }
-    }, l), hint && payment === v && /*#__PURE__*/React.createElement("p", {
-      style: {
-        margin: "2px 0 0",
-        fontSize: 11,
-        color: "#888",
-        fontFamily: "monospace"
-      }
-    }, hint)), /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 18,
-        height: 18,
-        borderRadius: "50%",
-        border: "2px solid " + (payment === v ? R : BORDER),
-        background: payment === v ? R : "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }
-    }, payment === v && /*#__PURE__*/React.createElement("div", {
-      style: {
-        width: 7,
-        height: 7,
-        borderRadius: "50%",
-        background: "#fff"
-      }
-    })));
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: CREAM,
-      borderRadius: 13,
-      padding: "12px 15px"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      marginBottom: 3
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      color: "#888"
-    }
-  }, "Total a pagar"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 900,
-      fontSize: 18,
-      color: R,
-      fontFamily: "Georgia,serif"
-    }
-  }, fmt(cart.total))), /*#__PURE__*/React.createElement("p", {
-    style: {
-      margin: 0,
-      fontSize: 11,
-      color: "#aaa"
-    }
-  }, "Realize o pagamento e depois envie o pedido"))), step === "confirmado" && /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center",
-      padding: "20px 0"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 52,
-      marginBottom: 10
-    }
-  }, ""), /*#__PURE__*/React.createElement("h3", {
-    style: {
-      fontFamily: "Georgia,serif",
-      fontSize: 20,
-      fontWeight: 700,
-      color: DARK,
-      margin: "0 0 8px"
-    }
-  }, "Pedido pronto!"), /*#__PURE__*/React.createElement("p", {
-    style: {
-      fontSize: 13,
-      color: "#888",
-      margin: "0 0 20px",
-      lineHeight: 1.6
-    }
-  }, "Clique abaixo para enviar seu pedido pelo WhatsApp."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: CREAM,
-      borderRadius: 13,
-      padding: "12px 15px",
-      marginBottom: 20,
-      textAlign: "left"
-    }
-  }, cart.items.map(function (i) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: i._key,
-      style: {
-        display: "flex",
-        justifyContent: "space-between",
-        fontSize: 12,
-        marginBottom: 5
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        color: "#555"
-      }
-    }, i.qty, "x ", i.name), /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontWeight: 700,
-        color: DARK
-      }
-    }, fmt(i.price * i.qty)));
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      justifyContent: "space-between",
-      borderTop: "1px solid " + BORDER,
-      paddingTop: 8,
-      marginTop: 4
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 800,
-      color: DARK
-    }
-  }, "Total"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 900,
-      color: R,
-      fontFamily: "Georgia,serif"
-    }
-  }, fmt(cart.total)))))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "12px 20px 28px",
-      borderTop: "1px solid " + BORDER,
-      flexShrink: 0
-    }
-  }, step === "cart" && /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setStep("dados");
-    },
-    style: {
-      width: "100%",
-      background: R,
-      color: "#fff",
-      border: "none",
-      borderRadius: 25,
-      padding: "14px 0",
-      fontSize: 15,
-      fontWeight: 800,
-      cursor: "pointer"
-    }
-  }, "Continuar \u2192 ", fmt(cart.total)), step === "dados" && /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return nome.trim() && setStep("pagamento");
-    },
-    disabled: !nome.trim(),
-    style: {
-      width: "100%",
-      background: nome.trim() ? R : "#ccc",
-      color: "#fff",
-      border: "none",
-      borderRadius: 25,
-      padding: "14px 0",
-      fontSize: 15,
-      fontWeight: 800,
-      cursor: nome.trim() ? "pointer" : "not-allowed"
-    }
-  }, "Ir para Pagamento \u2192"), step === "pagamento" && /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setStep("confirmado");
-    },
-    style: {
-      width: "100%",
-      background: R,
-      color: "#fff",
-      border: "none",
-      borderRadius: 25,
-      padding: "14px 0",
-      fontSize: 15,
-      fontWeight: 800,
-      cursor: "pointer"
-    }
-  }, "\u2713 Confirmar \xB7 ", fmt(cart.total)), step === "confirmado" && /*#__PURE__*/React.createElement("button", {
-    onClick: sendWpp,
-    style: {
-      width: "100%",
-      background: "#22c55e",
-      color: "#fff",
-      border: "none",
-      borderRadius: 25,
-      padding: "14px 0",
-      fontSize: 15,
-      fontWeight: 800,
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      gap: 8
-    }
-  }, /*#__PURE__*/React.createElement("span", null, ""), " Enviar pelo WhatsApp"))));
+
+  if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
+    h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:3,color:R,textTransform:"uppercase"}},"Nobre Bistro"),
+    h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}})
+  );
+
+  if(!status.aberto)return h(TelaFechada,{status:status,prods:prods});
+
+  return h("div",{style:{background:C,maxWidth:480,margin:"0 auto",minHeight:"100vh"}},
+    h(Hero,{prods:prods}),
+    h("div",{style:{background:"#fff",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid "+B}},
+      h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+        h("span",{style:{width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block"}}),
+        h("span",{style:{fontSize:11,fontWeight:700,color:"#16a34a"}},"Aberto")
+      ),
+      h("span",{style:{fontFamily:"Georgia,serif",fontSize:10,letterSpacing:3,color:R,textTransform:"uppercase",fontWeight:700}},"Nobre Bistro")
+    ),
+    h("div",{style:{padding:"8px 14px",background:"#fff",borderBottom:"1px solid "+B}},
+      h("input",{value:search,onChange:function(e){setSearch(e.target.value);},placeholder:"Buscar no cardapio...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:20,padding:"8px 14px",fontSize:13,outline:"none",boxSizing:"border-box",background:C}})
+    ),
+    !search&&h("div",{style:{display:"flex",overflowX:"auto",gap:6,padding:"10px 14px",background:"#fff",borderBottom:"1px solid "+B}},
+      CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})
+    ),
+    h("div",{style:{background:"#fff",padding:"0 16px 110px"}},
+      !search&&h("div",{style:{display:"flex",alignItems:"center",gap:8,paddingTop:16,paddingBottom:8}},
+        h("h2",{style:{fontSize:10,fontWeight:800,color:"#888",letterSpacing:2,textTransform:"uppercase",margin:0}},(CATS.find(function(c){return c.id===cat;})||{label:""}).label),
+        h("div",{style:{flex:1,height:1,background:B}})
+      ),
+      catProds.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum prato disponivel"),
+      catProds.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid "+B,cursor:esg?"default":"pointer",opacity:esg?.5:1}},
+        h("div",{style:{flex:1}},
+          esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),
+          !esg&&p.tag&&h("span",{style:{color:R,fontSize:9,fontWeight:800,display:"block",marginBottom:3,textTransform:"uppercase"}},"* "+p.tag),
+          h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108"}},p.name),
+          p.desc&&h("p",{style:{margin:"3px 0 0",fontSize:12,color:"#999",lineHeight:1.4}},p.desc),
+          h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:15,color:esg?"#ccc":"#1a1108",fontFamily:"Georgia,serif"}},fmt(p.price))
+        ),
+        h("div",{style:{position:"relative",flexShrink:0}},
+          h("div",{style:{width:100,height:80,borderRadius:12,overflow:"hidden",background:"#f5f5f5"}},
+            p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})
+          ),
+          !esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-8,right:4,width:26,height:26,borderRadius:"50%",background:R,border:"2px solid #fff",color:"#fff",fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}},"+")
+        )
+      );})
+    ),
+    sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480}},
+        h("div",{style:{height:180,overflow:"hidden",borderRadius:"20px 20px 0 0",background:"#f5f5f5"}},
+          sel.img&&h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}})
+        ),
+        h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.88)",border:"none",width:33,height:33,borderRadius:"50%",fontSize:18,cursor:"pointer",color:"#333"}},"x"),
+        h("div",{style:{padding:"16px 20px 28px"}},
+          h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 6px"}},sel.name),
+          sel.desc&&h("p",{style:{fontSize:13,color:"#888",margin:"0 0 14px"}},sel.desc),
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+            h("span",{style:{fontFamily:"Georgia,serif",fontSize:20,fontWeight:900,color:R}},fmt(sel.price)),
+            h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar")
+          )
+        )
+      )
+    ),
+    cc>0&&h("div",{style:{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}},
+      h("button",{onClick:function(){setShowCart(true);},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:14,padding:"15px 22px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 6px 24px rgba(139,26,26,.4)"}},
+        h("span",{style:{background:"rgba(255,255,255,.18)",borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700}},cc+" "+(cc===1?"item":"itens")),
+        h("span",null,"Ver pedido"),
+        h("span",{style:{fontFamily:"Georgia,serif",fontSize:15,fontWeight:700}},fmt(ct))
+      )
+    ),
+    showCart&&h(CartDrawer,{cart:cart,profs:profs,onClose:function(){setShowCart(false);},onConfirm:handleConfirm,onDec:decCart,onInc:incCart})
+  );
 }
-
-// ═══════════════════════════════════════════════════
-// APP
-// ═══════════════════════════════════════════════════
-function App() {
-  var _useState19 = useState("prato"),
-    _useState20 = _slicedToArray(_useState19, 2),
-    activeCat = _useState20[0],
-    setActiveCat = _useState20[1];
-  var _useState21 = useState(null),
-    _useState22 = _slicedToArray(_useState21, 2),
-    sel = _useState22[0],
-    setSel = _useState22[1];
-  var _useState23 = useState(false),
-    _useState24 = _slicedToArray(_useState23, 2),
-    showCart = _useState24[0],
-    setShowCart = _useState24[1];
-  var _useState25 = useState(""),
-    _useState26 = _slicedToArray(_useState25, 2),
-    search = _useState26[0],
-    setSearch = _useState26[1];
-  var _useState27 = useState(false),
-    _useState28 = _slicedToArray(_useState27, 2),
-    showSearch = _useState28[0],
-    setShowSearch = _useState28[1];
-  var _useState29 = useState(null),
-    _useState30 = _slicedToArray(_useState29, 2),
-    added = _useState30[0],
-    setAdded = _useState30[1];
-  var _useState31 = useState(PRODUTOS_PADRAO),
-    _useState32 = _slicedToArray(_useState31, 2),
-    products = _useState32[0],
-    setProducts = _useState32[1];
-  var _useState33 = useState([{
-      id: 1,
-      name: "Adriana",
-      active: true
-    }, {
-      id: 2,
-      name: "Amanda",
-      active: true
-    }, {
-      id: 3,
-      name: "Bruna",
-      active: true
-    }, {
-      id: 4,
-      name: "Carol",
-      active: true
-    }, {
-      id: 5,
-      name: "Fernanda",
-      active: true
-    }, {
-      id: 6,
-      name: "Gabriela",
-      active: true
-    }, {
-      id: 7,
-      name: "Juliana",
-      active: true
-    }, {
-      id: 8,
-      name: "Larissa",
-      active: true
-    }, {
-      id: 9,
-      name: "Letícia",
-      active: true
-    }, {
-      id: 10,
-      name: "Mariana",
-      active: true
-    }]),
-    _useState34 = _slicedToArray(_useState33, 2),
-    profs = _useState34[0],
-    setProfs = _useState34[1];
-  var _useState35 = useState(true),
-    _useState36 = _slicedToArray(_useState35, 2),
-    loading = _useState36[0],
-    setLoading = _useState36[1];
-  var cart = useCart();
-  var catRefs = useRef({});
-
-  // Carrega produtos e profissionais do storage do Bloco A
-  useEffect(function () {
-    _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
-      var p, pf;
-      return _regenerator().w(function (_context3) {
-        while (1) switch (_context3.n) {
-          case 0:
-            _context3.n = 1;
-            return store.get("nb_bA_products");
-          case 1:
-            p = _context3.v;
-            if (p && p.length) setProducts(p);
-            _context3.n = 2;
-            return store.get("nb_bA_profs");
-          case 2:
-            pf = _context3.v;
-            if (pf && pf.length) setProfs(pf);
-            setLoading(false);
-          case 3:
-            return _context3.a(2);
-        }
-      }, _callee3);
-    }))();
-  }, []);
-
-  // IntersectionObserver para scroll spy
-  useEffect(function () {
-    if (search) return;
-    var obs = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (e.isIntersecting) setActiveCat(e.target.dataset.cat);
-      });
-    }, {
-      rootMargin: "-120px 0px -50% 0px",
-      threshold: 0
-    });
-    Object.values(catRefs.current).forEach(function (el) {
-      return el && obs.observe(el);
-    });
-    return function () {
-      return obs.disconnect();
-    };
-  }, [search]);
-  var grouped = useMemo(function () {
-    var ap = products.filter(function (p) {
-      return p.active;
-    });
-    if (search) {
-      var q = search.toLowerCase();
-      return {
-        "Resultados": {
-          id: "s",
-          prods: ap.filter(function (p) {
-            var _p$desc;
-            return p.name.toLowerCase().includes(q) || ((_p$desc = p.desc) === null || _p$desc === void 0 ? void 0 : _p$desc.toLowerCase().includes(q));
-          })
-        }
-      };
-    }
-    return CATS.reduce(function (a, c) {
-      var ps = ap.filter(function (p) {
-        return p.cat === c.id;
-      });
-      if (ps.length) a[c.label] = {
-        id: c.id,
-        icon: c.icon,
-        prods: ps
-      };
-      return a;
-    }, {});
-  }, [search]);
-  function handleAdd(p, qty, obs) {
-    cart.add(p, qty, obs);
-    setSel(null);
-    setAdded(p.id);
-    setTimeout(function () {
-      return setAdded(null);
-    }, 1200);
-  }
-  function handleCatSelect(id) {
-    var _catRefs$current$id;
-    setSearch("");
-    setShowSearch(false);
-    setActiveCat(id);
-    (_catRefs$current$id = catRefs.current[id]) === null || _catRefs$current$id === void 0 || _catRefs$current$id.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }
-  if (loading) return /*#__PURE__*/React.createElement("div", {
-    style: {
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: CREAM,
-      fontFamily: "Nunito,sans-serif"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: "center"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: "Georgia,serif",
-      fontSize: 13,
-      letterSpacing: 4,
-      color: R,
-      textTransform: "uppercase",
-      marginBottom: 8
-    }
-  }, "Nobre Bistr\xF4"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 32,
-      height: 32,
-      border: "2.5px solid " + BORDER,
-      borderTop: "2.5px solid " + R,
-      borderRadius: "50%",
-      margin: "0 auto",
-      animation: "spin .7s linear infinite"
-    }
-  })));
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: CREAM,
-      maxWidth: 480,
-      margin: "0 auto",
-      minHeight: "100vh",
-      fontFamily: "Nunito,sans-serif"
-    }
-  }, /*#__PURE__*/React.createElement("style", null, "@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&display=swap');*{box-sizing:border-box;margin:0;padding:0;}::-webkit-scrollbar{display:none;}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1)}}@keyframes spin{to{transform:rotate(360deg)}}"), /*#__PURE__*/React.createElement(HeroCarousel, {
-    destaques: products.filter(function (p) {
-      return p.tag && p.active && p.stock !== 0;
-    }).slice(0, 6)
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      padding: "10px 16px",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      borderBottom: "1px solid " + BORDER
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 6
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      width: 7,
-      height: 7,
-      background: "#22c55e",
-      borderRadius: "50%",
-      display: "inline-block",
-      boxShadow: "0 0 0 2px #dcfce7"
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 12,
-      fontWeight: 700,
-      color: "#16a34a"
-    }
-  }, "Aberto agora")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: "flex",
-      gap: 8,
-      alignItems: "center"
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setShowSearch(!showSearch);
-    },
-    style: {
-      background: "#f5f5f5",
-      border: "none",
-      width: 34,
-      height: 34,
-      borderRadius: "50%",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center"
-    }
-  }, /*#__PURE__*/React.createElement("svg", {
-    width: "14",
-    height: "14",
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: "#666",
-    strokeWidth: "2.5"
-  }, /*#__PURE__*/React.createElement("circle", {
-    cx: "11",
-    cy: "11",
-    r: "7"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "16.5",
-    y1: "16.5",
-    x2: "22",
-    y2: "22"
-  }))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontFamily: "Georgia,serif",
-      textAlign: "right"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 10,
-      letterSpacing: 3,
-      color: R,
-      textTransform: "uppercase",
-      fontWeight: 700
-    }
-  }, "Nobre Bistr\xF4")))), showSearch && /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: "8px 14px",
-      background: "#fff",
-      borderBottom: "1px solid " + BORDER
-    }
-  }, /*#__PURE__*/React.createElement("input", {
-    autoFocus: true,
-    value: search,
-    onChange: function onChange(e) {
-      return setSearch(e.target.value);
-    },
-    placeholder: "Buscar no card\xE1pio...",
-    style: {
-      width: "100%",
-      border: "1.5px solid " + BORDER,
-      borderRadius: 20,
-      padding: "9px 16px",
-      fontSize: 13,
-      outline: "none",
-      background: CREAM,
-      boxSizing: "border-box",
-      fontFamily: "Nunito,sans-serif"
-    }
-  })), !search && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "sticky",
-      top: 0,
-      zIndex: 50
-    }
-  }, /*#__PURE__*/React.createElement(CatBar, {
-    cats: CATS,
-    active: activeCat,
-    onSelect: handleCatSelect
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "#fff",
-      paddingBottom: 110
-    }
-  }, Object.entries(grouped).map(function (_ref9) {
-    var _ref0 = _slicedToArray(_ref9, 2),
-      catLabel = _ref0[0],
-      _ref0$ = _ref0[1],
-      catId = _ref0$.id,
-      icon = _ref0$.icon,
-      prods = _ref0$.prods;
-    return /*#__PURE__*/React.createElement("div", {
-      key: catLabel,
-      ref: function ref(el) {
-        if (catId && catId !== "s") catRefs.current[catId] = el;
-      },
-      "data-cat": catId,
-      style: {
-        padding: "0 16px"
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "flex",
-        alignItems: "center",
-        gap: 7,
-        paddingTop: 20,
-        paddingBottom: 6
-      }
-    }, /*#__PURE__*/React.createElement("span", {
-      style: {
-        fontSize: 18
-      }
-    }, icon), /*#__PURE__*/React.createElement("h2", {
-      style: {
-        fontSize: 15,
-        fontWeight: 900,
-        color: DARK,
-        letterSpacing: -.2,
-        fontFamily: "Georgia,serif"
-      }
-    }, catLabel), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1,
-        height: 1,
-        background: BORDER
-      }
-    })), prods.map(function (p) {
-      return /*#__PURE__*/React.createElement(ProductCard, {
-        key: p.id,
-        p: p,
-        onTap: setSel
-      });
-    }));
-  })), added && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%,-50%)",
-      zIndex: 500,
-      background: "rgba(0,0,0,.75)",
-      borderRadius: 14,
-      padding: "12px 22px",
-      display: "flex",
-      alignItems: "center",
-      gap: 9,
-      animation: "fadeIn .2s ease",
-      backdropFilter: "blur(8px)"
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 20
-    }
-  }, ""), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 13,
-      fontWeight: 700,
-      color: "#fff"
-    }
-  }, "Adicionado ao pedido")), cart.count > 0 && /*#__PURE__*/React.createElement("div", {
-    style: {
-      position: "fixed",
-      bottom: 20,
-      left: "50%",
-      transform: "translateX(-50%)",
-      zIndex: 90,
-      width: "calc(100% - 32px)",
-      maxWidth: 448
-    }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: function onClick() {
-      return setShowCart(true);
-    },
-    style: {
-      width: "100%",
-      background: R,
-      color: "#fff",
-      border: "none",
-      borderRadius: 20,
-      padding: "15px 22px",
-      fontSize: 15,
-      fontWeight: 900,
-      cursor: "pointer",
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      boxShadow: "0 8px 28px " + R + "55"
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      background: "rgba(255,255,255,.2)",
-      borderRadius: 10,
-      padding: "2px 10px",
-      fontSize: 13,
-      fontWeight: 800
-    }
-  }, cart.count), /*#__PURE__*/React.createElement("span", {
-    style: {
-      letterSpacing: -.1
-    }
-  }, "Ver pedido"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontFamily: "Georgia,serif",
-      fontSize: 16,
-      fontWeight: 700
-    }
-  }, fmt(cart.total)))), sel && /*#__PURE__*/React.createElement(ProductModal, {
-    p: sel,
-    onClose: function onClose() {
-      return setSel(null);
-    },
-    onAdd: handleAdd
-  }), showCart && /*#__PURE__*/React.createElement(CartDrawer, {
-    cart: cart,
-    onClose: function onClose() {
-      return setShowCart(false);
-    },
-    profs: profs
-  }), /*#__PURE__*/React.createElement("button", {
-    style: {
-      position: "fixed",
-      bottom: 86,
-      right: 14,
-      zIndex: 80,
-      background: "rgba(255,255,255,.9)",
-      backdropFilter: "blur(8px)",
-      border: "1px solid " + BORDER,
-      borderRadius: 20,
-      padding: "6px 12px",
-      fontSize: 11,
-      color: "#888",
-      fontWeight: 700,
-      cursor: "pointer",
-      boxShadow: "0 2px 10px rgba(0,0,0,.08)"
-    }
-  }, ""));
-}
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
 </body>
 </html>
