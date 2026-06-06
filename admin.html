@@ -788,7 +788,7 @@ function App(){
     )
   );
 
-  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0]];
+  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0]];
   var TABS_A=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking]];
   var TABS_C=[["cozinha","Cozinha",cooking]];
   var tabs=nivel==="gerente"?TABS_G:nivel==="cozinha"?TABS_C:TABS_A;
@@ -816,7 +816,7 @@ function App(){
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
       tab==="equipe"&&(nivel==="gerente"?h(EquipeTab,{profs:profs,setProfs:setProfs,orders:orders}):null),
-      tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders}),tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null)
+      tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders}),tab==="consultor"&&nivel==="gerente"&&h(TabConsultor,{orders:orders}),tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null)
     )
   );
 }
@@ -872,6 +872,90 @@ h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:
 h("p",{style:{margin:"0 0 10px",fontWeight:700,fontSize:13}},"Pedidos de Hoje ("+pedHoje+")"),
 pedHoje===0&&h("p",{style:{textAlign:"center",color:"#ccc",fontSize:12,padding:"14px 0"}},"Nenhum pedido hoje"),
 [...todayOrders].reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid "+B,fontSize:12}},h("div",null,h("span",{style:{fontWeight:700}},"#"+o.id),h("span",{style:{color:"#888",marginLeft:5}},o.nome||"Balcao"),o.profissional&&h("span",{style:{color:"#aaa",fontSize:10,marginLeft:4}},"- "+o.profissional)),h("span",{style:{fontWeight:700,color:R}},fmt(o.total)));})
+)
+);}
+
+function TabConsultor(props){
+var orders=props.orders;
+var h=React.createElement,us=React.useState;
+var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
+var fmt=function(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});};
+var fmtN=function(v){return Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});};
+var s1=us("geral"),foco=s1[0],setFoco=s1[1];
+var s2=us(null),analise=s2[0],setAnalise=s2[1];
+var s3=us(false),gerando=s3[0],setGerando=s3[1];
+var s4=us(null),erro=s4[0],setErro=s4[1];
+var done=orders.filter(function(o){return o.status==="concluido";});
+var now=new Date();
+var c30=new Date();c30.setDate(now.getDate()-30);
+function toDate(str){if(!str)return null;var p=str.split(" ");var dm=(p[0]||"").split("/");if(dm.length<2)return null;return new Date(now.getFullYear(),parseInt(dm[1])-1,parseInt(dm[0]));}
+var last30=done.filter(function(o){var d=toDate(o.criadoEm);return d&&d>=c30;});
+var fat30=last30.reduce(function(s,o){return s+o.total;},0);
+var fatTotal=done.reduce(function(s,o){return s+o.total;},0);
+var ticket=done.length?fatTotal/done.length:0;
+var prodMap={};
+done.forEach(function(o){(o.items||[]).forEach(function(i){if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;});});
+var top5=Object.entries(prodMap).sort(function(a,b){return b[1].total-a[1].total;}).slice(0,5);
+var clienteMap={};
+done.forEach(function(o){if(!o.nome)return;var k=(o.nome||"").toLowerCase().trim();if(!clienteMap[k])clienteMap[k]={nome:o.nome,pedidos:[],total:0,ultima:null};clienteMap[k].pedidos.push(o);clienteMap[k].total+=o.total;var d=toDate(o.criadoEm);if(d&&(!clienteMap[k].ultima||d>clienteMap[k].ultima))clienteMap[k].ultima=d;});
+var clientes=Object.values(clienteMap);
+var sumidas=clientes.filter(function(c){return c.ultima&&Math.floor((now-c.ultima)/(1000*60*60*24))>21;});
+var dias=["Dom","Seg","Ter","Qua","Qui","Sex","Sab"];
+var FOCOS=[["geral","Visao Geral"],["crescimento","Crescimento"],["cmv","Rentabilidade"],["clientes","Clientes"]];
+function analisar(){
+setGerando(true);setAnalise(null);setErro(null);
+var byWD=Array.from({length:7},function(_,i){
+var ords=done.filter(function(o){var d=toDate(o.criadoEm);return d&&d.getDay()===i;});
+var days=new Set(ords.map(function(o){var d=toDate(o.criadoEm);return d?d.toLocaleDateString("pt-BR"):""}));
+var n=Math.max(1,days.size);
+return dias[i]+": R$ "+(ords.reduce(function(s,o){return s+o.total;},0)/n).toFixed(2)+"/dia";
+});
+var top5str=top5.map(function(e,i){return (i+1)+". "+e[0]+": "+e[1].qty+"un | R$ "+fmtN(e[1].total);}).join("\n");
+var focoDesc={geral:"analise executiva completa",crescimento:"foco em crescimento de faturamento",cmv:"foco em rentabilidade e margem",clientes:"foco em retencao e fidelizacao"};
+var prompt="Voce e consultor estrategico do Nobre Bistro, bistro dentro de salao de beleza em Osasco/SP. Clientes sao mulheres em atendimento de beleza.\n\nDADOS REAIS:\n- Pedidos totais: "+done.length+"\n- Faturamento 30 dias: R$ "+fmtN(fat30)+"\n- Ticket medio: R$ "+fmtN(ticket)+"\n- Clientes sumidas +21 dias: "+sumidas.length+"\n\nPor dia da semana:\n"+byWD.join("\n")+"\n\nTop pratos:\n"+top5str+"\n\nFoco solicitado: "+focoDesc[foco]+"\n\nEstruture a resposta:\n## Diagnostico\n[3 linhas sobre saude do negocio]\n\n## Alertas\n[max 3 pontos criticos]\n\n## Oportunidades\n[top 3 oportunidades nos dados]\n\n## Plano desta semana\n[5 acoes concretas]\n\n## KPI para monitorar\n[1 numero e por que]\n\nMaximo 400 palavras. Direto e com numeros reais.";
+fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})})
+.then(function(r){return r.json();})
+.then(function(data){
+if(data.error)throw new Error(data.error.message);
+setAnalise(data.content&&data.content[0]?data.content[0].text:"");
+setGerando(false);
+})
+.catch(function(e){setErro(e.message||"Erro.");setGerando(false);});
+}
+return h("div",{style:{padding:14}},
+h("div",{style:{background:"linear-gradient(135deg,"+R+",#a83232)",borderRadius:13,padding:"13px 15px",marginBottom:14,color:"#fff"}},
+h("p",{style:{margin:0,fontSize:10,opacity:.7,fontWeight:700,textTransform:"uppercase"}},"Consultor IA"),
+h("p",{style:{margin:"2px 0 8px",fontSize:17,fontWeight:900}},"Analise Estrategica"),
+h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:7}},
+[["Fat. 30d",fmt(fat30)],["Ticket",fmt(ticket)],["Sumidas",sumidas.length+" cli."]].map(function(a){
+return h("div",{key:a[0],style:{background:"rgba(255,255,255,.15)",borderRadius:9,padding:"7px 10px"}},
+h("p",{style:{margin:"0 0 1px",fontSize:9,opacity:.8}},a[0]),
+h("p",{style:{margin:0,fontWeight:800,fontSize:13}},a[1]));
+})
+)
+),
+h("p",{style:{fontWeight:700,fontSize:12,color:"#888",textTransform:"uppercase",letterSpacing:.4,margin:"0 0 8px"}},"Foco da analise"),
+h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:13}},
+FOCOS.map(function(f){
+return h("button",{key:f[0],onClick:function(){setFoco(f[0]);setAnalise(null);},style:{padding:"9px 0",borderRadius:11,border:"1.5px solid "+(foco===f[0]?R:B),background:foco===f[0]?"#fff5f5":"#fff",color:foco===f[0]?R:"#555",fontSize:12,fontWeight:foco===f[0]?800:600,cursor:"pointer"}},f[1]);
+})
+),
+h("button",{onClick:analisar,disabled:gerando,style:{width:"100%",background:gerando?"#ccc":R,color:"#fff",border:"none",borderRadius:13,padding:"14px 0",fontSize:14,fontWeight:800,cursor:gerando?"default":"pointer",marginBottom:13}},
+gerando?"Analisando com IA...":"Analisar com IA"
+),
+erro&&h("div",{style:{background:"#fee2e2",borderRadius:11,padding:"11px 13px",marginBottom:12}},
+h("p",{style:{margin:0,fontSize:12,color:"#b91c1c",fontWeight:700}},erro)
+),
+analise&&h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:14}},
+h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,paddingBottom:10,borderBottom:"1px solid "+B}},
+h("p",{style:{margin:0,fontWeight:800,fontSize:13}},FOCOS.find(function(f){return f[0]===foco;})[1]),
+h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText(analise);},style:{background:C,border:"1px solid "+B,borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:700,color:"#555",cursor:"pointer"}},"Copiar")
+),
+analise.split("\n").map(function(line,i){
+if(!line.trim())return h("div",{key:i,style:{height:5}});
+if(line.startsWith("## "))return h("div",{key:i,style:{background:C,borderRadius:8,padding:"7px 10px",margin:"8px 0 4px",fontWeight:800,fontSize:12,color:"#1a1a1a"}},line.replace("## ",""));
+return h("p",{key:i,style:{margin:"0 0 4px",fontSize:12,color:"#333",lineHeight:1.7}},line);
+})
 )
 );}
 
