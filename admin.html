@@ -821,6 +821,61 @@ function App(){
   );
 }
 
+
+function TabFinanceiro(props){
+var orders=props.orders;
+var h=React.createElement,us=React.useState;
+var fmt=function(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});};
+var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
+var done=orders.filter(function(o){return o.status==="concluido";});
+var now=new Date();
+var today=now.toLocaleDateString("pt-BR");
+function toDate(str){if(!str)return null;var p=str.split(" ");var dm=(p[0]||"").split("/");if(dm.length<2)return null;return new Date(now.getFullYear(),parseInt(dm[1])-1,parseInt(dm[0]));}
+var todayOrders=done.filter(function(o){return o.criadoEm&&o.criadoEm.indexOf(today)===0;});
+var fatHoje=todayOrders.reduce(function(s,o){return s+o.total;},0);
+var pedHoje=todayOrders.length;
+var ticketHoje=pedHoje?fatHoje/pedHoje:0;
+var wStart=new Date(now);wStart.setDate(now.getDate()-now.getDay());wStart.setHours(0,0,0,0);
+var semOrders=done.filter(function(o){var d=toDate(o.criadoEm);return d&&d>=wStart;});
+var fatSem=semOrders.reduce(function(s,o){return s+o.total;},0);
+var mStart=new Date(now.getFullYear(),now.getMonth(),1);
+var mesOrders=done.filter(function(o){var d=toDate(o.criadoEm);return d&&d>=mStart;});
+var fatMes=mesOrders.reduce(function(s,o){return s+o.total;},0);
+var byPay={};
+todayOrders.forEach(function(o){byPay[o.payment]=(byPay[o.payment]||0)+o.total;});
+var PAY={pix:"PIX",cartao_credito:"Credito",cartao_debito:"Debito",dinheiro:"Dinheiro",fiado:"Fiado"};
+var prodMap={};
+todayOrders.forEach(function(o){(o.items||[]).forEach(function(i){if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=i.qty;prodMap[i.name].total+=i.price*i.qty;});});
+var top5=Object.entries(prodMap).sort(function(a,b){return b[1].total-a[1].total;}).slice(0,5);
+var dias=["Dom","Seg","Ter","Qua","Qui","Sex","Sab"];
+var last7=Array.from({length:7},function(_,i){var d=new Date(now);d.setDate(now.getDate()-6+i);var key=d.toLocaleDateString("pt-BR");var v=done.filter(function(o){return o.criadoEm&&o.criadoEm.indexOf(key)===0;}).reduce(function(s,o){return s+o.total;},0);return{label:dias[d.getDay()],value:v,hoje:i===6};});
+var maxV=Math.max.apply(null,last7.map(function(d){return d.value||1;}))||1;
+return h("div",{style:{padding:14}},
+h("h2",{style:{fontWeight:900,fontSize:18,margin:"0 0 14px"}},"Financeiro"),
+h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}},
+[["Hoje",fmt(fatHoje),pedHoje+" pedidos",R],["Ticket Medio",fmt(ticketHoje),"hoje","#1a1a1a"],["Esta Semana",fmt(fatSem),semOrders.length+" pedidos","#1a1a1a"],["Este Mes",fmt(fatMes),mesOrders.length+" pedidos","#1a1a1a"]].map(function(a){return h("div",{key:a[0],style:{background:C,borderRadius:11,padding:"10px 12px"}},h("p",{style:{margin:"0 0 2px",fontSize:9,color:"#aaa",fontWeight:700,textTransform:"uppercase"}},a[0]),h("p",{style:{margin:0,fontWeight:900,fontSize:17,color:a[3]}},a[1]),h("p",{style:{margin:"2px 0 0",fontSize:10,color:"#aaa"}},a[2]));})
+),
+h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:13,marginBottom:12}},
+h("p",{style:{margin:"0 0 10px",fontWeight:700,fontSize:13}},"Ultimos 7 dias"),
+h("div",{style:{display:"flex",alignItems:"flex-end",gap:4,height:70}},
+last7.map(function(d){return h("div",{key:d.label,style:{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:3}},h("div",{style:{width:"100%",height:Math.max(3,(d.value/maxV)*60),background:d.hoje?R:R+"55",borderRadius:"3px 3px 0 0"}}),h("span",{style:{fontSize:8,color:"#aaa"}},d.label));})
+)
+),
+Object.keys(byPay).length>0&&h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:13,marginBottom:12}},
+h("p",{style:{margin:"0 0 10px",fontWeight:700,fontSize:13}},"Pagamentos Hoje"),
+Object.entries(byPay).map(function(e){return h("div",{key:e[0],style:{marginBottom:8}},h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},h("span",{style:{fontSize:12,color:"#555"}},PAY[e[0]]||e[0]),h("span",{style:{fontSize:12,fontWeight:700,color:R}},fmt(e[1]))),h("div",{style:{background:"#f0f0f0",borderRadius:4,height:5,overflow:"hidden"}},h("div",{style:{height:"100%",width:((e[1]/Math.max(fatHoje,1))*100)+"%",background:R,borderRadius:4}})));})
+),
+top5.length>0&&h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:13,marginBottom:12}},
+h("p",{style:{margin:"0 0 10px",fontWeight:700,fontSize:13}},"Top Pratos Hoje"),
+top5.map(function(e,i){return h("div",{key:e[0],style:{display:"flex",alignItems:"center",gap:8,marginBottom:7}},h("span",{style:{fontSize:12,color:"#aaa",width:16,textAlign:"right"}},i+1+"."),h("div",{style:{flex:1}},h("p",{style:{margin:0,fontSize:12,fontWeight:700}},e[0]),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},e[1].qty+"x")),h("p",{style:{margin:0,fontSize:12,fontWeight:800,color:R}},fmt(e[1].total)));})
+),
+h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:13}},
+h("p",{style:{margin:"0 0 10px",fontWeight:700,fontSize:13}},"Pedidos de Hoje ("+pedHoje+")"),
+pedHoje===0&&h("p",{style:{textAlign:"center",color:"#ccc",fontSize:12,padding:"14px 0"}},"Nenhum pedido hoje"),
+[...todayOrders].reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid "+B,fontSize:12}},h("div",null,h("span",{style:{fontWeight:700}},"#"+o.id),h("span",{style:{color:"#888",marginLeft:5}},o.nome||"Balcao"),o.profissional&&h("span",{style:{color:"#aaa",fontSize:10,marginLeft:4}},"· "+o.profissional)),h("span",{style:{fontWeight:700,color:R}},fmt(o.total)));})
+)
+);}
+
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
 </body>
