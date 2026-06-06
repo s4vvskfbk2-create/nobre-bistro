@@ -2048,7 +2048,7 @@ function App() {
     }
   }, "\u2699\uFE0F"));
 }
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+var AppComponent=typeof App!=="undefined"?App:(typeof exports!=="undefined"&&exports.default?exports.default:null);if(AppComponent)ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(AppComponent));else console.error("App not found");
 </script>
 </body>
 </html>
