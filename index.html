@@ -5,332 +5,195 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#8B1A1A">
-<title>Nobre Bistro</title><!-- v1780708763 -->
+<title>Nobre Bistro</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-</style>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}</style>
 </head>
 <body><div id="root"></div>
 <script>
 var h=React.createElement,us=React.useState,ue=React.useEffect,um=React.useMemo,ur=React.useRef;
-var R="#8B1A1A",B="#ede9e3",C="#faf8f5",G="#C9A84C";
+var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
 var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
 var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
 function sbGet(k){return fetch(SBU+"/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}}).then(function(r){return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});}
 function sbSet(k,v){return fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})}).catch(function(){});}
 function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
 function nowStr(){var d=new Date();return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
-
-var DIAS=["Domingo","Segunda","Terca","Quarta","Quinta","Sexta","Sabado"];
-var HORARIOS_DEF={0:{aberto:false,abre:"",fecha:""},1:{aberto:false,abre:"",fecha:""},2:{aberto:true,abre:"09:00",fecha:"18:30"},3:{aberto:true,abre:"09:00",fecha:"18:30"},4:{aberto:true,abre:"09:00",fecha:"18:30"},5:{aberto:true,abre:"09:00",fecha:"18:30"},6:{aberto:true,abre:"09:00",fecha:"18:30"}};
-
-function getStatus(hor,fec){
-  if(fec)return{aberto:false,motivo:"Fechado temporariamente",proximo:null};
-  var n=new Date(),dia=n.getDay(),hh=n.getHours()*60+n.getMinutes();
-  var h=(hor||HORARIOS_DEF)[dia];
-  if(!h||!h.aberto){var p=null;for(var d=1;d<=7;d++){var nx=(dia+d)%7;var hn=(hor||HORARIOS_DEF)[nx];if(hn&&hn.aberto){p=DIAS[nx]+" as "+hn.abre;break;}}return{aberto:false,motivo:"Fechado hoje",proximo:p};}
-  var pa=h.abre.split(":"),pf=h.fecha.split(":");
-  var ma=parseInt(pa[0])*60+parseInt(pa[1]||0),mf=parseInt(pf[0])*60+parseInt(pf[1]||0);
-  if(hh>=ma&&hh<mf)return{aberto:true,motivo:"Aberto ate "+h.fecha};
-  if(hh<ma)return{aberto:false,motivo:"Abre hoje as "+h.abre,proximo:"Hoje as "+h.abre};
-  var p2=null;for(var d2=1;d2<=7;d2++){var nx2=(dia+d2)%7;var hn2=(hor||HORARIOS_DEF)[nx2];if(hn2&&hn2.aberto){p2=DIAS[nx2]+" as "+hn2.abre;break;}}
-  return{aberto:false,motivo:"Encerrado por hoje",proximo:p2};
-}
-
 var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
-var PRODS_DEF=[
-{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8,active:true,desc:"Pure de mandioca com carne seca."},
-{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6,active:true,desc:"Panqueca artesanal."},
-{id:3,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4,active:true,desc:"Massa artesanal."},
-{id:4,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6,active:true,desc:"Folhas frescas."},
-{id:5,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5,active:true,desc:"Frango grelhado."},
-{id:6,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12,active:true,desc:"Crocante por fora."},
-{id:7,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15,active:true,desc:"Chocolate belga."},
-{id:8,cat:"bebidas",name:"Suco Natural",price:15,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Feito na hora."},
-{id:9,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10,active:true,desc:"Gin premium."},
-{id:10,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."}
-];
-var PROFS_DEF=[{id:1,name:"Adriana",active:true},{id:2,name:"Amanda",active:true},{id:3,name:"Bruna",active:true},{id:4,name:"Carol",active:true},{id:5,name:"Fernanda",active:true},{id:6,name:"Gabriela",active:true},{id:7,name:"Juliana",active:true},{id:8,name:"Larissa",active:true},{id:9,name:"Leticia",active:true},{id:10,name:"Mariana",active:true}];
-
-function Hero(props){
-  var prods=props.prods;
-  var dest=prods.filter(function(p){return p.tag&&p.active&&p.stock>0;}).slice(0,5);
-  var s1=us(0),idx=s1[0],setIdx=s1[1];
-  var timer=ur(null);var tS=ur(null);
-  ue(function(){
-    if(!dest.length)return;
-    timer.current=setInterval(function(){setIdx(function(i){return(i+1)%dest.length;});},3500);
-    return function(){clearInterval(timer.current);};
-  },[dest.length]);
-  function goTo(i){clearInterval(timer.current);setIdx(i);timer.current=setInterval(function(){setIdx(function(x){return(x+1)%dest.length;});},3500);}
-  if(!dest.length)return h("div",{style:{background:"linear-gradient(135deg,"+R+",#7a1515)",padding:"40px 20px 30px",textAlign:"center"}},
-    h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:4,color:"rgba(255,255,255,.6)",textTransform:"uppercase"}},"Nobre"),
-    h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
-    h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase"}},"Bistro")
-  );
-  var p=dest[idx]||dest[0];
-  return h("div",{
-    style:{position:"relative",height:240,overflow:"hidden",background:"#1a1108"},
-    onTouchStart:function(e){tS.current=e.touches[0].clientX;},
-    onTouchEnd:function(e){if(tS.current===null)return;var diff=tS.current-e.changedTouches[0].clientX;if(Math.abs(diff)>40)goTo(diff>0?(idx+1)%dest.length:(idx-1+dest.length)%dest.length);tS.current=null;}
-  },
-    dest.map(function(d,i){return h("div",{key:d.id,style:{position:"absolute",inset:0,transition:"opacity .6s",opacity:i===idx?1:0}},
-      h("img",{src:d.img,alt:d.name,style:{width:"100%",height:"100%",objectFit:"cover"},loading:"lazy"}),
-      h("div",{style:{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(10,6,2,.85) 40%,transparent)"}})
-    );}),
-    h("div",{style:{position:"absolute",bottom:0,left:0,right:0,padding:"0 20px 16px"}},
-      p.tag&&h("span",{style:{fontSize:9,fontWeight:800,color:"#fff",letterSpacing:1.5,textTransform:"uppercase",background:"rgba(255,255,255,.12)",padding:"3px 10px",borderRadius:4,display:"inline-block",marginBottom:6}},p.tag),
-      h("h2",{style:{margin:"0 0 3px",fontSize:20,fontWeight:900,color:"#fff",fontFamily:"Georgia,serif"}},p.name),
-      h("span",{style:{fontFamily:"Georgia,serif",fontSize:17,fontWeight:700,color:G}},fmt(p.price))
-    ),
-    h("div",{style:{position:"absolute",bottom:16,right:16,display:"flex",gap:5}},
-      dest.map(function(_,i){return h("button",{key:i,onClick:function(){goTo(i);},style:{width:i===idx?18:6,height:6,borderRadius:3,background:i===idx?"#fff":"rgba(255,255,255,.35)",border:"none",cursor:"pointer",padding:0,transition:"width .3s"}});})
-    )
-  );
+var PRODS=[{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8,active:true,desc:"Pure de mandioca com carne seca."},{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6,active:true,desc:"Panqueca artesanal."},{id:3,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4,active:true,desc:"Massa artesanal."},{id:4,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6,active:true,desc:"Folhas frescas."},{id:5,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5,active:true,desc:"Frango grelhado."},{id:6,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12,active:true,desc:"Crocante por fora."},{id:7,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15,active:true,desc:"Chocolate belga."},{id:8,cat:"bebidas",name:"Suco Natural",price:15,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Feito na hora."},{id:9,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10,active:true,desc:"Gin premium."},{id:10,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."}];
+var PROFS=[{id:1,name:"Adriana",active:true},{id:2,name:"Amanda",active:true},{id:3,name:"Bruna",active:true},{id:4,name:"Carol",active:true},{id:5,name:"Fernanda",active:true},{id:6,name:"Gabriela",active:true},{id:7,name:"Juliana",active:true},{id:8,name:"Larissa",active:true},{id:9,name:"Leticia",active:true},{id:10,name:"Mariana",active:true}];
+function CartDrawer(p){
+var cart=p.cart,profs=p.profs,onClose=p.onClose,onConfirm=p.onConfirm,onDec=p.onDec,onInc=p.onInc;
+var s1=us("cart"),step=s1[0],setStep=s1[1];
+var s2=us(""),nome=s2[0],setNome=s2[1];
+var s3=us(""),prof=s3[0],setProf=s3[1];
+var s4=us("pix"),pay=s4[0],setPay=s4[1];
+var total=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
+var steps=["cart","dados","pagamento","confirmar"];
+var si=steps.indexOf(step);
+function confirmar(){
+var oid=1000+Math.floor(Math.random()*9000);
+var order={id:oid,nome:nome||"Cliente",profissional:prof,payment:pay,items:cart.map(function(i){return{id:i.id,name:i.name,price:i.price,qty:i.qty};}),total:total,status:"aguardando_pagamento",criadoEm:nowStr(),canal:"app"};
+onConfirm(order);setStep("enviado");
 }
-
-function TelaFechada(props){
-  var st=props.status,prods=props.prods||[];
-  var dest=prods.filter(function(p){return p.tag&&p.active;}).slice(0,3);
-  return h("div",{style:{background:C,minHeight:"100vh"}},
-    h("div",{style:{background:"linear-gradient(135deg,"+R+",#7a1515)",padding:"40px 24px 32px",textAlign:"center"}},
-      h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:4,color:"rgba(255,255,255,.6)",textTransform:"uppercase"}},"Nobre"),
-      h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
-      h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase",marginBottom:20}},"Bistro"),
-      h("h2",{style:{fontFamily:"Georgia,serif",fontSize:22,fontWeight:700,color:"#fff",margin:"0 0 8px"}},st.motivo),
-      st.proximo&&h("p",{style:{fontSize:13,color:"rgba(255,255,255,.7)",margin:0}},"Retornamos: "+st.proximo)
-    ),
-    dest.length>0&&h("div",{style:{padding:"20px 16px"}},
-      h("p",{style:{fontSize:10,fontWeight:700,color:"#aaa",textTransform:"uppercase",letterSpacing:2,margin:"0 0 12px",textAlign:"center"}},"Veja nosso menu"),
-      dest.map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:12,marginBottom:8,border:"1px solid "+B,display:"flex",alignItems:"center",gap:12,padding:"10px 12px"}},
-        p.img&&h("div",{style:{width:50,height:42,borderRadius:8,overflow:"hidden",flexShrink:0}},h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover"}})),
-        h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:13}},p.name),h("p",{style:{margin:"2px 0 0",fontWeight:800,fontSize:13,color:R,fontFamily:"Georgia,serif"}},fmt(p.price)))
-      );})
-    ),
-    h("div",{style:{padding:"0 20px 30px",textAlign:"center"}},
-      h("a",{href:"https://wa.me/5511914195567",target:"_blank",style:{display:"inline-flex",alignItems:"center",gap:8,background:"#25D366",color:"#fff",padding:"12px 22px",borderRadius:25,fontSize:13,fontWeight:700,textDecoration:"none"}},"Fale conosco")
-    )
-  );
+if(step==="enviado")return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,padding:"28px 20px 36px",textAlign:"center"}},
+h("div",{style:{width:50,height:50,borderRadius:"50%",background:"#f0fdf4",border:"2px solid #22c55e",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}},h("svg",{width:22,height:22,viewBox:"0 0 24 24",fill:"none"},h("path",{d:"M5 13l4 4L19 7",stroke:"#22c55e",strokeWidth:"2.5",strokeLinecap:"round"}))),
+h("h3",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:700,margin:"0 0 6px"}},"Pedido enviado!"),
+h("p",{style:{fontSize:12,color:"#888",margin:"0 0 16px"}},"Aguarde a confirmacao do pagamento."),
+h("button",{onClick:onClose,style:{background:C,border:"1px solid "+B,borderRadius:25,padding:"12px 24px",fontSize:13,fontWeight:700,cursor:"pointer",color:"#555"}},"Fechar")
+));
+return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"slideUp .28s ease"}},
+h("div",{style:{padding:"14px 20px 10px",borderBottom:"1px solid "+B,flexShrink:0}},
+h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8}},
+si>0&&h("button",{onClick:function(){setStep(steps[si-1]);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888",padding:0}},"<"),
+h("span",{style:{fontWeight:800,fontSize:16,flex:1,fontFamily:"Georgia,serif"}},step==="cart"?"Meu Pedido":step==="dados"?"Seus Dados":step==="pagamento"?"Pagamento":"Confirmar"),
+h("button",{onClick:onClose,style:{background:"#f5f5f5",border:"none",width:28,height:28,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#888"}},"x")
+),
+h("div",{style:{display:"flex",gap:4}},steps.slice(0,-1).map(function(s,i){return h("div",{key:s,style:{flex:1,height:3,borderRadius:3,background:i<=si?R:"#eee"}});}))
+),
+h("div",{style:{overflowY:"auto",flex:1,padding:"14px 20px"}},
+step==="cart"&&h("div",null,
+cart.map(function(item){return h("div",{key:item.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:10,marginBottom:10,borderBottom:"1px solid "+B}},
+h("div",{style:{flex:1}},h("p",{style:{margin:0,fontWeight:700,fontSize:13}},item.name),h("p",{style:{margin:"2px 0 0",fontWeight:800,fontSize:13,color:R}},fmt(item.price*item.qty))),
+h("div",{style:{display:"flex",alignItems:"center",gap:8}},
+h("button",{onClick:function(){onDec(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}},"-"),
+h("span",{style:{fontWeight:700,minWidth:20,textAlign:"center"}},item.qty),
+h("button",{onClick:function(){onInc(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}},"+"))
+);} ),
+h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid "+B,paddingTop:10}},h("span",{style:{fontWeight:800,fontSize:15}},"Total"),h("span",{style:{fontWeight:900,fontSize:16,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
+),
+step==="dados"&&h("div",null,
+h("label",{style:{fontSize:11,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Seu nome"),
+h("input",{value:nome,onChange:function(e){setNome(e.target.value);},placeholder:"Como prefere ser chamada?",style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"11px 13px",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:14}}),
+h("p",{style:{fontSize:11,fontWeight:700,color:"#888",textTransform:"uppercase",marginBottom:8}},"Profissional"),
+h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},profs.filter(function(x){return x.active;}).map(function(x){var a=prof===x.name;return h("button",{key:x.id,onClick:function(){setProf(a?"":x.name);},style:{padding:"6px 12px",borderRadius:18,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#666",fontSize:12,fontWeight:700,cursor:"pointer"}},x.name);}))
+),
+step==="pagamento"&&h("div",null,
+[["pix","PIX","Chave: nobre@bistro.com.br"],["cartao_credito","Cartao Credito",""],["cartao_debito","Cartao Debito",""],["dinheiro","Dinheiro",""]].map(function(arr){var v=arr[0],l=arr[1],hint=arr[2];var a=pay===v;return h("button",{key:v,onClick:function(){setPay(v);},style:{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"13px 15px",borderRadius:13,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",cursor:"pointer",textAlign:"left",marginBottom:9}},
+h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:14,color:a?R:"#1a1108"}},l),a&&hint&&h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},hint)),
+h("div",{style:{width:18,height:18,borderRadius:"50%",border:"2px solid "+(a?R:B),background:a?R:"#fff",display:"flex",alignItems:"center",justifyContent:"center"}},a&&h("div",{style:{width:7,height:7,borderRadius:"50%",background:"#fff"}})));} ),
+h("div",{style:{background:C,borderRadius:12,padding:"11px 14px"}},h("div",{style:{display:"flex",justifyContent:"space-between"}},h("span",{style:{fontSize:12,color:"#888"}},"Total"),h("span",{style:{fontWeight:900,fontSize:17,color:R,fontFamily:"Georgia,serif"}},fmt(total))))
+),
+step==="confirmar"&&h("div",null,
+pay==="pix"&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
+h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12,color:"#1d4ed8"}},"Chave PIX"),
+h("p",{style:{margin:"0 0 10px",fontWeight:900,fontSize:15,color:"#1d4ed8",fontFamily:"monospace"}},"nobre@bistro.com.br"),
+h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText("nobre@bistro.com.br");},style:{background:"#1d4ed8",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer"}},"Copiar chave")
+),
+h("div",{style:{background:C,borderRadius:12,padding:"12px 14px"}},
+cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}},h("span",{style:{color:"#555"}},i.qty+"x "+i.name),h("span",{style:{fontWeight:700}},fmt(i.price*i.qty)));} ),
+h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1px solid "+B,paddingTop:8,marginTop:4}},h("span",{style:{fontWeight:800}},"Total"),h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
+)
+)
+),
+h("div",{style:{padding:"11px 20px 28px",borderTop:"1px solid "+B,flexShrink:0}},
+step==="cart"&&h("button",{onClick:function(){setStep("dados");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Continuar -- "+fmt(total)),
+step==="dados"&&h("button",{onClick:function(){if(nome.trim())setStep("pagamento");},style:{width:"100%",background:nome.trim()?R:"#ccc",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Ir para Pagamento"),
+step==="pagamento"&&h("button",{onClick:function(){setStep("confirmar");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Confirmar Pedido"),
+step==="confirmar"&&h("button",{onClick:confirmar,style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Ja paguei -- Enviar para cozinha")
+)
+));
 }
-
-function CartDrawer(props){
-  var cart=props.cart,profs=props.profs,onClose=props.onClose,onConfirm=props.onConfirm,onDec=props.onDec,onInc=props.onInc;
-  var s1=us("cart"),step=s1[0],setStep=s1[1];
-  var s2=us(""),nome=s2[0],setNome=s2[1];
-  var s3=us(""),prof=s3[0],setProf=s3[1];
-  var s4=us("pix"),pay=s4[0],setPay=s4[1];
-  var total=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
-  var steps=["cart","dados","pagamento","confirmar"];
-  var si=steps.indexOf(step);
-  var PAY=[["pix","PIX","Chave: nobre@bistro.com.br"],["cartao_credito","Cartao Credito",""],["cartao_debito","Cartao Debito",""],["dinheiro","Dinheiro",""]];
-
-  function confirmar(){
-    var oid=1000+Math.floor(Math.random()*9000);
-    var order={id:oid,nome:nome||"Cliente",profissional:prof,payment:pay,items:cart,total:total,status:"aguardando_pagamento",criadoEm:nowStr(),canal:"app"};
-    onConfirm(order);
-    setStep("enviado");
-  }
-
-  if(step==="enviado")return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
-    h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,padding:"28px 20px 36px",textAlign:"center"}},
-      h("div",{style:{width:50,height:50,borderRadius:"50%",background:"#f0fdf4",border:"2px solid #22c55e",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}},
-        h("svg",{width:22,height:22,viewBox:"0 0 24 24",fill:"none"},h("path",{d:"M5 13l4 4L19 7",stroke:"#22c55e",strokeWidth:"2.5",strokeLinecap:"round"}))
-      ),
-      h("h3",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:700,margin:"0 0 6px"}},"Pedido enviado!"),
-      h("p",{style:{fontSize:12,color:"#888",margin:"0 0 16px"}},"Aguarde a confirmacao do pagamento."),
-      h("button",{onClick:onClose,style:{background:C,border:"1px solid "+B,borderRadius:25,padding:"12px 24px",fontSize:13,fontWeight:700,cursor:"pointer",color:"#555"}},"Fechar")
-    )
-  );
-
-  return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
-    h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"slideUp .28s ease"}},
-      h("div",{style:{padding:"14px 20px 10px",borderBottom:"1px solid "+B,flexShrink:0}},
-        h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8}},
-          si>0&&h("button",{onClick:function(){setStep(steps[si-1]);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888",padding:0}},"<"),
-          h("span",{style:{fontWeight:800,fontSize:16,flex:1,fontFamily:"Georgia,serif"}},step==="cart"?"Meu Pedido":step==="dados"?"Seus Dados":step==="pagamento"?"Pagamento":"Confirmar"),
-          h("button",{onClick:onClose,style:{background:"#f5f5f5",border:"none",width:28,height:28,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#888"}},"x")
-        ),
-        h("div",{style:{display:"flex",gap:4}},steps.slice(0,-1).map(function(s,i){return h("div",{key:s,style:{flex:1,height:3,borderRadius:3,background:i<=si?R:"#eee"}});}))
-      ),
-      h("div",{style:{overflowY:"auto",flex:1,padding:"14px 20px"}},
-        step==="cart"&&h("div",null,
-          cart.map(function(item){return h("div",{key:item.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:10,marginBottom:10,borderBottom:"1px solid "+B}},
-            h("div",{style:{flex:1}},h("p",{style:{margin:0,fontWeight:700,fontSize:13}},item.name),h("p",{style:{margin:"2px 0 0",fontWeight:800,fontSize:13,color:R}},fmt(item.price*item.qty))),
-            h("div",{style:{display:"flex",alignItems:"center",gap:8}},
-              h("button",{onClick:function(){onDec(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}}," - "),
-              h("span",{style:{fontWeight:700,minWidth:20,textAlign:"center"}},item.qty),
-              h("button",{onClick:function(){onInc(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}}," + ")
-            )
-          );}),
-          h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid "+B,paddingTop:10}},
-            h("span",{style:{fontWeight:800,fontSize:15}},"Total"),
-            h("span",{style:{fontWeight:900,fontSize:16,color:R,fontFamily:"Georgia,serif"}},fmt(total))
-          )
-        ),
-        step==="dados"&&h("div",null,
-          h("label",{style:{fontSize:11,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Seu nome"),
-          h("input",{value:nome,onChange:function(e){setNome(e.target.value);},placeholder:"Como prefere ser chamada?",style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"11px 13px",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:14}}),
-          profs.filter(function(p){return p.active;}).length>0&&h("div",null,
-            h("p",{style:{fontSize:11,fontWeight:700,color:"#888",textTransform:"uppercase",marginBottom:8}},"Profissional"),
-            h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},
-              profs.filter(function(p){return p.active;}).map(function(p){var a=prof===p.name;return h("button",{key:p.id,onClick:function(){setProf(a?"":p.name);},style:{padding:"6px 12px",borderRadius:18,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#666",fontSize:12,fontWeight:700,cursor:"pointer"}},p.name);})
-            )
-          )
-        ),
-        step==="pagamento"&&h("div",null,
-          PAY.map(function(arr){var v=arr[0],l=arr[1],hint=arr[2];var a=pay===v;return h("button",{key:v,onClick:function(){setPay(v);},style:{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"13px 15px",borderRadius:13,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",cursor:"pointer",textAlign:"left",marginBottom:9}},
-            h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:14,color:a?R:"#1a1108"}},l),a&&hint&&h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},hint)),
-            h("div",{style:{width:18,height:18,borderRadius:"50%",border:"2px solid "+(a?R:B),background:a?R:"#fff",display:"flex",alignItems:"center",justifyContent:"center"}},a&&h("div",{style:{width:7,height:7,borderRadius:"50%",background:"#fff"}}))
-          );}),
-          h("div",{style:{background:C,borderRadius:12,padding:"11px 14px",marginTop:4}},
-            h("div",{style:{display:"flex",justifyContent:"space-between"}},h("span",{style:{fontSize:12,color:"#888"}},"Total"),h("span",{style:{fontWeight:900,fontSize:17,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
-          )
-        ),
-        step==="confirmar"&&h("div",null,
-          pay==="pix"&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
-            h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12,color:"#1d4ed8"}},"Chave PIX"),
-            h("p",{style:{margin:"0 0 10px",fontWeight:900,fontSize:15,color:"#1d4ed8",fontFamily:"monospace"}},"nobre@bistro.com.br"),
-            h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText("nobre@bistro.com.br");},style:{background:"#1d4ed8",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer"}},"Copiar chave")
-          ),
-          h("div",{style:{background:C,borderRadius:12,padding:"12px 14px"}},
-            cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}},h("span",{style:{color:"#555"}},i.qty+"x "+i.name),h("span",{style:{fontWeight:700}},fmt(i.price*i.qty)));}),
-            h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1px solid "+B,paddingTop:8,marginTop:4}},h("span",{style:{fontWeight:800}},"Total"),h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
-          )
-        )
-      ),
-      h("div",{style:{padding:"11px 20px 28px",borderTop:"1px solid "+B,flexShrink:0}},
-        step==="cart"&&h("button",{onClick:function(){setStep("dados");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Continuar -- "+fmt(total)),
-        step==="dados"&&h("button",{onClick:function(){if(nome.trim())setStep("pagamento");},style:{width:"100%",background:nome.trim()?R:"#ccc",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Ir para Pagamento"),
-        step==="pagamento"&&h("button",{onClick:function(){setStep("confirmar");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Confirmar Pedido"),
-        step==="confirmar"&&h("button",{onClick:confirmar,style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Ja paguei -- Enviar para cozinha")
-      )
-    )
-  );
-}
-
 function App(){
-  var s1=us(PRODS_DEF),prods=s1[0],setProds=s1[1];
-  var s2=us(PROFS_DEF),profs=s2[0],setProfs=s2[1];
-  var s3=us([]),orders=s3[0],setOrders=s3[1];
-  var s4=us(true),loading=s4[0],setLoading=s4[1];
-  var s5=us("prato"),cat=s5[0],setCat=s5[1];
-  var s6=us([]),cart=s6[0],setCart=s6[1];
-  var s7=us(null),sel=s7[0],setSel=s7[1];
-  var s8=us(false),showCart=s8[0],setShowCart=s8[1];
-  var s9=us(""),search=s9[0],setSearch=s9[1];
-  var s10=us(HORARIOS_DEF),hor=s10[0],setHor=s10[1];
-  var s11=us(false),fec=s11[0],setFec=s11[1];
-
-  ue(function(){
-    Promise.all([sbGet("nb_bA_products"),sbGet("nb_bA_orders"),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
-      if(res[0]&&res[0].length)setProds(res[0]);
-      if(res[1])setOrders(res[1]);
-      if(res[2]&&res[2].length)setProfs(res[2]);
-      if(res[3])setHor(res[3]);
-      if(res[4]!==null)setFec(!!res[4]);
-      setLoading(false);
-    });
-    var poll=setInterval(function(){sbGet("nb_bA_products").then(function(p){if(p&&p.length)setProds(p);});},15000);
-    return function(){clearInterval(poll);};
-  },[]);
-
-  var status=getStatus(hor,fec);
-  var cc=cart.reduce(function(s,i){return s+i.qty;},0);
-  var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
-
-  var catProds=um(function(){
-    var ap=prods.filter(function(p){return p.active;});
-    if(search){var q=search.toLowerCase();return ap.filter(function(p){return p.name.toLowerCase().includes(q);});}
-    return ap.filter(function(p){return p.cat===cat;});
-  },[prods,cat,search]);
-
-  function addCart(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
-  function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
-  function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
-
-  function handleConfirm(order){
-    sbGet("nb_bA_orders").then(function(existing){
-      var novos=(existing||[]).concat([order]);
-      sbSet("nb_bA_orders",novos);
-      setOrders(novos);
-    });
-    setCart([]);setShowCart(false);
-  }
-
-  if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
-    h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:3,color:R,textTransform:"uppercase"}},"Nobre Bistro"),
-    h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}})
-  );
-
-  if(!status.aberto)return h(TelaFechada,{status:status,prods:prods});
-
-  return h("div",{style:{background:C,maxWidth:480,margin:"0 auto",minHeight:"100vh"}},
-    h(Hero,{prods:prods}),
-    h("div",{style:{background:"#fff",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid "+B}},
-      h("div",{style:{display:"flex",alignItems:"center",gap:6}},
-        h("span",{style:{width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block"}}),
-        h("span",{style:{fontSize:11,fontWeight:700,color:"#16a34a"}},"Aberto")
-      ),
-      h("span",{style:{fontFamily:"Georgia,serif",fontSize:10,letterSpacing:3,color:R,textTransform:"uppercase",fontWeight:700}},"Nobre Bistro")
-    ),
-    h("div",{style:{padding:"8px 14px",background:"#fff",borderBottom:"1px solid "+B}},
-      h("input",{value:search,onChange:function(e){setSearch(e.target.value);},placeholder:"Buscar no cardapio...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:20,padding:"8px 14px",fontSize:13,outline:"none",boxSizing:"border-box",background:C}})
-    ),
-    !search&&h("div",{style:{display:"flex",overflowX:"auto",gap:6,padding:"10px 14px",background:"#fff",borderBottom:"1px solid "+B}},
-      CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})
-    ),
-    h("div",{style:{background:"#fff",padding:"0 16px 110px"}},
-      !search&&h("div",{style:{display:"flex",alignItems:"center",gap:8,paddingTop:16,paddingBottom:8}},
-        h("h2",{style:{fontSize:10,fontWeight:800,color:"#888",letterSpacing:2,textTransform:"uppercase",margin:0}},(CATS.find(function(c){return c.id===cat;})||{label:""}).label),
-        h("div",{style:{flex:1,height:1,background:B}})
-      ),
-      catProds.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum prato disponivel"),
-      catProds.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid "+B,cursor:esg?"default":"pointer",opacity:esg?.5:1}},
-        h("div",{style:{flex:1}},
-          esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),
-          !esg&&p.tag&&h("span",{style:{color:R,fontSize:9,fontWeight:800,display:"block",marginBottom:3,textTransform:"uppercase"}},"* "+p.tag),
-          h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108"}},p.name),
-          p.desc&&h("p",{style:{margin:"3px 0 0",fontSize:12,color:"#999",lineHeight:1.4}},p.desc),
-          h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:15,color:esg?"#ccc":"#1a1108",fontFamily:"Georgia,serif"}},fmt(p.price))
-        ),
-        h("div",{style:{position:"relative",flexShrink:0}},
-          h("div",{style:{width:100,height:80,borderRadius:12,overflow:"hidden",background:"#f5f5f5"}},
-            p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})
-          ),
-          !esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-8,right:4,width:26,height:26,borderRadius:"50%",background:R,border:"2px solid #fff",color:"#fff",fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}},"+")
-        )
-      );})
-    ),
-    sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
-      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480}},
-        h("div",{style:{height:180,overflow:"hidden",borderRadius:"20px 20px 0 0",background:"#f5f5f5"}},
-          sel.img&&h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}})
-        ),
-        h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.88)",border:"none",width:33,height:33,borderRadius:"50%",fontSize:18,cursor:"pointer",color:"#333"}},"x"),
-        h("div",{style:{padding:"16px 20px 28px"}},
-          h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 6px"}},sel.name),
-          sel.desc&&h("p",{style:{fontSize:13,color:"#888",margin:"0 0 14px"}},sel.desc),
-          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
-            h("span",{style:{fontFamily:"Georgia,serif",fontSize:20,fontWeight:900,color:R}},fmt(sel.price)),
-            h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar")
-          )
-        )
-      )
-    ),
-    cc>0&&h("div",{style:{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}},
-      h("button",{onClick:function(){setShowCart(true);},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:14,padding:"15px 22px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 6px 24px rgba(139,26,26,.4)"}},
-        h("span",{style:{background:"rgba(255,255,255,.18)",borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700}},cc+" "+(cc===1?"item":"itens")),
-        h("span",null,"Ver pedido"),
-        h("span",{style:{fontFamily:"Georgia,serif",fontSize:15,fontWeight:700}},fmt(ct))
-      )
-    ),
-    showCart&&h(CartDrawer,{cart:cart,profs:profs,onClose:function(){setShowCart(false);},onConfirm:handleConfirm,onDec:decCart,onInc:incCart})
-  );
+var s1=us(PRODS),prods=s1[0],setProds=s1[1];
+var s2=us(PROFS),profs=s2[0],setProfs=s2[1];
+var s4=us(true),loading=s4[0],setLoading=s4[1];
+var s5=us("prato"),cat=s5[0],setCat=s5[1];
+var s6=us([]),cart=s6[0],setCart=s6[1];
+var s7=us(null),sel=s7[0],setSel=s7[1];
+var s8=us(false),showCart=s8[0],setShowCart=s8[1];
+var s9=us(""),search=s9[0],setSearch=s9[1];
+ue(function(){
+Promise.all([sbGet("nb_bA_products"),sbGet("nb_bA_profs")]).then(function(res){
+if(res[0]&&res[0].length)setProds(res[0]);
+if(res[1]&&res[1].length)setProfs(res[1]);
+setLoading(false);
+});
+var poll=setInterval(function(){sbGet("nb_bA_products").then(function(p){if(p&&p.length)setProds(p);});},15000);
+return function(){clearInterval(poll);};
+},[]);
+var cc=cart.reduce(function(s,i){return s+i.qty;},0);
+var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
+var catProds=um(function(){var ap=prods.filter(function(p){return p.active;});if(search){var q=search.toLowerCase();return ap.filter(function(p){return p.name.toLowerCase().includes(q);});}return ap.filter(function(p){return p.cat===cat;});},[prods,cat,search]);
+function addCart(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
+function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
+function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
+function handleConfirm(order){
+sbGet("nb_bA_orders").then(function(existing){
+var novos=(existing||[]).concat([order]);
+sbSet("nb_bA_orders",novos);
+});
+setCart([]);setShowCart(false);
+}
+if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
+h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:3,color:R,textTransform:"uppercase"}},"Nobre Bistro"),
+h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}})
+);
+return h("div",{style:{background:C,maxWidth:480,margin:"0 auto",minHeight:"100vh"}},
+h("div",{style:{background:"linear-gradient(135deg,#8B1A1A,#7a1515)",padding:"28px 20px 20px",textAlign:"center"}},
+h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:4,color:"rgba(255,255,255,.6)",textTransform:"uppercase",fontWeight:700}},"Nobre"),
+h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
+h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase"}},"Bistro")
+),
+h("div",{style:{background:"#fff",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid "+B}},
+h("div",{style:{display:"flex",alignItems:"center",gap:6}},h("span",{style:{width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block"}}),h("span",{style:{fontSize:11,fontWeight:700,color:"#16a34a"}},"Aberto")),
+h("span",{style:{fontFamily:"Georgia,serif",fontSize:10,letterSpacing:3,color:R,textTransform:"uppercase",fontWeight:700}},"Nobre Bistro")
+),
+h("div",{style:{padding:"8px 14px",background:"#fff",borderBottom:"1px solid "+B}},
+h("input",{value:search,onChange:function(e){setSearch(e.target.value);},placeholder:"Buscar no cardapio...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:20,padding:"8px 14px",fontSize:13,outline:"none",boxSizing:"border-box",background:C}})
+),
+!search&&h("div",{style:{display:"flex",overflowX:"auto",gap:6,padding:"10px 14px",background:"#fff",borderBottom:"1px solid "+B}},
+CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})
+),
+h("div",{style:{background:"#fff",padding:"0 16px 110px"}},
+!search&&h("div",{style:{display:"flex",alignItems:"center",gap:8,paddingTop:16,paddingBottom:8}},
+h("h2",{style:{fontSize:10,fontWeight:800,color:"#888",letterSpacing:2,textTransform:"uppercase",margin:0}},(CATS.find(function(c){return c.id===cat;})||{label:""}).label),
+h("div",{style:{flex:1,height:1,background:B}})
+),
+catProds.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum prato disponivel"),
+catProds.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid "+B,cursor:esg?"default":"pointer",opacity:esg?.5:1}},
+h("div",{style:{flex:1}},
+esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),
+!esg&&p.tag&&h("span",{style:{color:R,fontSize:9,fontWeight:800,display:"block",marginBottom:3,textTransform:"uppercase"}},"* "+p.tag),
+h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108"}},p.name),
+p.desc&&h("p",{style:{margin:"3px 0 0",fontSize:12,color:"#999",lineHeight:1.4}},p.desc),
+h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:15,color:esg?"#ccc":"#1a1108",fontFamily:"Georgia,serif"}},fmt(p.price))
+),
+h("div",{style:{position:"relative",flexShrink:0}},
+h("div",{style:{width:100,height:80,borderRadius:12,overflow:"hidden",background:"#f5f5f5"}},
+p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})
+),
+!esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-8,right:4,width:26,height:26,borderRadius:"50%",background:R,border:"2px solid #fff",color:"#fff",fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}},"+"))
+);} )
+),
+sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
+h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480}},
+h("div",{style:{height:180,overflow:"hidden",borderRadius:"20px 20px 0 0",background:"#f5f5f5",position:"relative"}},
+sel.img&&h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}}),
+h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.88)",border:"none",width:33,height:33,borderRadius:"50%",fontSize:18,cursor:"pointer",color:"#333"}},"x")
+),
+h("div",{style:{padding:"16px 20px 28px"}},
+h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 6px"}},sel.name),
+sel.desc&&h("p",{style:{fontSize:13,color:"#888",margin:"0 0 14px"}},sel.desc),
+h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+h("span",{style:{fontFamily:"Georgia,serif",fontSize:20,fontWeight:900,color:R}},fmt(sel.price)),
+h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar")
+)
+)
+)
+),
+cc>0&&h("div",{style:{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}},
+h("button",{onClick:function(){setShowCart(true);},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:14,padding:"15px 22px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 6px 24px rgba(139,26,26,.4)"}},
+h("span",{style:{background:"rgba(255,255,255,.18)",borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700}},cc+" "+(cc===1?"item":"itens")),
+h("span",null,"Ver pedido"),
+h("span",{style:{fontFamily:"Georgia,serif",fontSize:15,fontWeight:700}},fmt(ct))
+)
+),
+showCart&&h(CartDrawer,{cart:cart,profs:profs,onClose:function(){setShowCart(false);},onConfirm:handleConfirm,onDec:decCart,onInc:incCart})
+);
 }
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
