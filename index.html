@@ -12,15 +12,7 @@
 </head>
 <body><div id="root"></div>
 <script>
-var exports={};var module={exports:exports};
-"use strict";
-
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = App;
-var _react = require("react");
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
@@ -34,12 +26,14 @@ function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLim
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
-function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i["return"]) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
+function _regenerator() { /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */ var e, t, r = "function" == typeof Symbol ? Symbol : {}, n = r.iterator || "@@iterator", o = r.toStringTag || "@@toStringTag"; function i(r, n, o, i) { var c = n && n.prototype instanceof Generator ? n : Generator, u = Object.create(c.prototype); return _regeneratorDefine2(u, "_invoke", function (r, n, o) { var i, c, u, f = 0, p = o || [], y = !1, G = { p: 0, n: 0, v: e, a: d, f: d.bind(e, 4), d: function d(t, r) { return i = t, c = 0, u = e, G.n = r, a; } }; function d(r, n) { for (c = r, u = n, t = 0; !y && f && !o && t < p.length; t++) { var o, i = p[t], d = G.p, l = i[2]; r > 3 ? (o = l === n) && (u = i[(c = i[4]) ? 5 : (c = 3, 3)], i[4] = i[5] = e) : i[0] <= d && ((o = r < 2 && d < i[1]) ? (c = 0, G.v = n, G.n = i[1]) : d < l && (o = r < 3 || i[0] > n || n > l) && (i[4] = r, i[5] = n, G.n = l, c = 0)); } if (o || r > 1) return a; throw y = !0, n; } return function (o, p, l) { if (f > 1) throw TypeError("Generator is already running"); for (y && 1 === p && d(p, l), c = p, u = l; (t = c < 2 ? e : u) || !y;) { i || (c ? c < 3 ? (c > 1 && (G.n = -1), d(c, u)) : G.n = u : G.v = u); try { if (f = 2, i) { if (c || (o = "next"), t = i[o]) { if (!(t = t.call(i, u))) throw TypeError("iterator result is not an object"); if (!t.done) return t; u = t.value, c < 2 && (c = 0); } else 1 === c && (t = i.return) && t.call(i), c < 2 && (u = TypeError("The iterator does not provide a '" + o + "' method"), c = 1); i = e; } else if ((t = (y = G.n < 0) ? u : r.call(n, G)) !== a) break; } catch (t) { i = e, c = 1, u = t; } finally { f = 1; } } return { value: t, done: y }; }; }(r, o, i), !0), u; } var a = {}; function Generator() {} function GeneratorFunction() {} function GeneratorFunctionPrototype() {} t = Object.getPrototypeOf; var c = [][n] ? t(t([][n]())) : (_regeneratorDefine2(t = {}, n, function () { return this; }), t), u = GeneratorFunctionPrototype.prototype = Generator.prototype = Object.create(c); function f(e) { return Object.setPrototypeOf ? Object.setPrototypeOf(e, GeneratorFunctionPrototype) : (e.__proto__ = GeneratorFunctionPrototype, _regeneratorDefine2(e, o, "GeneratorFunction")), e.prototype = Object.create(u), e; } return GeneratorFunction.prototype = GeneratorFunctionPrototype, _regeneratorDefine2(u, "constructor", GeneratorFunctionPrototype), _regeneratorDefine2(GeneratorFunctionPrototype, "constructor", GeneratorFunction), GeneratorFunction.displayName = "GeneratorFunction", _regeneratorDefine2(GeneratorFunctionPrototype, o, "GeneratorFunction"), _regeneratorDefine2(u), _regeneratorDefine2(u, o, "Generator"), _regeneratorDefine2(u, n, function () { return this; }), _regeneratorDefine2(u, "toString", function () { return "[object Generator]"; }), (_regenerator = function _regenerator() { return { w: i, m: f }; })(); }
 function _regeneratorDefine2(e, r, n, t) { var i = Object.defineProperty; try { i({}, "", {}); } catch (e) { i = 0; } _regeneratorDefine2 = function _regeneratorDefine(e, r, n, t) { function o(r, n) { _regeneratorDefine2(e, r, function (e) { return this._invoke(r, n, e); }); } r ? i ? i(e, r, { value: n, enumerable: !t, configurable: !t, writable: !t }) : e[r] = n : (o("next", 0), o("throw", 1), o("return", 2)); }, _regeneratorDefine2(e, r, n, t); }
 function asyncGeneratorStep(n, t, e, r, o, a, c) { try { var i = n[a](c), u = i.value; } catch (n) { return void e(n); } i.done ? t(u) : Promise.resolve(u).then(r, o); }
 function _asyncToGenerator(n) { return function () { var t = this, e = arguments; return new Promise(function (r, o) { var a = n.apply(t, e); function _next(n) { asyncGeneratorStep(a, r, o, _next, _throw, "next", n); } function _throw(n) { asyncGeneratorStep(a, r, o, _next, _throw, "throw", n); } _next(void 0); }); }; }
+import { useState, useEffect, useRef, useMemo } from "react";
+
 // ═══════════════════════════════════════════════════
 // NOBRE BISTRÔ — CARDÁPIO DIGITAL v2
 // Design moderno: hero animado, carrossel de destaques,
@@ -297,7 +291,7 @@ var PRODUTOS_PADRAO = [{
 
 // ── Cart hook ─────────────────────────────────────
 function useCart() {
-  var _useState = (0, _react.useState)([]),
+  var _useState = useState([]),
     _useState2 = _slicedToArray(_useState, 2),
     items = _useState2[0],
     setItems = _useState2[1];
@@ -364,13 +358,13 @@ function useCart() {
 // ── Hero Carrossel ────────────────────────────────
 function HeroCarousel(_ref) {
   var destaques = _ref.destaques;
-  var _useState3 = (0, _react.useState)(0),
+  var _useState3 = useState(0),
     _useState4 = _slicedToArray(_useState3, 2),
     idx = _useState4[0],
     setIdx = _useState4[1];
-  var timer = (0, _react.useRef)(null);
-  var touchStart = (0, _react.useRef)(null);
-  (0, _react.useEffect)(function () {
+  var timer = useRef(null);
+  var touchStart = useRef(null);
+  useEffect(function () {
     timer.current = setInterval(function () {
       return setIdx(function (i) {
         return (i + 1) % destaques.length;
@@ -518,8 +512,8 @@ function CatBar(_ref2) {
   var cats = _ref2.cats,
     active = _ref2.active,
     onSelect = _ref2.onSelect;
-  var ref = (0, _react.useRef)(null);
-  (0, _react.useEffect)(function () {
+  var ref = useRef(null);
+  useEffect(function () {
     var _ref$current;
     var el = (_ref$current = ref.current) === null || _ref$current === void 0 ? void 0 : _ref$current.querySelector("[data-active='true']");
     if (el) el.scrollIntoView({
@@ -574,7 +568,7 @@ function CatBar(_ref2) {
 function ProductCard(_ref3) {
   var p = _ref3.p,
     onTap = _ref3.onTap;
-  var _useState5 = (0, _react.useState)(false),
+  var _useState5 = useState(false),
     _useState6 = _slicedToArray(_useState5, 2),
     pressed = _useState6[0],
     setPressed = _useState6[1];
@@ -735,11 +729,11 @@ function ProductModal(_ref4) {
   var p = _ref4.p,
     onClose = _ref4.onClose,
     onAdd = _ref4.onAdd;
-  var _useState7 = (0, _react.useState)(1),
+  var _useState7 = useState(1),
     _useState8 = _slicedToArray(_useState7, 2),
     qty = _useState8[0],
     setQty = _useState8[1];
-  var _useState9 = (0, _react.useState)(""),
+  var _useState9 = useState(""),
     _useState0 = _slicedToArray(_useState9, 2),
     obs = _useState0[0],
     setObs = _useState0[1];
@@ -974,27 +968,27 @@ function CartDrawer(_ref5) {
   var cart = _ref5.cart,
     onClose = _ref5.onClose,
     profs = _ref5.profs;
-  var _useState1 = (0, _react.useState)("cart"),
+  var _useState1 = useState("cart"),
     _useState10 = _slicedToArray(_useState1, 2),
     step = _useState10[0],
     setStep = _useState10[1];
-  var _useState11 = (0, _react.useState)(""),
+  var _useState11 = useState(""),
     _useState12 = _slicedToArray(_useState11, 2),
     nome = _useState12[0],
     setNome = _useState12[1];
-  var _useState13 = (0, _react.useState)(""),
+  var _useState13 = useState(""),
     _useState14 = _slicedToArray(_useState13, 2),
     prof = _useState14[0],
     setProf = _useState14[1];
-  var _useState15 = (0, _react.useState)("pix"),
+  var _useState15 = useState("pix"),
     _useState16 = _slicedToArray(_useState15, 2),
     payment = _useState16[0],
     setPayment = _useState16[1];
-  var _useState17 = (0, _react.useState)(""),
+  var _useState17 = useState(""),
     _useState18 = _slicedToArray(_useState17, 2),
     obs = _useState18[0],
     setObs = _useState18[1];
-  var oid = (0, _react.useRef)(1000 + Math.floor(Math.random() * 9000));
+  var oid = useRef(1000 + Math.floor(Math.random() * 9000));
   var PAY = {
     pix: "💠 PIX",
     cartao_credito: "💳 Crédito",
@@ -1563,36 +1557,36 @@ function CartDrawer(_ref5) {
 // ═══════════════════════════════════════════════════
 // APP
 // ═══════════════════════════════════════════════════
-function App() {
-  var _useState19 = (0, _react.useState)("prato"),
+export default function App() {
+  var _useState19 = useState("prato"),
     _useState20 = _slicedToArray(_useState19, 2),
     activeCat = _useState20[0],
     setActiveCat = _useState20[1];
-  var _useState21 = (0, _react.useState)(null),
+  var _useState21 = useState(null),
     _useState22 = _slicedToArray(_useState21, 2),
     sel = _useState22[0],
     setSel = _useState22[1];
-  var _useState23 = (0, _react.useState)(false),
+  var _useState23 = useState(false),
     _useState24 = _slicedToArray(_useState23, 2),
     showCart = _useState24[0],
     setShowCart = _useState24[1];
-  var _useState25 = (0, _react.useState)(""),
+  var _useState25 = useState(""),
     _useState26 = _slicedToArray(_useState25, 2),
     search = _useState26[0],
     setSearch = _useState26[1];
-  var _useState27 = (0, _react.useState)(false),
+  var _useState27 = useState(false),
     _useState28 = _slicedToArray(_useState27, 2),
     showSearch = _useState28[0],
     setShowSearch = _useState28[1];
-  var _useState29 = (0, _react.useState)(null),
+  var _useState29 = useState(null),
     _useState30 = _slicedToArray(_useState29, 2),
     added = _useState30[0],
     setAdded = _useState30[1];
-  var _useState31 = (0, _react.useState)(PRODUTOS_PADRAO),
+  var _useState31 = useState(PRODUTOS_PADRAO),
     _useState32 = _slicedToArray(_useState31, 2),
     products = _useState32[0],
     setProducts = _useState32[1];
-  var _useState33 = (0, _react.useState)([{
+  var _useState33 = useState([{
       id: 1,
       name: "Adriana",
       active: true
@@ -1636,15 +1630,15 @@ function App() {
     _useState34 = _slicedToArray(_useState33, 2),
     profs = _useState34[0],
     setProfs = _useState34[1];
-  var _useState35 = (0, _react.useState)(true),
+  var _useState35 = useState(true),
     _useState36 = _slicedToArray(_useState35, 2),
     loading = _useState36[0],
     setLoading = _useState36[1];
   var cart = useCart();
-  var catRefs = (0, _react.useRef)({});
+  var catRefs = useRef({});
 
   // Carrega produtos e profissionais do storage do Bloco A
-  (0, _react.useEffect)(function () {
+  useEffect(function () {
     _asyncToGenerator(/*#__PURE__*/_regenerator().m(function _callee3() {
       var p, pf;
       return _regenerator().w(function (_context3) {
@@ -1669,7 +1663,7 @@ function App() {
   }, []);
 
   // IntersectionObserver para scroll spy
-  (0, _react.useEffect)(function () {
+  useEffect(function () {
     if (search) return;
     var obs = new IntersectionObserver(function (es) {
       es.forEach(function (e) {
@@ -1686,7 +1680,7 @@ function App() {
       return obs.disconnect();
     };
   }, [search]);
-  var grouped = (0, _react.useMemo)(function () {
+  var grouped = useMemo(function () {
     var ap = products.filter(function (p) {
       return p.active;
     });
@@ -2049,7 +2043,7 @@ function App() {
     }
   }, "\u2699\uFE0F"));
 }
-var AppComponent=typeof App!=="undefined"?App:(typeof exports!=="undefined"&&exports.default?exports.default:null);if(AppComponent)ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(AppComponent));else console.error("App not found");
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
 </script>
 </body>
 </html>
