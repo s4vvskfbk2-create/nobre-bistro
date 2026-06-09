@@ -158,11 +158,19 @@ function BalcaoTab(props){
 }
 
 function PedidosTab(props){
-  var orders=props.orders,setOrders=props.setOrders;
+  var orders=props.orders,setOrders=props.setOrders,nivel=props.nivel;
   var s1=us("todos"),filtro=s1[0],setFiltro=s1[1];
+  var sc=us(null),pedidoParaCancelar=sc[0],setPedidoParaCancelar=sc[1];
   var STATUS={todos:"Todos",aguardando_pagamento:"Aguard.Pgto",em_curso:"Em curso",concluido:"Concluido",cancelado:"Cancelado"};
   var CORES={aguardando_pagamento:"#3b82f6",em_curso:"#8b5cf6",concluido:"#22c55e",cancelado:"#ef4444",pendente:"#f59e0b"};
   function upd(id,st){var n=orders.map(function(o){return o.id===id?Object.assign({},o,{status:st}):o;});setOrders(n);sbSet("nb_bA_orders",n);}
+  function abrirCancelar(o){setPedidoParaCancelar({id:o.id,numero:o.id,cliente:o.nome,total:o.total,data:o});}
+  async function confirmarCancelar(pedido,motivo){
+    await cancelarPedido(pedido,motivo,nivel||"gerente");
+    var n=orders.map(function(o){return o.id===pedido.id?Object.assign({},o,{status:"cancelado",motivo_cancelamento:motivo}):o;});
+    setOrders(n);sbSet("nb_bA_orders",n);
+    setPedidoParaCancelar(null);
+  }
   var lista=orders.slice().reverse().filter(function(o){return filtro==="todos"||o.status===filtro;});
   var aguard=orders.filter(function(o){return o.status==="aguardando_pagamento";});
   return h("div",{style:{padding:14}},
@@ -187,9 +195,10 @@ function PedidosTab(props){
       h("div",{style:{display:"flex",gap:5}},
         o.status==="pendente"&&h(Btn,{sm:true,onClick:function(){upd(o.id,"em_curso");}},"Aceitar"),
         o.status==="em_curso"&&h(Btn,{sm:true,color:"#22c55e",onClick:function(){upd(o.id,"concluido");}},"Concluir"),
-        o.status!=="cancelado"&&o.status!=="concluido"&&h(Btn,{sm:true,outline:true,onClick:function(){upd(o.id,"cancelado");}},"Cancelar")
+        o.status!=="cancelado"&&o.status!=="concluido"&&h(Btn,{sm:true,outline:true,color:"#dc2626",onClick:function(){abrirCancelar(o);}},"Cancelar")
       )
-    );})
+    );}),
+    pedidoParaCancelar&&h(ModalCancelamento,{pedido:pedidoParaCancelar,onConfirm:confirmarCancelar,onClose:function(){setPedidoParaCancelar(null);}})
   );
 }
 
@@ -808,7 +817,7 @@ function App(){
     ),
     h("div",{style:{overflowY:"auto"}},
       tab==="balcao"&&h(BalcaoTab,{prods:prods,profs:profs,orders:orders,setOrders:setOrders,setProds:setProds}),
-      tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders}),
+      tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders,nivel:nivel}),
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
