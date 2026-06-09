@@ -86,6 +86,13 @@ function BalcaoTab(props){
     setOrders(function(prev){
       var novos=prev.concat([order]);
       sbSet("nb_bA_orders",novos);
+      var U2="https://zxpnguynjrsixsomaieg.supabase.co";
+      var K2="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+      var H2={"Content-Type":"application/json","apikey":K2,"Authorization":"Bearer "+K2,"Prefer":"return=minimal"};
+      fetch(U2+"/rest/v1/system_events",{method:"POST",headers:H2,body:JSON.stringify({event_type:"ORDER_CREATED",source:"admin.BalcaoTab",entity_type:"order",entity_id:String(order.id),payload:{pedido_id:order.id,cliente:order.nome,total:order.total,payment:order.payment,fiado:order.fiado}})}).catch(function(){});
+      if(fiado&&profSel){
+        fetch(U2+"/rest/v1/system_events",{method:"POST",headers:H2,body:JSON.stringify({event_type:"PAYMENT_PENDING",source:"admin.BalcaoTab.fiado",entity_type:"order",entity_id:String(order.id),payload:{pedido_id:order.id,cliente:profSel,total:order.total,tipo:"fiado"}})}).catch(function(){});
+      }
       if(fiado&&profSel){
         var profObj=profs.find(function(p){return p.name===profSel;});
         var fiadosAnt=prev.filter(function(o){return o.fiado&&o.profFiado===profSel;});
@@ -163,7 +170,20 @@ function PedidosTab(props){
   var sc=us(null),pedidoParaCancelar=sc[0],setPedidoParaCancelar=sc[1];
   var STATUS={todos:"Todos",aguardando_pagamento:"Aguard.Pgto",em_curso:"Em curso",concluido:"Concluido",cancelado:"Cancelado"};
   var CORES={aguardando_pagamento:"#3b82f6",em_curso:"#8b5cf6",concluido:"#22c55e",cancelado:"#ef4444",pendente:"#f59e0b"};
-  function upd(id,st){var n=orders.map(function(o){return o.id===id?Object.assign({},o,{status:st}):o;});setOrders(n);sbSet("nb_bA_orders",n);}
+  function upd(id,st){
+    var n=orders.map(function(o){return o.id===id?Object.assign({},o,{status:st}):o;});
+    setOrders(n);sbSet("nb_bA_orders",n);
+    var U="https://zxpnguynjrsixsomaieg.supabase.co";
+    var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+    var H={"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+K,"Prefer":"return=minimal"};
+    var o=orders.find(function(x){return x.id===id;});
+    if(!o)return;
+    var evType=st==="aguardando_pagamento"?"PAYMENT_PENDING":st==="concluido"&&o.status==="aguardando_pagamento"?"PAYMENT_RECEIVED":null;
+    if(evType){
+      fetch(U+"/rest/v1/system_events",{method:"POST",headers:H,body:JSON.stringify({event_type:evType,source:"admin.PedidosTab",entity_type:"order",entity_id:String(id),payload:{pedido_id:id,cliente:o.nome,total:o.total,status_anterior:o.status,status_novo:st}})}).catch(function(){});
+      fetch(U+"/rest/v1/audit_logs",{method:"POST",headers:H,body:JSON.stringify({action:evType,entity_type:"order",entity_id:String(id),user_role:nivel||"gerente",user_info:"admin",old_value:{status:o.status},new_value:{status:st}})}).catch(function(){});
+    }
+  }
   function abrirCancelar(o){setPedidoParaCancelar({id:o.id,numero:o.id,cliente:o.nome,total:o.total,data:o});}
   async function confirmarCancelar(pedido,motivo){
     await cancelarPedido(pedido,motivo,nivel||"gerente");
@@ -176,10 +196,20 @@ function PedidosTab(props){
   return h("div",{style:{padding:14}},
     h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 10px",fontFamily:"Georgia,serif"}},"Pedidos"),
     aguard.length>0&&h("div",{style:{background:"#eff6ff",border:"1.5px solid #3b82f6",borderRadius:12,padding:"10px 12px",marginBottom:10}},
-      h("p",{style:{margin:"0 0 7px",fontWeight:800,fontSize:12,color:"#1d4ed8"}},aguard.length+" aguardando pagamento"),
+      h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}},
+        h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:"#1d4ed8"}},aguard.length+" aguardando pagamento"),
+        h("p",{style:{margin:0,fontSize:11,fontWeight:700,color:"#1d4ed8"}},fmt(aguard.reduce(function(s,o){return s+o.total;},0)))
+      ),
       aguard.map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",background:"#fff",borderRadius:9,padding:"8px 10px",marginBottom:5}},
-        h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:12}},"#"+o.id+" - "+o.nome),h("p",{style:{margin:"1px 0 0",fontWeight:800,fontSize:11,color:R}},fmt(o.total))),
-        h("button",{onClick:function(){upd(o.id,"em_curso");},style:{background:"#22c55e",color:"#fff",border:"none",borderRadius:8,padding:"7px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"Pago")
+        h("div",null,
+          h("p",{style:{margin:0,fontWeight:700,fontSize:12}},"#"+o.id+" - "+o.nome),
+          h("p",{style:{margin:"1px 0 0",fontWeight:800,fontSize:11,color:R}},fmt(o.total)),
+          h("p",{style:{margin:"1px 0 0",fontSize:9,color:"#aaa"}},o.criadoEm)
+        ),
+        h("div",{style:{display:"flex",flexDirection:"column",gap:4}},
+          h("button",{onClick:function(){upd(o.id,"concluido");},style:{background:"#22c55e",color:"#fff",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:800,cursor:"pointer"}},"Pago"),
+          h("button",{onClick:function(){abrirCancelar(o);},style:{background:"#fee2e2",color:"#dc2626",border:"none",borderRadius:8,padding:"6px 10px",fontSize:11,fontWeight:800,cursor:"pointer"}},"Cancelar")
+        )
       );})
     ),
     h("div",{style:{display:"flex",overflowX:"auto",gap:5,marginBottom:10}},
@@ -194,6 +224,7 @@ function PedidosTab(props){
       h("p",{style:{margin:"0 0 7px",fontSize:11,color:"#666"}},(o.items||[]).map(function(i){return i.qty+"x "+i.name;}).join(", ")),
       h("div",{style:{display:"flex",gap:5}},
         o.status==="pendente"&&h(Btn,{sm:true,onClick:function(){upd(o.id,"em_curso");}},"Aceitar"),
+        (o.status==="pendente"||o.status==="em_curso")&&h(Btn,{sm:true,color:"#3b82f6",onClick:function(){upd(o.id,"aguardando_pagamento");}},"Aguardar Pgto"),
         o.status==="em_curso"&&h(Btn,{sm:true,color:"#22c55e",onClick:function(){upd(o.id,"concluido");}},"Concluir"),
         o.status!=="cancelado"&&o.status!=="concluido"&&h(Btn,{sm:true,outline:true,color:"#dc2626",onClick:function(){abrirCancelar(o);}},"Cancelar")
       )
