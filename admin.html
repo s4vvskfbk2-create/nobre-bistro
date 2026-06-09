@@ -788,7 +788,7 @@ function App(){
     )
   );
 
-  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0],["clientes","Clientes",0]];
+  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0],["clientes","Clientes",0],["centroIA","Centro IA",0]];
   var TABS_A=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking]];
   var TABS_C=[["cozinha","Cozinha",cooking]];
   var tabs=nivel==="gerente"?TABS_G:nivel==="cozinha"?TABS_C:TABS_A;
@@ -812,7 +812,8 @@ function App(){
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
-      tab==="historico"&&(nivel==="gerente"?h(HistoricoTab,{orders:orders,profs:profs,setOrders:setOrders}):null),
+      tab==="centroIA"&&(nivel==="gerente")&&React.createElement(TabCentroIA,null),
+              tab==="historico"&&(nivel==="gerente"?h(HistoricoTab,{orders:orders,profs:profs,setOrders:setOrders}):null),
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
       tab==="equipe"&&(nivel==="gerente"?h(EquipeTab,{profs:profs,setProfs:setProfs,orders:orders}):null),
@@ -1032,6 +1033,140 @@ h("span",null,dias<999?"Ultima: "+dias+"d atras":"Sem data")
 );
 })
 );}
+
+
+function ModalCancelamento({pedido,onConfirm,onClose}){
+  const[motivo,setMotivo]=React.useState('');
+  const[motivoCustom,setMotivoCustom]=React.useState('');
+  const[loading,setLoading]=React.useState(false);
+  const[erro,setErro]=React.useState('');
+  const motivosPadrao=['Cliente desistiu','Produto indisponivel','Erro no pedido','Pagamento nao confirmado','Solicitacao do cliente','Outro'];
+  const motivoFinal=motivo==='Outro'?motivoCustom:motivo;
+  async function handleConfirm(){
+    if(!motivoFinal.trim()){setErro('O motivo e obrigatorio.');return;}
+    setLoading(true);setErro('');
+    try{await onConfirm(pedido,motivoFinal);onClose();}
+    catch(e){setErro('Erro ao cancelar: '+(e.message||'Tente novamente.'));setLoading(false);}
+  }
+  return React.createElement('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.6)',zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}},
+    React.createElement('div',{style:{background:'#fff',borderRadius:'12px',padding:'1.5rem',maxWidth:'420px',width:'100%',boxShadow:'0 20px 40px rgba(0,0,0,0.3)'}},
+      React.createElement('h3',{style:{margin:'0 0 0.5rem',color:'#dc2626',fontSize:'1.1rem'}},'Cancelar Pedido #'+pedido.numero),
+      React.createElement('p',{style:{color:'#666',fontSize:'0.85rem',marginBottom:'1rem'}},'Cliente: '+(pedido.cliente||'Nao informado')+' - Total: R$ '+(pedido.total||0).toFixed(2)),
+      React.createElement('div',{style:{marginBottom:'0.75rem'}},
+        React.createElement('label',{style:{fontSize:'0.85rem',fontWeight:600,color:'#374151',display:'block',marginBottom:'0.4rem'}},'Motivo do cancelamento *'),
+        React.createElement('select',{value:motivo,onChange:function(e){setMotivo(e.target.value);},style:{width:'100%',padding:'0.5rem',borderRadius:'6px',border:'1px solid #d1d5db',fontSize:'0.9rem',marginBottom:'0.5rem'}},
+          React.createElement('option',{value:''},'Selecione um motivo'),
+          motivosPadrao.map(function(m){return React.createElement('option',{key:m,value:m},m);})
+        ),
+        motivo==='Outro'&&React.createElement('textarea',{placeholder:'Descreva o motivo...',value:motivoCustom,onChange:function(e){setMotivoCustom(e.target.value);},style:{width:'100%',padding:'0.5rem',borderRadius:'6px',border:'1px solid #d1d5db',fontSize:'0.85rem',minHeight:'70px',resize:'vertical',boxSizing:'border-box'}})
+      ),
+      erro&&React.createElement('p',{style:{color:'#dc2626',fontSize:'0.8rem',marginBottom:'0.75rem'}},erro),
+      React.createElement('div',{style:{display:'flex',gap:'0.5rem',justifyContent:'flex-end'}},
+        React.createElement('button',{onClick:onClose,disabled:loading,style:{padding:'0.5rem 1rem',borderRadius:'6px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',fontSize:'0.85rem'}},'Voltar'),
+        React.createElement('button',{onClick:handleConfirm,disabled:loading||!motivoFinal.trim(),style:{padding:'0.5rem 1rem',borderRadius:'6px',border:'none',background:loading?'#9ca3af':'#dc2626',color:'#fff',cursor:loading?'not-allowed':'pointer',fontSize:'0.85rem',fontWeight:600}},loading?'Cancelando...':'Confirmar Cancelamento')
+      )
+    )
+  );
+}
+async function cancelarPedido(pedido,motivo,userRole){
+  const U='https://zxpnguynjrsixsomaieg.supabase.co';
+  const K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q';
+  const H={'Content-Type':'application/json','apikey':K,'Authorization':'Bearer '+K,'Prefer':'return=minimal'};
+  const now=new Date().toISOString();
+  const oldData={...(pedido.data||{})};
+  const novoData={...oldData,status:'cancelado',cancelado_em:now,motivo_cancelamento:motivo,cancelado_por:userRole||'gerente'};
+  const r1=await fetch(U+'/rest/v1/orders?id=eq.'+pedido.id,{method:'PATCH',headers:H,body:JSON.stringify({data:novoData})});
+  if(!r1.ok) throw new Error('Falha ao atualizar pedido');
+  await fetch(U+'/rest/v1/audit_logs',{method:'POST',headers:H,body:JSON.stringify({action:'CANCEL_ORDER',entity_type:'order',entity_id:String(pedido.id),user_role:userRole||'gerente',user_info:'admin',old_value:oldData,new_value:novoData,reason:motivo})});
+  await fetch(U+'/rest/v1/system_events',{method:'POST',headers:H,body:JSON.stringify({event_type:'ORDER_CANCELLED',source:'admin.cancelarPedido',entity_type:'order',entity_id:String(pedido.id),payload:{pedido_numero:pedido.numero,cliente:pedido.cliente,total:pedido.total,motivo:motivo,cancelado_por:userRole||'gerente'}})});
+  return true;
+}
+
+
+
+function TabCentroIA(){
+  const U='https://zxpnguynjrsixsomaieg.supabase.co';
+  const K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q';
+  const H={'apikey':K,'Authorization':'Bearer '+K};
+  const[subTab,setSubTab]=React.useState('eventos');
+  const[eventos,setEventos]=React.useState([]);
+  const[recomendacoes,setRecomendacoes]=React.useState([]);
+  const[agentes,setAgentes]=React.useState([]);
+  const[loading,setLoading]=React.useState(true);
+  const EICONS={ORDER_CANCELLED:'X',ORDER_CREATED:'N',PAYMENT_PENDING:'...',PAYMENT_RECEIVED:'OK',LOW_STOCK:'!',DEFAULT:'*'};
+  React.useEffect(function(){
+    async function load(){
+      setLoading(true);
+      try{
+        const[evR,recR,agR]=await Promise.all([
+          fetch(U+'/rest/v1/system_events?order=created_at.desc&limit=50',{headers:H}),
+          fetch(U+'/rest/v1/ai_recommendations?order=created_at.desc&limit=20',{headers:H}),
+          fetch(U+'/rest/v1/ai_agents?order=name.asc',{headers:H})
+        ]);
+        const[ev,rec,ag]=await Promise.all([evR.json(),recR.json(),agR.json()]);
+        setEventos(Array.isArray(ev)?ev:[]);
+        setRecomendacoes(Array.isArray(rec)?rec:[]);
+        setAgentes(Array.isArray(ag)?ag:[]);
+      }catch(e){console.error(e);}
+      setLoading(false);
+    }
+    load();
+  },[subTab]);
+  const STABS=[{id:'eventos',label:'Eventos'},{id:'recomendacoes',label:'Recomendacoes'},{id:'agentes',label:'Agentes'}];
+  function ft(iso){if(!iso)return'--';const d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+  function pc(p){return{critical:'#dc2626',high:'#f97316',medium:'#2563eb',low:'#6b7280'}[p]||'#6b7280';}
+  return React.createElement('div',{style:{padding:'1rem',maxWidth:'900px',margin:'0 auto'}},
+    React.createElement('div',{style:{marginBottom:'1.5rem'}},
+      React.createElement('h2',{style:{margin:0,fontSize:'1.3rem',fontWeight:700,color:'#1f2937'}},'Centro de Inteligencia Artificial'),
+      React.createElement('p',{style:{margin:'0.25rem 0 0',color:'#6b7280',fontSize:'0.85rem'}},'Monitoramento de eventos, recomendacoes e agentes do sistema.')
+    ),
+    React.createElement('div',{style:{display:'flex',gap:'0.5rem',marginBottom:'1.5rem',borderBottom:'2px solid #e5e7eb'}},
+      STABS.map(function(st){return React.createElement('button',{key:st.id,onClick:function(){setSubTab(st.id);},style:{padding:'0.6rem 1rem',border:'none',background:'transparent',borderBottom:subTab===st.id?'2px solid #2563eb':'2px solid transparent',color:subTab===st.id?'#2563eb':'#6b7280',fontWeight:subTab===st.id?700:400,cursor:'pointer',fontSize:'0.85rem',marginBottom:'-2px'}},st.label);})
+    ),
+    loading&&React.createElement('div',{style:{textAlign:'center',padding:'2rem',color:'#9ca3af'}},'Carregando...'),
+    !loading&&subTab==='eventos'&&React.createElement('div',null,
+      eventos.length===0
+        ?React.createElement('div',{style:{textAlign:'center',padding:'3rem',color:'#9ca3af',background:'#f9fafb',borderRadius:'12px'}},
+            React.createElement('p',{style:{margin:0}},'Nenhum evento registrado ainda.'),
+            React.createElement('p',{style:{margin:'0.25rem 0 0',fontSize:'0.8rem'}},'Eventos serao gerados ao cancelar pedidos e outras acoes.')
+          )
+        :React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:'0.5rem'}},
+            eventos.map(function(ev){return React.createElement('div',{key:ev.id,style:{background:'#fff',border:'1px solid #e5e7eb',borderRadius:'8px',padding:'0.75rem 1rem',display:'flex',alignItems:'center',gap:'1rem'}},
+              React.createElement('div',{style:{flex:1}},
+                React.createElement('div',{style:{fontWeight:600,fontSize:'0.85rem',color:'#1f2937'}},ev.event_type),
+                React.createElement('div',{style:{fontSize:'0.75rem',color:'#6b7280'}},(ev.entity_type||'')+(ev.entity_id?' #'+ev.entity_id:'')+' - '+(ev.source||'--'))
+              ),
+              React.createElement('div',{style:{fontSize:'0.75rem',color:'#9ca3af',whiteSpace:'nowrap'}},ft(ev.created_at))
+            );})
+          )
+    ),
+    !loading&&subTab==='recomendacoes'&&React.createElement('div',null,
+      recomendacoes.length===0
+        ?React.createElement('div',{style:{textAlign:'center',padding:'3rem',color:'#9ca3af',background:'#f9fafb',borderRadius:'12px'}},
+            React.createElement('p',{style:{margin:0}},'Nenhuma recomendacao gerada ainda.'),
+            React.createElement('p',{style:{margin:'0.25rem 0 0',fontSize:'0.8rem'}},'As recomendacoes aparecerao quando os agentes de IA forem ativados.')
+          )
+        :recomendacoes.map(function(rec){return React.createElement('div',{key:rec.id,style:{background:'#fff',border:'1px solid #e5e7eb',borderRadius:'8px',padding:'1rem',marginBottom:'0.5rem'}},
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'0.25rem'}},
+              React.createElement('span',{style:{fontWeight:700,fontSize:'0.9rem',color:'#1f2937'}},rec.title),
+              React.createElement('span',{style:{fontSize:'0.75rem',fontWeight:700,color:pc(rec.priority)}},rec.priority)
+            ),
+            rec.description&&React.createElement('p',{style:{margin:'0.25rem 0',fontSize:'0.8rem',color:'#6b7280'}},rec.description)
+          );})
+    ),
+    !loading&&subTab==='agentes'&&React.createElement('div',null,
+      React.createElement('div',{style:{background:'#fef3c7',border:'1px solid #fcd34d',borderRadius:'8px',padding:'0.75rem 1rem',marginBottom:'1rem',fontSize:'0.85rem',color:'#92400e'}},'Agentes em modo INATIVO. Estrutura pronta para ativacao futura.'),
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'1rem'}},
+        agentes.map(function(ag){return React.createElement('div',{key:ag.id,style:{background:'#fff',border:'1px solid #e5e7eb',borderRadius:'10px',padding:'1rem',textAlign:'center'}},
+          React.createElement('div',{style:{fontWeight:700,fontSize:'0.85rem',color:'#1f2937',marginBottom:'0.25rem'}},ag.name.replace('-agent','').replace(/^\w/,function(c){return c.toUpperCase();})),
+          React.createElement('div',{style:{fontSize:'0.75rem',color:'#6b7280',marginBottom:'0.5rem'}},ag.description),
+          React.createElement('span',{style:{fontSize:'0.7rem',fontWeight:700,padding:'2px 8px',borderRadius:'999px',background:ag.status==='active'?'#d1fae5':'#f3f4f6',color:ag.status==='active'?'#065f46':'#6b7280'}},ag.status==='active'?'ATIVO':'INATIVO')
+        );})
+      )
+    )
+  );
+}
+
 
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
