@@ -1339,11 +1339,18 @@ function TabReceitas(){
 
   ue(function(){carregarDados();},[]);
 
-  function calcCustoItens(itens,ings){
+  function calcCustoItens(itens,ings,recs){
     return itens.reduce(function(s,it){
-      var ing=ings.find(function(i){return i.id===it.ingrediente_id;});
+      var qtd=parseFloat(it.quantidade)||0;
+      if((it.tipo||"ingrediente")==="sub_receita"){
+        var rec=(recs||receitas).find(function(r){return String(r.id)===String(it.sub_receita_id);});
+        if(!rec)return s;
+        var rend=parseFloat(rec.rendimento)||1;
+        return s+(qtd/rend)*parseFloat(rec.custo_total||0);
+      }
+      var ing=ings.find(function(i){return String(i.id)===String(it.ingrediente_id);});
       if(!ing)return s;
-      return s+(parseFloat(it.quantidade)||0)*(parseFloat(ing.custo_unitario)||0);
+      return s+qtd*(parseFloat(ing.custo_unitario)||0);
     },0);
   }
 
@@ -1363,6 +1370,11 @@ function TabReceitas(){
         if(i!==idx)return it;
         var novo=Object.assign({},it);
         novo[campo]=val;
+        if(campo==="tipo"){
+          novo.ingrediente_id="";
+          novo.sub_receita_id="";
+          novo.quantidade="";
+        }
         if(campo==="ingrediente_id"){
           var ing=ingredientes.find(function(x){return String(x.id)===String(val);});
           if(ing)novo.unidade=ing.unidade;
@@ -1380,7 +1392,7 @@ function TabReceitas(){
     if(!formRec.nome.trim()){setFormErro("Nome obrigatorio.");return;}
     if(!formRec.preco_venda||isNaN(parseFloat(formRec.preco_venda))){setFormErro("Preco de venda obrigatorio.");return;}
     if(formItens.length===0){setFormErro("Adicione pelo menos 1 ingrediente.");return;}
-    var itensValidos=formItens.filter(function(it){return it.ingrediente_id&&it.quantidade;});
+    var itensValidos=formItens.filter(function(it){return ((it.tipo||"ingrediente")==="sub_receita"?it.sub_receita_id:it.ingrediente_id)&&it.quantidade;});
     if(itensValidos.length===0){setFormErro("Preencha os ingredientes corretamente.");return;}
     setSalvando(true);setFormErro(null);
     var custoTotal=calcCustoItens(itensValidos,ingredientes);
@@ -1394,11 +1406,23 @@ function TabReceitas(){
       var fichaData=await rFicha.json();
       var fichaId=Array.isArray(fichaData)?fichaData[0].id:fichaData.id;
       await Promise.all(itensValidos.map(function(it){
-        var ing=ingredientes.find(function(x){return String(x.id)===String(it.ingrediente_id);});
-        var custoLinha=(parseFloat(it.quantidade)||0)*(ing?parseFloat(ing.custo_unitario)||0:0);
+        var tipo=it.tipo||"ingrediente";
+        var custoLinha=0;
+        var payload={ficha_id:fichaId,quantidade:parseFloat(it.quantidade),unidade:it.unidade||"un",tipo:tipo};
+        if(tipo==="sub_receita"){
+          var rec=receitas.find(function(x){return String(x.id)===String(it.sub_receita_id);});
+          custoLinha=rec?((parseFloat(it.quantidade)||0)/(parseFloat(rec.rendimento)||1))*parseFloat(rec.custo_total||0):0;
+          payload.sub_receita_id=parseInt(it.sub_receita_id);
+          payload.ingrediente_id=null;
+        } else {
+          var ing=ingredientes.find(function(x){return String(x.id)===String(it.ingrediente_id);});
+          custoLinha=(parseFloat(it.quantidade)||0)*(ing?parseFloat(ing.custo_unitario)||0:0);
+          payload.ingrediente_id=parseInt(it.ingrediente_id);
+        }
+        payload.custo_linha=custoLinha;
         return fetch(U+"/rest/v1/ficha_ingredientes",{
           method:"POST",headers:Object.assign({},H,{"Prefer":"return=minimal"}),
-          body:JSON.stringify({ficha_id:fichaId,ingrediente_id:parseInt(it.ingrediente_id),quantidade:parseFloat(it.quantidade),unidade:it.unidade,custo_linha:custoLinha})
+          body:JSON.stringify(payload)
         });
       }));
       setFormOk(true);
@@ -1450,7 +1474,7 @@ function TabReceitas(){
       ),
       h("div",{style:{background:R,borderRadius:12,padding:"12px 14px",marginBottom:12,color:"#fff",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}},
         [["Preco Venda",fmt(r.preco_venda)],["Custo Total",fmt(r.custo_total)],["CMV",(r.cmv_percentual||0).toFixed(1)+"%"]].map(function(a){
-          return h("div",{key:a[0]},h("p",{style:{margin:0,fontSize:9,opacity:.75,textTransform:"uppercase"}},"a[0]"),h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:15}},a[1]));
+          return h("div",{key:a[0]},h("p",{style:{margin:0,fontSize:9,opacity:.75,textTransform:"uppercase"}},a[0]),h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:15}},a[1]));
         })
       ),
       h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:12}},
@@ -1529,7 +1553,7 @@ function TabReceitas(){
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
           [["Custo",fmt(custoFormAtual)],["CMV",cmvFormAtual.toFixed(1)+"%"],["Preco sugerido",precoSugerido>0?fmt(precoSugerido):"--"]].map(function(a){
             return h("div",{key:a[0],style:{textAlign:"center"}},
-              h("p",{style:{margin:0,fontSize:9,color:"#666",textTransform:"uppercase"}},"a[0]"),
+              h("p",{style:{margin:0,fontSize:9,color:"#666",textTransform:"uppercase"}},a[0]),
               h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:13,color:cmvCor(cmvFormAtual)}},a[1])
             );
           })
@@ -1542,13 +1566,28 @@ function TabReceitas(){
         ),
         ingredientes.length===0&&h("p",{style:{fontSize:11,color:"#f59e0b",margin:0}},"Cadastre ingredientes primeiro na aba Ingredientes"),
         formItens.map(function(it,idx){
-          return h("div",{key:idx,style:{display:"grid",gridTemplateColumns:"1fr 80px 30px",gap:5,marginBottom:6}},
-            h("select",{value:it.ingrediente_id,onChange:function(e){updItemForm(idx,"ingrediente_id",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",background:"#fff"}},
-              h("option",{value:""},"Ingrediente..."),
-              ingredientes.map(function(ing){return h("option",{key:ing.id,value:ing.id},ing.nome+" (R$/"+ing.unidade+")");})
+          var tipo=it.tipo||"ingrediente";
+          return h("div",{key:idx,style:{marginBottom:8,background:"#f9fafb",borderRadius:8,padding:"8px"}},
+            h("div",{style:{display:"flex",gap:4,marginBottom:5}},
+              [["ingrediente","Ingrediente"],["sub_receita","Sub-Receita"]].map(function(tp){
+                var at=tipo===tp[0];
+                return h("button",{key:tp[0],onClick:function(){updItemForm(idx,"tipo",tp[0]);},
+                  style:{flex:1,padding:"4px 0",borderRadius:6,border:"1.5px solid "+(at?R:B),background:at?R:"#fff",color:at?"#fff":"#666",fontSize:10,fontWeight:at?700:500,cursor:"pointer"}},tp[1]);
+              })
             ),
-            h("input",{type:"number",placeholder:"Qtd",value:it.quantidade,onChange:function(e){updItemForm(idx,"quantidade",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none"}}),
-            h("button",{onClick:function(){remItemForm(idx);},style:{background:"#fee2e2",border:"none",borderRadius:7,color:"#dc2626",fontWeight:700,cursor:"pointer"}},"x")
+            h("div",{style:{display:"grid",gridTemplateColumns:"1fr 70px 28px",gap:5}},
+              tipo==="ingrediente"
+                ?h("select",{value:it.ingrediente_id||"",onChange:function(e){updItemForm(idx,"ingrediente_id",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",background:"#fff"}},
+                    h("option",{value:""},"Escolha o ingrediente..."),
+                    ingredientes.map(function(ing){return h("option",{key:ing.id,value:ing.id},ing.nome+" ("+fmt(ing.custo_unitario)+"/"+ing.unidade+")");})
+                  )
+                :h("select",{value:it.sub_receita_id||"",onChange:function(e){updItemForm(idx,"sub_receita_id",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",background:"#fff"}},
+                    h("option",{value:""},"Escolha a sub-receita..."),
+                    receitas.map(function(r){return h("option",{key:r.id,value:r.id},r.nome+" (custo: "+fmt(r.custo_total)+")");})
+                  ),
+              h("input",{type:"number",placeholder:"Qtd",value:it.quantidade||"",onChange:function(e){updItemForm(idx,"quantidade",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none"}}),
+              h("button",{onClick:function(){remItemForm(idx);},style:{background:"#fee2e2",border:"none",borderRadius:7,color:"#dc2626",fontWeight:700,cursor:"pointer",fontSize:14}},"x")
+            )
           );
         })
       ),
