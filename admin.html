@@ -56,11 +56,13 @@ var PRODS_DEFAULT=[
 {id:10,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."}
 ];
 var PROFS_DEFAULT=[
-{id:1,name:"Adriana",active:true,telefone:"",desconto:20},{id:2,name:"Amanda",active:true,telefone:"",desconto:20},
+{id:1,name:"Adriana",active:true,telefone:"",desconto:20,tipo:"salao"},{id:2,name:"Amanda",active:true,telefone:"",desconto:20,tipo:"salao"},
 {id:3,name:"Bruna",active:true,telefone:"",desconto:20},{id:4,name:"Carol",active:true,telefone:"",desconto:20},
 {id:5,name:"Fernanda",active:true,telefone:"",desconto:20},{id:6,name:"Gabriela",active:true,telefone:"",desconto:20},
 {id:7,name:"Juliana",active:true,telefone:"",desconto:20},{id:8,name:"Larissa",active:true,telefone:"",desconto:20},
-{id:9,name:"Leticia",active:true,telefone:"",desconto:20},{id:10,name:"Mariana",active:true,telefone:"",desconto:20}
+{id:9,name:"Leticia",active:true,telefone:"",desconto:20},{id:10,name:"Mariana",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:11,name:"Breno",active:true,telefone:"",desconto:0,tipo:"bistro"},
+{id:12,name:"Nayra",active:true,telefone:"",desconto:0,tipo:"bistro"}
 ];
 
 function Inp(props){return h("div",{style:{marginBottom:10}},props.label&&h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:3,textTransform:"uppercase"}},props.label),props.textarea?h("textarea",{value:props.value,onChange:function(e){props.onChange(e.target.value);},rows:props.rows||2,placeholder:props.placeholder,style:{width:"100%",border:"1.5px solid "+B,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box"}}):h("input",{type:props.type||"text",value:props.value,onChange:function(e){props.onChange(e.target.value);},placeholder:props.placeholder,style:{width:"100%",border:"1.5px solid "+B,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),props.hint&&h("p",{style:{fontSize:9,color:"#aaa",margin:"2px 0 0"}},props.hint));}
@@ -549,7 +551,7 @@ function EquipeTab(props){
   function openEdit(p){setForm(Object.assign({},p));setModal("edit");}
   function openNew(){setForm({name:"",active:true,telefone:"",desconto:20});setModal("new");}
   function save(){
-    var p=Object.assign({},form,{id:modal==="new"?Date.now():form.id,desconto:parseInt(form.desconto)||20});
+    var p=Object.assign({},form,{id:modal==="new"?Date.now():form.id,desconto:parseInt(form.desconto)||20,tipo:form.tipo||"salao"});
     var n=modal==="new"?profs.concat([p]):profs.map(function(x){return x.id===p.id?p:x;});
     setProfs(n);sbSet("nb_bA_profs",n);setModal(null);
   }
@@ -569,7 +571,7 @@ function EquipeTab(props){
     ),
     tab==="lista"&&profs.map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:10,border:"1px solid "+B,padding:"9px 11px",marginBottom:6,display:"flex",alignItems:"center",gap:9,opacity:p.active?1:.5}},
       h("div",{style:{width:36,height:36,borderRadius:"50%",background:C,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:15,color:R,flexShrink:0}},p.name[0]),
-      h("div",{style:{flex:1}},h("p",{style:{margin:0,fontWeight:700,fontSize:12}},p.name),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},(p.telefone||"Sem telefone")+" - Desc "+( p.desconto||20)+"%")),
+      h("div",{style:{flex:1}},h("p",{style:{margin:0,fontWeight:700,fontSize:12}},p.name),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},(p.telefone||"Sem telefone")+" - Desc "+(p.desconto||20)+"% - "+(p.tipo==="bistro"?"Bistro":"Salao"))),
       h("button",{onClick:function(){openEdit(p);},style:{background:C,border:"1px solid "+B,borderRadius:6,padding:"4px 9px",fontSize:10,fontWeight:700,cursor:"pointer"}},"Edit")
     );}),
     tab==="ranking"&&ranking.map(function(p,idx){return h("div",{key:p.id,style:{background:"#fff",borderRadius:10,border:"1px solid "+B,padding:"9px 11px",marginBottom:6,display:"flex",alignItems:"center",gap:9}},
@@ -580,6 +582,12 @@ function EquipeTab(props){
     h(Modal,{open:!!modal,onClose:function(){setModal(null);},title:modal==="new"?"Nova Profissional":"Editar Profissional"},
       h(Inp,{label:"Nome *",value:form.name||"",onChange:function(v){setForm(Object.assign({},form,{name:v}));},placeholder:"Nome da profissional"}),
       h(Inp,{label:"Telefone WhatsApp",value:form.telefone||"",onChange:function(v){setForm(Object.assign({},form,{telefone:v}));},placeholder:"(11) 99999-9999",hint:"Para receber notificacoes de fiado"}),
+      h("div",{style:{marginBottom:10}},
+        h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Tipo"),
+        h("div",{style:{display:"flex",gap:5}},
+          [["salao","Salao"],["bistro","Bistro"]].map(function(arr){var a=(form.tipo||"salao")===arr[0];return h("button",{key:arr[0],onClick:function(){setForm(Object.assign({},form,{tipo:arr[0]}));},style:{flex:1,padding:"7px 0",borderRadius:8,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})
+        )
+      ),
       h(Inp,{label:"Desconto %",value:String(form.desconto||20),onChange:function(v){setForm(Object.assign({},form,{desconto:v}));},type:"number"}),
       h("label",{style:{display:"flex",alignItems:"center",gap:6,cursor:"pointer",fontSize:12,fontWeight:700,color:"#555",marginBottom:14}},
         h("input",{type:"checkbox",checked:form.active!==false,onChange:function(e){setForm(Object.assign({},form,{active:e.target.checked}));},style:{width:14,height:14}}),"Ativa"
@@ -724,9 +732,9 @@ function HistoricoTab(props){
     );
   }
 
-  var PROFS_BISTRO=["Breno","Chef","Cozinheiro","Auxiliar","Garcom"];
-  var profsBistroSet=new Set(PROFS_BISTRO.map(function(n){return n.toLowerCase();}));
-  function ehBistro(nome){return profsBistroSet.has((nome||"").toLowerCase());}
+  var profTipoMap={};
+  profs.forEach(function(p){profTipoMap[(p.name||"").toLowerCase()]=p.tipo||"salao";});
+  function ehBistro(nome){return profTipoMap[(nome||"").toLowerCase()]==="bistro";}
   var porProf={};
   ordersNoP.filter(function(o){return o.fiado&&o.profFiado;}).forEach(function(o){
     var isBistro=ehBistro(o.profFiado);
