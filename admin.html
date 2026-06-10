@@ -1469,7 +1469,7 @@ function TabReceitas(){
     carregarDados();setSel(null);
   }
 
-  var custoFormAtual=calcCustoItens(formItens.filter(function(it){return it.ingrediente_id&&it.quantidade;}),ingredientes);
+  var itensFormValidos=formItens.filter(function(it){return ((it.tipo||"ingrediente")==="sub_receita"?it.sub_receita_id:it.ingrediente_id)&&it.quantidade;});var custoFormAtual=calcCustoItens(itensFormValidos,ingredientes,receitas);
   var precoFormAtual=parseFloat(formRec.preco_venda)||0;
   var cmvFormAtual=precoFormAtual>0?(custoFormAtual/precoFormAtual)*100:0;
   var precoSugerido=cmvAlvo>0?(custoFormAtual/(cmvAlvo/100)):0;
@@ -1540,7 +1540,7 @@ function TabReceitas(){
           h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#888"}},
             h("span",null,"Venda: "+fmt(r.preco_venda)),
             h("span",null,"Custo: "+fmt(r.custo_total)),
-            h("span",null,(r.categoria||"Sem categoria"))
+            h("span",null,"Rend: "+(r.rendimento||1)+" porcao"+(r.rendimento>1?"s":""))
           ),
           h("div",{style:{background:"#f0f0f0",borderRadius:4,height:4,marginTop:6,overflow:"hidden"}},
             h("div",{style:{height:"100%",width:Math.min(100,cmvPct)+"%",background:cor,borderRadius:4}})
@@ -1561,9 +1561,9 @@ function TabReceitas(){
         h("input",{placeholder:"Preco de venda R$ *",type:"number",value:formRec.preco_venda,onChange:function(e){setFormRec(Object.assign({},formRec,{preco_venda:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
         h("textarea",{placeholder:"Observacoes (modo de preparo, etc)",value:formRec.observacoes,onChange:function(e){setFormRec(Object.assign({},formRec,{observacoes:e.target.value}));},rows:2,style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}})
       ),
-      custoFormAtual>0&&h("div",{style:{background:cmvCor(cmvFormAtual)+"18",border:"1px solid "+cmvCor(cmvFormAtual)+"44",borderRadius:10,padding:"10px 12px",marginBottom:10}},
+      (itensFormValidos.length>0||precoFormAtual>0)&&h("div",{style:{background:cmvCor(cmvFormAtual)+"18",border:"1px solid "+cmvCor(cmvFormAtual)+"44",borderRadius:10,padding:"10px 12px",marginBottom:10}},
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
-          [["Custo",fmt(custoFormAtual)],["CMV",cmvFormAtual.toFixed(1)+"%"],["Preco sugerido",precoSugerido>0?fmt(precoSugerido):"--"]].map(function(a){
+          [["Custo total",fmt(custoFormAtual)],["CMV atual",cmvFormAtual.toFixed(1)+"%"],["Preco sugerido (CMV "+cmvAlvo+"%)",precoSugerido>0?fmt(precoSugerido):"cadastre ingredientes"]].map(function(a){
             return h("div",{key:a[0],style:{textAlign:"center"}},
               h("p",{style:{margin:0,fontSize:9,color:"#666",textTransform:"uppercase"}},a[0]),
               h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:13,color:cmvCor(cmvFormAtual)}},a[1])
