@@ -1556,12 +1556,24 @@ function TabReceitas(){
       ),
       (itensFormValidos.length>0||precoFormAtual>0)&&h("div",{style:{background:cmvCor(cmvFormAtual)+"18",border:"1px solid "+cmvCor(cmvFormAtual)+"44",borderRadius:10,padding:"10px 12px",marginBottom:10}},
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
-          [["Custo total",fmt(custoFormAtual)],["CMV atual",cmvFormAtual.toFixed(1)+"%"],["Preco sugerido (CMV "+cmvAlvo+"%)",precoSugerido>0?fmt(precoSugerido):"cadastre ingredientes"]].map(function(a){
-            return h("div",{key:a[0],style:{textAlign:"center"}},
-              h("p",{style:{margin:0,fontSize:9,color:"#666",textTransform:"uppercase"}},a[0]),
-              h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:13,color:cmvCor(cmvFormAtual)}},a[1])
+(function(){
+            var rend=parseFloat(formRec.rendimento)||1;
+            var custoPorcao=rend>0?custoFormAtual/rend:0;
+            var items=[
+              ["Custo total",fmt(custoFormAtual)],
+              ["Custo/porcao ("+rend+"x)",fmt(custoPorcao)],
+              ["CMV atual",cmvFormAtual.toFixed(1)+"%"],
+              ["Preco sugerido",precoSugerido>0?fmt(precoSugerido):"--"]
+            ];
+            return h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6}},
+              items.map(function(a){
+                return h("div",{key:a[0],style:{textAlign:"center",background:"rgba(255,255,255,0.6)",borderRadius:7,padding:"6px 4px"}},
+                  h("p",{style:{margin:0,fontSize:8,color:"#555",textTransform:"uppercase"}},a[0]),
+                  h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:12,color:cmvCor(cmvFormAtual)}},a[1])
+                );
+              })
             );
-          })
+          })()
         )
       ),
       h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:10}},
