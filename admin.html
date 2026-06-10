@@ -1355,8 +1355,8 @@ function TabReceitas(){
       }
       var ing=ings.find(function(i){return String(i.id)===String(it.ingrediente_id);});
       if(!ing)return s;
-      var custoUnit=parseFloat(ing.custo_liquido)||parseFloat(ing.custo_unitario)||0;
-      return s+qtd*custoUnit;
+      var cu=parseFloat(ing.custo_liquido)||parseFloat(ing.custo_unitario)||0;
+      return s+qtd*cu;
     },0);
   }
 
@@ -1444,13 +1444,13 @@ function TabReceitas(){
     if(!formIng.custo_unitario||isNaN(parseFloat(formIng.custo_unitario))){setErroIng("Custo obrigatorio.");return;}
     setSalvandoIng(true);setErroIng(null);
     try{
-      var _fc2=parseFloat(formIng.fc)||1;
-      var _cl2=(parseFloat(formIng.custo_unitario)||0)*_fc2;
+      var _ifc=parseFloat(formIng.fc)||1;
+      var _icl=(parseFloat(formIng.custo_unitario)||0)*_ifc;
       await fetch(U+"/rest/v1/ingredientes",{
         method:"POST",headers:Object.assign({},H,{"Prefer":"return=minimal"}),
-        body:JSON.stringify({nome:formIng.nome,unidade:formIng.unidade,custo_unitario:parseFloat(formIng.custo_unitario)||0,custo_liquido:_cl2,fc:_fc2,perda_pct:parseFloat(formIng.perda_pct)||0,categoria:formIng.categoria,ativo:true})
+        body:JSON.stringify({nome:formIng.nome,unidade:formIng.unidade,custo_unitario:parseFloat(formIng.custo_unitario)||0,custo_liquido:_icl,fc:_ifc,perda_pct:parseFloat(formIng.perda_pct)||0,categoria:formIng.categoria,ativo:true})
       });
-      setFormIng({nome:"",unidade:"g",custo_unitario:"",categoria:"",metodoFC:"perda",perda_pct:"",peso_bruto:"",peso_liquido:"",fc:""});
+      setFormIng({nome:"",unidade:"g",custo_unitario:"",categoria:"",metodoFC:"perda",perda_pct:"",fc:""});
       carregarDados();
       setErroIng("ok");
       setTimeout(function(){setErroIng(null);},2000);
@@ -1599,7 +1599,7 @@ function TabReceitas(){
               tipo==="ingrediente"
                 ?h("select",{value:it.ingrediente_id||"",onChange:function(e){updItemForm(idx,"ingrediente_id",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",background:"#fff"}},
                     h("option",{value:""},"Escolha o ingrediente..."),
-                    ingredientes.map(function(ing){var cl=parseFloat(ing.custo_liquido)||parseFloat(ing.custo_unitario)||0;var fc=parseFloat(ing.fc)||1;return h("option",{key:ing.id,value:ing.id},ing.nome+" ("+fmt(cl)+"/"+ing.unidade+(fc>1?" FC:"+fc.toFixed(2):"")+")");}))
+                    ingredientes.map(function(ing){var _cl=parseFloat(ing.custo_liquido)||parseFloat(ing.custo_unitario)||0;var _fc=parseFloat(ing.fc)||1;return h("option",{key:ing.id,value:ing.id},ing.nome+" ("+fmt(_cl)+"/"+ing.unidade+(_fc>1?" FC:"+_fc.toFixed(2):"")+")");}))
                   )
                 :h("select",{value:it.sub_receita_id||"",onChange:function(e){updItemForm(idx,"sub_receita_id",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",background:"#fff"}},
                     h("option",{value:""},"Escolha a sub-receita..."),
@@ -1626,42 +1626,23 @@ function TabReceitas(){
           h("input",{placeholder:"Categoria",value:formIng.categoria,onChange:function(e){setFormIng(Object.assign({},formIng,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}})
         ),
         h("input",{placeholder:"Custo bruto R$ *",type:"number",value:formIng.custo_unitario,onChange:function(e){setFormIng(Object.assign({},formIng,{custo_unitario:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
-        h("div",{style:{background:"#faf8f5",borderRadius:9,padding:"10px",marginBottom:8,border:"1px solid "+B}},
-          h("p",{style:{margin:"0 0 6px",fontWeight:700,fontSize:11,color:"#555"}},"Fator de Correcao (FC)"),
-          h("div",{style:{display:"flex",gap:5,marginBottom:7}},
-            [["perda","% Perda"],["peso","Bruto/Liquido"]].map(function(m){var a=(formIng.metodoFC||"perda")===m[0];return h("button",{key:m[0],onClick:function(){setFormIng(Object.assign({},formIng,{metodoFC:m[0],perda_pct:"",peso_bruto:"",peso_liquido:"",fc:""}));},style:{flex:1,padding:"5px 0",borderRadius:7,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#555",fontSize:10,fontWeight:a?700:500,cursor:"pointer"}},m[1]);})
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6,marginBottom:8,alignItems:"end"}},
+          h("div",null,
+            h("label",{style:{fontSize:9,color:"#888",display:"block",marginBottom:2}},"Perda % (opcional)"),
+            h("input",{type:"number",min:"0",max:"99",placeholder:"Ex: 20",value:formIng.perda_pct||"",onChange:function(e){
+              var _p=parseFloat(e.target.value)||0;
+              var _f=_p>0&&_p<100?(100/(100-_p)):1;
+              setFormIng(Object.assign({},formIng,{perda_pct:e.target.value,fc:_f.toFixed(3)}));
+            },style:{width:"100%",border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",boxSizing:"border-box"}})
           ),
-          (formIng.metodoFC||"perda")==="perda"
-            ?h("div",{style:{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:8,alignItems:"center"}},
-                h("div",null,
-                  h("label",{style:{fontSize:9,color:"#888",display:"block",marginBottom:2}},"Perda %"),
-                  h("input",{type:"number",min:"0",max:"99",placeholder:"Ex: 20",value:formIng.perda_pct||"",onChange:function(e){var p=parseFloat(e.target.value)||0;var fc=p>0&&p<100?(100/(100-p)):1;setFormIng(Object.assign({},formIng,{perda_pct:e.target.value,fc:fc.toFixed(4)}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",boxSizing:"border-box"}})
-                ),
-                h("div",{style:{textAlign:"center"}},
-                  h("p",{style:{margin:0,fontSize:9,color:"#888"}},"FC"),
-                  h("p",{style:{margin:0,fontWeight:900,fontSize:16,color:R}},formIng.fc?parseFloat(formIng.fc).toFixed(2):"1.00")
-                ),
-                h("div",null,
-                  h("label",{style:{fontSize:9,color:"#16a34a",display:"block",marginBottom:2}},"Custo liquido"),
-                  h("p",{style:{margin:0,fontWeight:700,fontSize:12,color:"#16a34a",padding:"6px 0"}},
-                    (formIng.custo_unitario&&formIng.fc)?"R$ "+(parseFloat(formIng.custo_unitario)*parseFloat(formIng.fc)).toLocaleString("pt-BR",{minimumFractionDigits:4}):"--"
-                  )
-                )
-              )
-            :h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr auto",gap:6,alignItems:"end"}},
-                h("div",null,
-                  h("label",{style:{fontSize:9,color:"#888",display:"block",marginBottom:2}},"Peso Bruto"),
-                  h("input",{type:"number",placeholder:"1000",value:formIng.peso_bruto||"",onChange:function(e){var pb=parseFloat(e.target.value)||0;var pl=parseFloat(formIng.peso_liquido)||0;var fc=pb>0&&pl>0?pb/pl:1;setFormIng(Object.assign({},formIng,{peso_bruto:e.target.value,fc:fc.toFixed(4)}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",boxSizing:"border-box"}})
-                ),
-                h("div",null,
-                  h("label",{style:{fontSize:9,color:"#888",display:"block",marginBottom:2}},"Peso Liquido"),
-                  h("input",{type:"number",placeholder:"800",value:formIng.peso_liquido||"",onChange:function(e){var pl=parseFloat(e.target.value)||0;var pb=parseFloat(formIng.peso_bruto)||0;var fc=pb>0&&pl>0?pb/pl:1;setFormIng(Object.assign({},formIng,{peso_liquido:e.target.value,fc:fc.toFixed(4)}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",boxSizing:"border-box"}})
-                ),
-                h("div",{style:{textAlign:"center"}},
-                  h("p",{style:{margin:0,fontSize:9,color:"#888"}},"FC"),
-                  h("p",{style:{margin:0,fontWeight:900,fontSize:16,color:R}},formIng.fc?parseFloat(formIng.fc).toFixed(2):"1.00")
-                )
-              )
+          h("div",null,
+            h("label",{style:{fontSize:9,color:"#888",display:"block",marginBottom:2}},"FC calculado"),
+            h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:R,padding:"6px 0"}},formIng.fc?parseFloat(formIng.fc).toFixed(2):"1.00")
+          ),
+          h("div",null,
+            h("label",{style:{fontSize:9,color:"#16a34a",display:"block",marginBottom:2}},"Custo liquido"),
+            h("p",{style:{margin:0,fontWeight:700,fontSize:12,color:"#16a34a",padding:"6px 0"}},(formIng.custo_unitario&&formIng.fc)?fmt((parseFloat(formIng.custo_unitario)||0)*(parseFloat(formIng.fc)||1)):"--")
+          )
         ),
         erroIng==="ok"?h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,marginBottom:6}},"Ingrediente salvo!"):erroIng&&h("p",{style:{color:"#dc2626",fontSize:12,marginBottom:6}},erroIng),
         h("button",{onClick:salvarIngrediente,disabled:salvandoIng,style:{width:"100%",background:salvandoIng?"#ccc":R,color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:12,fontWeight:700,cursor:salvandoIng?"not-allowed":"pointer"}},salvandoIng?"Salvando...":"Salvar Ingrediente")
@@ -1669,23 +1650,23 @@ function TabReceitas(){
       h("p",{style:{fontWeight:700,fontSize:12,marginBottom:6}},"Ingredientes cadastrados ("+ingredientes.length+")"),
       ingredientes.length===0&&h("p",{style:{color:"#ccc",fontSize:12,textAlign:"center",padding:"20px 0"}},"Nenhum ingrediente cadastrado"),
       ingredientes.map(function(ing){
-        var _fc=parseFloat(ing.fc)||1;
-        var _cl=parseFloat(ing.custo_liquido)||parseFloat(ing.custo_unitario)||0;
+        var _fc2=parseFloat(ing.fc)||1;
+        var _cl2=parseFloat(ing.custo_liquido)||parseFloat(ing.custo_unitario)||0;
         return h("div",{key:ing.id,style:{background:"#fff",borderRadius:9,border:"1px solid "+B,padding:"8px 11px",marginBottom:5}},
-          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:_fc>1?4:0}},
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
             h("div",null,
               h("p",{style:{margin:0,fontWeight:700,fontSize:12}},ing.nome),
               h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},(ing.categoria||"Sem categoria")+" - "+ing.unidade)
             ),
             h("div",{style:{textAlign:"right"}},
-              h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:R}},fmt(_cl)+"/"+ing.unidade),
-              _fc>1&&h("p",{style:{margin:0,fontSize:9,color:"#aaa"}},"Bruto: "+fmt(ing.custo_unitario))
+              h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:R}},fmt(_cl2)+"/"+ing.unidade),
+              _fc2>1&&h("p",{style:{margin:0,fontSize:9,color:"#aaa"}},"Bruto: "+fmt(ing.custo_unitario))
             )
           ),
-          _fc>1&&h("div",{style:{display:"flex",gap:8,fontSize:10,borderTop:"1px solid "+B,paddingTop:4}},
-            h("span",{style:{color:"#ca8a04",fontWeight:700}},"FC: "+_fc.toFixed(2)),
-            h("span",null,"Perda: "+(parseFloat(ing.perda_pct)||((1-1/_fc)*100).toFixed(0))+"%"),
-            h("span",{style:{color:"#16a34a",fontWeight:700}},"Liquido: "+fmt(_cl))
+          _fc2>1&&h("div",{style:{display:"flex",gap:8,fontSize:10,borderTop:"1px solid "+B,paddingTop:4}},
+            h("span",{style:{color:"#ca8a04",fontWeight:700}},"FC: "+_fc2.toFixed(2)),
+            h("span",null,"Perda: "+(parseFloat(ing.perda_pct)||0)+"%"),
+            h("span",{style:{color:"#16a34a",fontWeight:700}},"Liq: "+fmt(_cl2))
           )
         );
       })
