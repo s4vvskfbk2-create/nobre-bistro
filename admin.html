@@ -633,13 +633,20 @@ function HistoricoTab(props){
   ue(function(){var i=setInterval(function(){sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
   var s1=us("clientes"),tipo=s1[0],setTipo=s1[1];
   var s2=us(null),selNome=s2[0],setSelNome=s2[1];
-  var s3=us("atual"),periodo=s3[0],setPeriodo=s3[1];
+  var s3=us("quinzena"),modoPeriodo=s3[0],setModoPeriodo=s3[1];
+  var s4=us("atual"),periodoQ=s4[0],setPeriodoQ=s4[1];
+  var s5=us(""),dataIni=s5[0],setDataIni=s5[1];
+  var s6=us(""),dataFim=s6[0],setDataFim=s6[1];
+  var s7=us("salao"),subTipoFunc=s7[0],setSubTipoFunc=s7[1];
 
   var hoje=new Date(),dia=hoje.getDate();
   var inicioQ=new Date(hoje.getFullYear(),hoje.getMonth(),dia<=15?1:16);
   var fimQ=new Date(hoje.getFullYear(),hoje.getMonth(),dia<=15?15:new Date(hoje.getFullYear(),hoje.getMonth()+1,0).getDate(),23,59,59);
   var inicioQAnt=dia<=15?new Date(hoje.getFullYear(),hoje.getMonth()-1,16):new Date(hoje.getFullYear(),hoje.getMonth(),1);
   var fimQAnt=dia<=15?new Date(hoje.getFullYear(),hoje.getMonth()-1,new Date(hoje.getFullYear(),hoje.getMonth(),0).getDate(),23,59,59):new Date(hoje.getFullYear(),hoje.getMonth(),15,23,59,59);
+
+  function parseDataBR(str){if(!str)return null;var pts=str.split("/");if(pts.length<3)return null;return new Date(parseInt(pts[2]),parseInt(pts[1])-1,parseInt(pts[0]));}
+  function parseDataISO(str){if(!str)return null;var pts=str.split("-");if(pts.length<3)return null;return new Date(parseInt(pts[0]),parseInt(pts[1])-1,parseInt(pts[2]));}
 
   function isNoPeriodo(o,inicio,fim){
     if(!o.criadoEm)return false;
@@ -649,9 +656,18 @@ function HistoricoTab(props){
     return d>=inicio&&d<=fim;
   }
 
-  function getInicio(){return periodo==="atual"?inicioQ:inicioQAnt;}
-  function getFim(){return periodo==="atual"?fimQ:fimQAnt;}
-  function getPLabel(){return periodo==="atual"?"Quinzena atual ("+inicioQ.toLocaleDateString("pt-BR")+" - "+fimQ.toLocaleDateString("pt-BR")+")":"Quinzena anterior ("+inicioQAnt.toLocaleDateString("pt-BR")+" - "+fimQAnt.toLocaleDateString("pt-BR")+")";}
+  function getInicio(){
+    if(modoPeriodo==="livre"&&dataIni){var d=parseDataISO(dataIni);if(d)return d;}
+    return periodoQ==="atual"?inicioQ:inicioQAnt;
+  }
+  function getFim(){
+    if(modoPeriodo==="livre"&&dataFim){var d=parseDataISO(dataFim);d&&d.setHours(23,59,59);if(d)return d;}
+    return periodoQ==="atual"?fimQ:fimQAnt;
+  }
+  function getPLabel(){
+    if(modoPeriodo==="livre"){return (dataIni||"inicio")+" ate "+(dataFim||"hoje");}
+    return periodoQ==="atual"?"Quinzena atual ("+inicioQ.toLocaleDateString("pt-BR")+" - "+fimQ.toLocaleDateString("pt-BR")+")":"Quinzena anterior ("+inicioQAnt.toLocaleDateString("pt-BR")+" - "+fimQAnt.toLocaleDateString("pt-BR")+")";
+  }
 
   var ordersNoP=orders.filter(function(o){return isNoPeriodo(o,getInicio(),getFim());});
 
@@ -708,8 +724,14 @@ function HistoricoTab(props){
     );
   }
 
+  var PROFS_BISTRO=["Breno","Chef","Cozinheiro","Auxiliar","Garcom"];
+  var profsBistroSet=new Set(PROFS_BISTRO.map(function(n){return n.toLowerCase();}));
+  function ehBistro(nome){return profsBistroSet.has((nome||"").toLowerCase());}
   var porProf={};
   ordersNoP.filter(function(o){return o.fiado&&o.profFiado;}).forEach(function(o){
+    var isBistro=ehBistro(o.profFiado);
+    if(subTipoFunc==="bistro"&&!isBistro)return;
+    if(subTipoFunc==="salao"&&isBistro)return;
     if(!porProf[o.profFiado])porProf[o.profFiado]={orders:[],total:0};
     porProf[o.profFiado].orders.push(o);
     porProf[o.profFiado].total+=o.total;
@@ -760,9 +782,23 @@ function HistoricoTab(props){
   return h("div",{style:{padding:14}},
     h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 6px",fontFamily:"Georgia,serif"}},"Historico"),
     h("div",{style:{display:"flex",gap:5,marginBottom:8}},
-      [["clientes","Clientes"],["funcionarias","Funcionarias"]].map(function(arr){var a=tipo===arr[0];return h("button",{key:arr[0],onClick:function(){setTipo(arr[0]);setSelNome(null);},style:{flex:1,padding:"7px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:800,cursor:"pointer"}},arr[1]);})),
-    h("div",{style:{display:"flex",gap:5,marginBottom:12}},
-      [["atual","Quinzena atual"],["ant","Quinzena anterior"]].map(function(arr){var a=periodo===arr[0];return h("button",{key:arr[0],onClick:function(){setPeriodo(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+      [["clientes","Clientes"],["funcionarios","Funcionarios"]].map(function(arr){var a=tipo===arr[0];return h("button",{key:arr[0],onClick:function(){setTipo(arr[0]);setSelNome(null);},style:{flex:1,padding:"7px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:800,cursor:"pointer"}},arr[1]);})),
+    tipo==="funcionarios"&&h("div",{style:{display:"flex",gap:5,marginBottom:8}},
+      [["salao","Funcionarios Salao"],["bistro","Funcionarios Bistro"]].map(function(arr){var a=subTipoFunc===arr[0];return h("button",{key:arr[0],onClick:function(){setSubTipoFunc(arr[0]);setSelNome(null);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+    h("div",{style:{display:"flex",gap:5,marginBottom:8}},
+      [["quinzena","Quinzena"],["livre","Periodo Livre"]].map(function(arr){var a=modoPeriodo===arr[0];return h("button",{key:arr[0],onClick:function(){setModoPeriodo(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+    modoPeriodo==="quinzena"&&h("div",{style:{display:"flex",gap:5,marginBottom:8}},
+      [["atual","Quinzena atual"],["ant","Quinzena anterior"]].map(function(arr){var a=periodoQ===arr[0];return h("button",{key:arr[0],onClick:function(){setPeriodoQ(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+    modoPeriodo==="livre"&&h("div",{style:{display:"flex",gap:8,marginBottom:8,alignItems:"center"}},
+      h("div",{style:{flex:1}},
+        h("label",{style:{fontSize:9,color:"#aaa",display:"block",marginBottom:2}},"De"),
+        h("input",{type:"date",value:dataIni,onChange:function(e){setDataIni(e.target.value);},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"6px 8px",fontSize:12,outline:"none",boxSizing:"border-box"}})
+      ),
+      h("div",{style:{flex:1}},
+        h("label",{style:{fontSize:9,color:"#aaa",display:"block",marginBottom:2}},"Ate"),
+        h("input",{type:"date",value:dataFim,onChange:function(e){setDataFim(e.target.value);},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"6px 8px",fontSize:12,outline:"none",boxSizing:"border-box"}})
+      )
+    ),
     h("p",{style:{fontSize:9,color:"#aaa",marginBottom:10}},getPLabel()),
     listaP.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum fiado neste periodo"),
     listaP.map(function(entry){var nome=entry[0],d=entry[1];var profObj=profs.find(function(p){return p.name===nome;});var desc=profObj?profObj.desconto||20:20;var liq=d.total-(d.total*(desc/100));
