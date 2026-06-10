@@ -6,12 +6,12 @@
 <title>Nobre Bistro Admin</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f4f6f9;font-family:sans-serif;width:100%}@keyframes spin{to{transform:rotate(360deg)}}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f4f6f9;font-family:"Inter",system-ui,-apple-system,sans-serif;width:100%;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}input,select,button,textarea{font-family:inherit}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d1c9be;border-radius:4px}@keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}.nb-card{animation:fadeIn .18s ease}.nb-skeleton{animation:pulse 1.4s ease infinite;background:linear-gradient(90deg,#ede9e3 25%,#f5f2ee 50%,#ede9e3 75%);background-size:200% 100%;border-radius:8px}</style>
 </head>
 <body><div id="root"></div>
 <script>
 var h=React.createElement,us=React.useState,ue=React.useEffect,um=React.useMemo;
-var R="#8B1A1A",B="#ede9e3",C="#faf8f5",BG="#f4f6f9";
+var R="#8B1A1A",B="#e8e2da",C="#faf8f5",BG="#f2f0ec";var TX="#1a1a1a",TX2="#555",TX3="#999";var SH="0 2px 8px rgba(0,0,0,.08)";
 var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
 var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
 function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
@@ -218,7 +218,7 @@ function PedidosTab(props){
       Object.entries(STATUS).map(function(e){var a=filtro===e[0];return h("button",{key:e[0],onClick:function(){setFiltro(e[0]);},style:{flexShrink:0,padding:"5px 10px",borderRadius:16,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},e[1]);})
     ),
     lista.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum pedido"),
-    lista.map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"10px 12px",marginBottom:7}},
+    lista.map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"10px 12px",marginBottom:7}},
       h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:5}},
         h("div",null,h("p",{style:{margin:0,fontWeight:800,fontSize:12}},"#"+o.id+" - "+o.nome),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},o.criadoEm+" - "+(o.canal==="balcao"?"Balcao":"App"))),
         h("div",{style:{textAlign:"right"}},h("span",{style:{background:CORES[o.status]||"#aaa",color:"#fff",fontSize:9,fontWeight:800,padding:"2px 6px",borderRadius:16,display:"inline-block"}},STATUS[o.status]||o.status),h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:12,color:R}},fmt(o.total)))
@@ -304,7 +304,7 @@ function CozinhaTab(props){
       h("button",{onClick:function(){concluir(o.id);},style:{width:"100%",marginTop:9,background:"#22c55e",color:"#fff",border:"none",borderRadius:9,padding:"11px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Concluido")
     );}),
     aba==="historico"&&concluidos.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0"}},"Nenhum pedido entregue hoje"),
-    aba==="historico"&&concluidos.map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"10px 12px",marginBottom:8}},
+    aba==="historico"&&concluidos.map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"10px 12px",marginBottom:8}},
       h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},
         h("span",{style:{fontWeight:800,fontSize:13}},"#"+o.id+" - "+o.nome),
         o.tempoPreparo!=null&&h("span",{style:{background:"#f0fdf4",color:"#15803d",fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:18}},o.tempoPreparo+"min")
@@ -436,12 +436,12 @@ function CaixaTab(props){
       [["caixa","Caixa"],["fiado","Fiado hoje"],["todos","Todos os pedidos"]].map(function(arr){var a=aba===arr[0];return h("button",{key:arr[0],onClick:function(){setAba(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})
     ),
     aba==="caixa"&&h("div",null,
-      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:11,marginBottom:10}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:11,marginBottom:10}},
         h("p",{style:{fontWeight:800,fontSize:12,margin:"0 0 8px"}},"Por forma de pagamento"),
         Object.keys(byPay).length===0&&h("p",{style:{fontSize:11,color:"#ccc"}},"Nenhuma venda paga hoje"),
         Object.entries(byPay).map(function(e){return h("div",{key:e[0],style:{display:"flex",justifyContent:"space-between",marginBottom:5}},h("span",{style:{fontSize:12,color:"#555"}},PAY[e[0]]||e[0]),h("span",{style:{fontWeight:700,fontSize:12}},fmt(e[1])));})
       ),
-      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:11}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:11}},
         h("p",{style:{fontWeight:800,fontSize:12,margin:"0 0 8px"}},"Vendas pagas ("+pagos.length+")"),
         pagos.length===0&&h("p",{style:{fontSize:11,color:"#ccc"}},"Nenhuma venda paga hoje"),
         pagos.slice().reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:5,marginBottom:5,borderBottom:"1px solid "+B}},
@@ -489,7 +489,7 @@ function FiadoTab(props){
     lista.map(function(entry){
       var nome=entry[0],dados=entry[1];
       var profObj=profs.find(function(p){return p.name===nome;});
-      return h("div",{key:nome,style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"11px 12px",marginBottom:9}},
+      return h("div",{key:nome,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"11px 12px",marginBottom:9}},
         h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:8}},
           h("div",null,h("p",{style:{margin:0,fontWeight:800,fontSize:13}},nome),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},dados.orders.length+" pedidos")),
           h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:R,fontFamily:"Georgia,serif"}},fmt(dados.total))
@@ -526,7 +526,7 @@ function QuinzenaTab(props){
       h("p",{style:{margin:"0 0 2px",fontSize:9,fontWeight:700,opacity:.75,textTransform:"uppercase"}},"Total a descontar"),
       h("p",{style:{margin:0,fontWeight:900,fontSize:20,fontFamily:"Georgia,serif"}},fmt(metricas.reduce(function(s,p){return s+p.liquido;},0)))
     ),
-    metricas.map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"11px 12px",marginBottom:9}},
+    metricas.map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"11px 12px",marginBottom:9}},
       h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:9}},
         h("div",null,h("p",{style:{margin:0,fontWeight:800,fontSize:13}},p.name),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},p.fiadosQ.length+" pedidos")),
         h("div",{style:{textAlign:"right"}},h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:R,fontFamily:"Georgia,serif"}},fmt(p.liquido)),h("p",{style:{margin:"1px 0 0",fontSize:9,color:"#aaa"}},"a descontar"))
@@ -613,7 +613,7 @@ function HorariosTab(props){
       ),
       h("button",{onClick:toggleFechamento,style:{background:fechamentoManual?"#22c55e":"#ef4444",color:"#fff",border:"none",borderRadius:8,padding:"7px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},fechamentoManual?"Reabrir":"Fechar agora")
     ),
-    h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,overflow:"hidden",marginBottom:12}},
+    h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",overflow:"hidden",marginBottom:12}},
       Object.entries(horarios).map(function(entry){
         var dia=parseInt(entry[0]),hn=entry[1];
         var isHoje=new Date().getDay()===dia;
@@ -891,11 +891,11 @@ function App(){
       )
     ),
     h("div",{style:{display:"flex",overflowX:"auto",background:"#fff",borderBottom:"1px solid "+B}},
-      tabs.map(function(t){var a=tab===t[0];return h("button",{key:t[0],onClick:function(){setTab(t[0]);},style:{flexShrink:0,padding:"9px 10px",border:"none",borderBottom:"2.5px solid "+(a?R:"transparent"),background:"#fff",color:a?R:"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:2}},
-        t[1],t[2]>0&&h("span",{style:{background:"#ef4444",color:"#fff",fontSize:8,fontWeight:800,borderRadius:9,padding:"1px 4px"}},t[2])
+      tabs.map(function(t){var a=tab===t[0];return h("button",{key:t[0],onClick:function(){setTab(t[0]);},style:{flexShrink:0,padding:"10px 12px",border:"none",borderBottom:"2.5px solid "+(a?R:"transparent"),background:a?"#fff":"#fff",color:a?R:"#888",fontSize:11,fontWeight:a?800:500,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:3,transition:"color .15s,border-color .15s",letterSpacing:"-0.01em"}},
+        t[1],t[2]>0&&h("span",{style:{background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,borderRadius:10,padding:"2px 5px",minWidth:16,textAlign:"center"}},t[2])
       );})
     ),
-    h("div",{style:{overflowY:"auto"}},
+    h("div",{style:{overflowY:"auto",paddingBottom:12}},
       tab==="balcao"&&h(BalcaoTab,{prods:prods,profs:profs,orders:orders,setOrders:setOrders,setProds:setProds}),
       tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders,nivel:nivel}),
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
@@ -1500,7 +1500,7 @@ function TabReceitas(){
           return h("div",{key:a[0]},h("p",{style:{margin:0,fontSize:9,opacity:.75,textTransform:"uppercase"}},a[0]),h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:15}},a[1]));
         })
       ),
-      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:12}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:12,marginBottom:12}},
         h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
           h("p",{style:{margin:0,fontWeight:700,fontSize:13}},"CMV: "+(r.cmv_percentual||0).toFixed(1)+"%"),
           h("span",{style:{background:cmvCl+"18",color:cmvCl,fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20}},
@@ -1543,7 +1543,7 @@ function TabReceitas(){
       !loading&&receitas.map(function(r){
         var cmvPct=r.cmv_percentual||0;
         var cor=cmvCor(cmvPct);
-        return h("div",{key:r.id,onClick:function(){setSel(r);},style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"11px 13px",marginBottom:8,cursor:"pointer"}},
+        return h("div",{key:r.id,onClick:function(){setSel(r);},style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"11px 13px",marginBottom:8,cursor:"pointer"}},
           h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}},
             h("p",{style:{margin:0,fontWeight:800,fontSize:13}},r.nome),
             h("span",{style:{background:cor+"18",color:cor,fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:20}},cmvPct.toFixed(1)+"%"),
@@ -1566,15 +1566,15 @@ function TabReceitas(){
 
     aba==="nova"&&h("div",null,
       formOk&&h("div",{style:{background:"#f0fdf4",border:"1px solid #86efac",borderRadius:10,padding:"12px",marginBottom:12,textAlign:"center",fontWeight:700,color:"#15803d"}},"Receita salva com sucesso!"),
-      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:10}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:12,marginBottom:10}},
         h("p",{style:{margin:"0 0 8px",fontWeight:700,fontSize:12}},"Dados da Receita"),
-        h("input",{placeholder:"Nome da receita *",value:formRec.nome,onChange:function(e){setFormRec(Object.assign({},formRec,{nome:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
+        h("input",{placeholder:"Nome da receita *",value:formRec.nome,onChange:function(e){setFormRec(Object.assign({},formRec,{nome:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}},
-          h("input",{placeholder:"Categoria",value:formRec.categoria,onChange:function(e){setFormRec(Object.assign({},formRec,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}}),
-          h("input",{placeholder:"Rendimento (porcoes)",type:"number",value:formRec.rendimento,onChange:function(e){setFormRec(Object.assign({},formRec,{rendimento:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}})
+          h("input",{placeholder:"Categoria",value:formRec.categoria,onChange:function(e){setFormRec(Object.assign({},formRec,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:12,outline:"none",boxSizing:"border-box"}}),
+          h("input",{placeholder:"Rendimento (porcoes)",type:"number",value:formRec.rendimento,onChange:function(e){setFormRec(Object.assign({},formRec,{rendimento:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:12,outline:"none",boxSizing:"border-box"}})
         ),
-        h("input",{placeholder:"Preco de venda R$ *",type:"number",value:formRec.preco_venda,onChange:function(e){setFormRec(Object.assign({},formRec,{preco_venda:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
-        h("textarea",{placeholder:"Observacoes (modo de preparo, etc)",value:formRec.observacoes,onChange:function(e){setFormRec(Object.assign({},formRec,{observacoes:e.target.value}));},rows:2,style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}})
+        h("input",{placeholder:"Preco de venda R$ *",type:"number",value:formRec.preco_venda,onChange:function(e){setFormRec(Object.assign({},formRec,{preco_venda:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
+        h("textarea",{placeholder:"Observacoes (modo de preparo, etc)",value:formRec.observacoes,onChange:function(e){setFormRec(Object.assign({},formRec,{observacoes:e.target.value}));},rows:2,style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}})
       ),
       (itensFormValidos.length>0||precoFormAtual>0)&&h("div",{style:{background:cmvCor(cmvFormAtual)+"18",border:"1px solid "+cmvCor(cmvFormAtual)+"44",borderRadius:10,padding:"10px 12px",marginBottom:10}},
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
@@ -1598,7 +1598,7 @@ function TabReceitas(){
           })()
         )
       ),
-      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:10}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:12,marginBottom:10}},
         h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
           h("p",{style:{margin:0,fontWeight:700,fontSize:12}},"Ingredientes ("+(formItens.length)+")"),
           h("button",{onClick:addItemForm,style:{background:R,color:"#fff",border:"none",borderRadius:7,padding:"5px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}},"+ Add")
@@ -1635,16 +1635,16 @@ function TabReceitas(){
     ),
 
     aba==="ingredientes"&&h("div",null,
-      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:12}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:12,marginBottom:12}},
         h("p",{style:{margin:"0 0 8px",fontWeight:700,fontSize:12}},"Novo Ingrediente"),
-        h("input",{placeholder:"Nome *",value:formIng.nome,onChange:function(e){setFormIng(Object.assign({},formIng,{nome:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
+        h("input",{placeholder:"Nome *",value:formIng.nome,onChange:function(e){setFormIng(Object.assign({},formIng,{nome:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}},
-          h("select",{value:formIng.unidade,onChange:function(e){setFormIng(Object.assign({},formIng,{unidade:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",background:"#fff"}},
+          h("select",{value:formIng.unidade,onChange:function(e){setFormIng(Object.assign({},formIng,{unidade:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:12,outline:"none",background:"#fff"}},
             ["g","kg","ml","l","un","porcao"].map(function(u){return h("option",{key:u,value:u},u);})
           ),
-          h("input",{placeholder:"Categoria",value:formIng.categoria,onChange:function(e){setFormIng(Object.assign({},formIng,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}})
+          h("input",{placeholder:"Categoria",value:formIng.categoria,onChange:function(e){setFormIng(Object.assign({},formIng,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:12,outline:"none",boxSizing:"border-box"}})
         ),
-        h("input",{placeholder:"Custo unitario R$ *",type:"number",value:formIng.custo_unitario,onChange:function(e){setFormIng(Object.assign({},formIng,{custo_unitario:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("input",{placeholder:"Custo unitario R$ *",type:"number",value:formIng.custo_unitario,onChange:function(e){setFormIng(Object.assign({},formIng,{custo_unitario:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
         erroIng==="ok"?h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,marginBottom:6}},"Ingrediente salvo!"):erroIng&&h("p",{style:{color:"#dc2626",fontSize:12,marginBottom:6}},erroIng),
         h("button",{onClick:salvarIngrediente,disabled:salvandoIng,style:{width:"100%",background:salvandoIng?"#ccc":R,color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:12,fontWeight:700,cursor:salvandoIng?"not-allowed":"pointer"}},salvandoIng?"Salvando...":"Salvar Ingrediente")
       ),
