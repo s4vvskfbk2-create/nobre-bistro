@@ -8,7 +8,7 @@
 <title>Nobre Bistro</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:sans-serif;width:100%;overflow-x:hidden}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:"Inter",system-ui,-apple-system,sans-serif;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased}input,button,select,textarea{font-family:inherit}::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:#d1c9be;border-radius:3px}::-webkit-scrollbar-track{background:transparent}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.prod-card{animation:fadeIn .16s ease}</style>
 </head>
 <body><div id="root"></div>
 <script>
@@ -59,9 +59,9 @@ step==="cart"&&h("div",null,
 cart.map(function(item){return h("div",{key:item.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:10,marginBottom:10,borderBottom:"1px solid "+B}},
 h("div",{style:{flex:1}},h("p",{style:{margin:0,fontWeight:700,fontSize:13}},item.name),h("p",{style:{margin:"2px 0 0",fontWeight:800,fontSize:13,color:R}},fmt(item.price*item.qty))),
 h("div",{style:{display:"flex",alignItems:"center",gap:8}},
-h("button",{onClick:function(){onDec(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}},"-"),
+h("button",{onClick:function(){onDec(item.id);},style:{width:34,height:34,borderRadius:"50%",border:"1.5px solid "+B,background:"#fff",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}},"-"),
 h("span",{style:{fontWeight:700,minWidth:20,textAlign:"center"}},item.qty),
-h("button",{onClick:function(){onInc(item.id);},style:{width:26,height:26,borderRadius:"50%",border:"1px solid "+B,background:"#fff",cursor:"pointer",fontSize:14}},"+"))
+h("button",{onClick:function(){onInc(item.id);},style:{width:34,height:34,borderRadius:"50%",border:"1.5px solid "+B,background:"#fff",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}},"+"))
 );} ),
 h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid "+B,paddingTop:10}},h("span",{style:{fontWeight:800,fontSize:15}},"Total"),h("span",{style:{fontWeight:900,fontSize:16,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
 ),
@@ -69,7 +69,7 @@ step==="dados"&&h("div",null,
 h("label",{style:{fontSize:11,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Seu nome"),
 h("input",{value:nome,onChange:function(e){setNome(e.target.value);},placeholder:"Como prefere ser chamada?",style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"11px 13px",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:14}}),
 h("p",{style:{fontSize:11,fontWeight:700,color:"#888",textTransform:"uppercase",marginBottom:8}},"Profissional"),
-h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},profs.filter(function(x){return x.active;}).map(function(x){var a=prof===x.name;return h("button",{key:x.id,onClick:function(){setProf(a?"":x.name);},style:{padding:"6px 12px",borderRadius:18,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#666",fontSize:12,fontWeight:700,cursor:"pointer"}},x.name);}))
+h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},profs.filter(function(x){return x.active;}).map(function(x){var a=prof===x.name;return h("button",{key:x.id,onClick:function(){setProf(a?"":x.name);},style:{padding:"8px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#777",fontSize:12,fontWeight:a?700:500,cursor:"pointer",transition:"all .12s"}},x.name);}))
 ),
 step==="pagamento"&&h("div",null,
 [["pix","PIX","Chave: nobre@bistro.com.br"],["cartao_credito","Cartao Credito",""],["cartao_debito","Cartao Debito",""],["dinheiro","Dinheiro",""]].map(function(arr){var v=arr[0],l=arr[1],hint=arr[2];var a=pay===v;return h("button",{key:v,onClick:function(){setPay(v);},style:{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"13px 15px",borderRadius:13,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",cursor:"pointer",textAlign:"left",marginBottom:9}},
@@ -134,7 +134,7 @@ h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px soli
 );
 return h("div",{style:{background:C,maxWidth:480,margin:"0 auto",minHeight:"100vh"}},
 h("div",{style:{background:"linear-gradient(135deg,#8B1A1A,#7a1515)",padding:"28px 20px 20px",textAlign:"center"}},
-h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:4,color:"rgba(255,255,255,.6)",textTransform:"uppercase",fontWeight:700}},"Nobre"),
+h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:5,color:"rgba(255,255,255,.75)",textTransform:"uppercase",fontWeight:400}},"Nobre"),
 h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
 h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase"}},"Bistro")
 ),
@@ -150,30 +150,30 @@ CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:functi
 ),
 h("div",{style:{background:"#fff",padding:"0 16px 110px"}},
 !search&&h("div",{style:{display:"flex",alignItems:"center",gap:8,paddingTop:16,paddingBottom:8}},
-h("h2",{style:{fontSize:10,fontWeight:800,color:"#888",letterSpacing:2,textTransform:"uppercase",margin:0}},(CATS.find(function(c){return c.id===cat;})||{label:""}).label),
-h("div",{style:{flex:1,height:1,background:B}})
+h("h2",{style:{fontSize:9,fontWeight:800,color:"#bbb",letterSpacing:3,textTransform:"uppercase",margin:0}},(CATS.find(function(c){return c.id===cat;})||{label:""}).label),
+h("div",{style:{flex:1,height:1,background:"#ede8e2"}})
 ),
 catProds.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum prato disponivel"),
-catProds.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:12,padding:"12px 0",borderBottom:"1px solid "+B,cursor:esg?"default":"pointer",opacity:esg?.5:1}},
+catProds.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:13,padding:"14px 0",borderBottom:"1px solid #f0ece6",cursor:esg?"default":"pointer",opacity:esg?.5:1}},
 h("div",{style:{flex:1}},
 esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),
-!esg&&p.tag&&h("span",{style:{color:R,fontSize:9,fontWeight:800,display:"block",marginBottom:3,textTransform:"uppercase"}},"* "+p.tag),
-h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108"}},p.name),
-p.desc&&h("p",{style:{margin:"3px 0 0",fontSize:12,color:"#999",lineHeight:1.4}},p.desc),
-h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:15,color:esg?"#ccc":"#1a1108",fontFamily:"Georgia,serif"}},fmt(p.price))
+!esg&&p.tag&&h("span",{style:{display:"inline-flex",alignItems:"center",gap:3,background:R+"18",color:R,fontSize:9,fontWeight:800,borderRadius:20,padding:"2px 7px",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}},"* "+p.tag),
+h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108",letterSpacing:"-0.01em",lineHeight:1.3}},p.name),
+p.desc&&h("p",{style:{margin:"4px 0 0",fontSize:12,color:"#aaa",lineHeight:1.5}},p.desc),
+h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:16,color:esg?"#ccc":R,fontFamily:"Georgia,serif"}},fmt(p.price))
 ),
 h("div",{style:{position:"relative",flexShrink:0}},
-h("div",{style:{width:100,height:80,borderRadius:12,overflow:"hidden",background:"#f5f5f5"}},
+h("div",{style:{width:88,height:88,borderRadius:14,overflow:"hidden",background:"#f0ece8",flexShrink:0}},
 p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})
 ),
-!esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-8,right:4,width:26,height:26,borderRadius:"50%",background:R,border:"2px solid #fff",color:"#fff",fontSize:17,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}},"+"))
+!esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-6,right:0,width:32,height:32,borderRadius:"50%",background:R,border:"2.5px solid #fff",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,boxShadow:"0 2px 8px rgba(139,26,26,.35)"}},"+"))
 );} )
 ),
 sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
 h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480}},
-h("div",{style:{height:180,overflow:"hidden",borderRadius:"20px 20px 0 0",background:"#f5f5f5",position:"relative"}},
+h("div",{style:{height:220,overflow:"hidden",borderRadius:"22px 22px 0 0",background:"#f0ece8",position:"relative"}},
 sel.img&&h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}}),
-h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:12,right:12,background:"rgba(255,255,255,.88)",border:"none",width:33,height:33,borderRadius:"50%",fontSize:18,cursor:"pointer",color:"#333"}},"x")
+h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:14,right:14,background:"rgba(255,255,255,.92)",border:"none",width:36,height:36,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#555",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 4px rgba(0,0,0,.12)"}},"x")
 ),
 h("div",{style:{padding:"16px 20px 28px"}},
 h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 6px"}},sel.name),
@@ -186,7 +186,7 @@ h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",b
 )
 ),
 cc>0&&h("div",{style:{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}},
-h("button",{onClick:function(){setShowCart(true);},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:14,padding:"15px 22px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 6px 24px rgba(139,26,26,.4)"}},
+h("button",{onClick:function(){setShowCart(true);},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:16,padding:"15px 22px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 8px 28px rgba(139,26,26,.45)",letterSpacing:"-0.01em"}},
 h("span",{style:{background:"rgba(255,255,255,.18)",borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700}},cc+" "+(cc===1?"item":"itens")),
 h("span",null,"Ver pedido"),
 h("span",{style:{fontFamily:"Georgia,serif",fontSize:15,fontWeight:700}},fmt(ct))
