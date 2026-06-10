@@ -8,7 +8,20 @@
 <title>Nobre Bistro</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#faf8f5;font-family:"Inter",system-ui,-apple-system,sans-serif;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}input,button,select,textarea{font-family:inherit}::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-thumb{background:#d1c9be;border-radius:3px}::-webkit-scrollbar-track{background:transparent}@keyframes spin{to{transform:rotate(360deg)}}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}.prod-card{animation:fadeIn .16s ease}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#faf8f5;font-family:"Inter",system-ui,-apple-system,sans-serif;width:100%;overflow-x:hidden;-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+input,button,select,textarea{font-family:inherit}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:#d1c9be;border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+</style>
 </head>
 <body><div id="root"></div>
 <script>
@@ -23,6 +36,7 @@ function nowStr(){var d=new Date();return String(d.getDate()).padStart(2,"0")+"/
 var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
 var PRODS=[{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8,active:true,desc:"Pure de mandioca com carne seca."},{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6,active:true,desc:"Panqueca artesanal."},{id:3,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4,active:true,desc:"Massa artesanal."},{id:4,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6,active:true,desc:"Folhas frescas."},{id:5,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5,active:true,desc:"Frango grelhado."},{id:6,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12,active:true,desc:"Crocante por fora."},{id:7,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15,active:true,desc:"Chocolate belga."},{id:8,cat:"bebidas",name:"Suco Natural",price:15,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Feito na hora."},{id:9,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10,active:true,desc:"Gin premium."},{id:10,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."}];
 var PROFS=[{id:1,name:"Adriana",active:true},{id:2,name:"Amanda",active:true},{id:3,name:"Bruna",active:true},{id:4,name:"Carol",active:true},{id:5,name:"Fernanda",active:true},{id:6,name:"Gabriela",active:true},{id:7,name:"Juliana",active:true},{id:8,name:"Larissa",active:true},{id:9,name:"Leticia",active:true},{id:10,name:"Mariana",active:true}];
+
 function CartDrawer(p){
 var cart=p.cart,profs=p.profs,onClose=p.onClose,onConfirm=p.onConfirm,onDec=p.onDec,onInc=p.onInc;
 var s1=us("cart"),step=s1[0],setStep=s1[1];
@@ -39,19 +53,18 @@ onConfirm(order);setStep("enviado");
 }
 if(step==="enviado")return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
 h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,padding:"28px 20px 36px",textAlign:"center"}},
-h("div",{style:{width:50,height:50,borderRadius:"50%",background:"#f0fdf4",border:"2px solid #22c55e",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}},h("svg",{width:22,height:22,viewBox:"0 0 24 24",fill:"none"},h("path",{d:"M5 13l4 4L19 7",stroke:"#22c55e",strokeWidth:"2.5",strokeLinecap:"round"}))),
+h("div",{style:{width:50,height:50,borderRadius:"50%",background:"#f0fdf4",border:"2px solid #22c55e",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}},
+h("svg",{width:22,height:22,viewBox:"0 0 24 24",fill:"none"},h("path",{d:"M5 13l4 4L19 7",stroke:"#22c55e",strokeWidth:"2.5",strokeLinecap:"round"}))),
 h("h3",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:700,margin:"0 0 6px"}},"Pedido enviado!"),
 h("p",{style:{fontSize:12,color:"#888",margin:"0 0 16px"}},"Aguarde a confirmacao do pagamento."),
-h("button",{onClick:onClose,style:{background:C,border:"1px solid "+B,borderRadius:25,padding:"12px 24px",fontSize:13,fontWeight:700,cursor:"pointer",color:"#555"}},"Fechar")
-));
+h("button",{onClick:onClose,style:{background:C,border:"1px solid "+B,borderRadius:25,padding:"12px 24px",fontSize:13,fontWeight:700,cursor:"pointer",color:"#555"}},"Fechar")));
 return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
 h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"22px 22px 0 0",width:"100%",maxWidth:480,maxHeight:"88vh",display:"flex",flexDirection:"column",animation:"slideUp .28s ease"}},
 h("div",{style:{padding:"14px 20px 10px",borderBottom:"1px solid "+B,flexShrink:0}},
 h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:8}},
 si>0&&h("button",{onClick:function(){setStep(steps[si-1]);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888",padding:0}},"<"),
 h("span",{style:{fontWeight:800,fontSize:16,flex:1,fontFamily:"Georgia,serif"}},step==="cart"?"Meu Pedido":step==="dados"?"Seus Dados":step==="pagamento"?"Pagamento":"Confirmar"),
-h("button",{onClick:onClose,style:{background:"#f5f5f5",border:"none",width:28,height:28,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#888"}},"x")
-),
+h("button",{onClick:onClose,style:{background:"#f5f5f5",border:"none",width:28,height:28,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#888"}},"x")),
 h("div",{style:{display:"flex",gap:4}},steps.slice(0,-1).map(function(s,i){return h("div",{key:s,style:{flex:1,height:3,borderRadius:3,background:i<=si?R:"#eee"}});}))
 ),
 h("div",{style:{overflowY:"auto",flex:1,padding:"14px 20px"}},
@@ -62,41 +75,52 @@ h("div",{style:{display:"flex",alignItems:"center",gap:8}},
 h("button",{onClick:function(){onDec(item.id);},style:{width:34,height:34,borderRadius:"50%",border:"1.5px solid "+B,background:"#fff",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}},"-"),
 h("span",{style:{fontWeight:700,minWidth:20,textAlign:"center"}},item.qty),
 h("button",{onClick:function(){onInc(item.id);},style:{width:34,height:34,borderRadius:"50%",border:"1.5px solid "+B,background:"#fff",cursor:"pointer",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center"}},"+"))
-);} ),
-h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid "+B,paddingTop:10}},h("span",{style:{fontWeight:800,fontSize:15}},"Total"),h("span",{style:{fontWeight:900,fontSize:16,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
-),
+);}),
+h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1.5px solid "+B,paddingTop:10}},h("span",{style:{fontWeight:800,fontSize:15}},"Total"),h("span",{style:{fontWeight:900,fontSize:16,color:R,fontFamily:"Georgia,serif"}},fmt(total)))),
 step==="dados"&&h("div",null,
 h("label",{style:{fontSize:11,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Seu nome"),
-h("input",{value:nome,onChange:function(e){setNome(e.target.value);},placeholder:"Como prefere ser chamada?",style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"11px 13px",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:14}}),
+h("input",{value:nome,onChange:function(e){setNome(e.target.value);},placeholder:"Como prefere ser chamada?",autoComplete:"name",style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"11px 13px",fontSize:14,outline:"none",boxSizing:"border-box",marginBottom:14}}),
 h("p",{style:{fontSize:11,fontWeight:700,color:"#888",textTransform:"uppercase",marginBottom:8}},"Profissional"),
-h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},profs.filter(function(x){return x.active;}).map(function(x){var a=prof===x.name;return h("button",{key:x.id,onClick:function(){setProf(a?"":x.name);},style:{padding:"8px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#777",fontSize:12,fontWeight:a?700:500,cursor:"pointer",transition:"all .12s"}},x.name);}))
-),
+h("div",{style:{display:"flex",flexWrap:"wrap",gap:6}},profs.filter(function(x){return x.active;}).map(function(x){var a=prof===x.name;return h("button",{key:x.id,onClick:function(){setProf(a?"":x.name);},style:{padding:"8px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#777",fontSize:12,fontWeight:a?700:500,cursor:"pointer",transition:"all .12s"}},x.name);}))),
 step==="pagamento"&&h("div",null,
 [["pix","PIX","Chave: nobre@bistro.com.br"],["cartao_credito","Cartao Credito",""],["cartao_debito","Cartao Debito",""],["dinheiro","Dinheiro",""]].map(function(arr){var v=arr[0],l=arr[1],hint=arr[2];var a=pay===v;return h("button",{key:v,onClick:function(){setPay(v);},style:{display:"flex",alignItems:"center",justifyContent:"space-between",width:"100%",padding:"13px 15px",borderRadius:13,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",cursor:"pointer",textAlign:"left",marginBottom:9}},
 h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:14,color:a?R:"#1a1108"}},l),a&&hint&&h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},hint)),
-h("div",{style:{width:18,height:18,borderRadius:"50%",border:"2px solid "+(a?R:B),background:a?R:"#fff",display:"flex",alignItems:"center",justifyContent:"center"}},a&&h("div",{style:{width:7,height:7,borderRadius:"50%",background:"#fff"}})));} ),
-h("div",{style:{background:C,borderRadius:12,padding:"11px 14px"}},h("div",{style:{display:"flex",justifyContent:"space-between"}},h("span",{style:{fontSize:12,color:"#888"}},"Total"),h("span",{style:{fontWeight:900,fontSize:17,color:R,fontFamily:"Georgia,serif"}},fmt(total))))
-),
+h("div",{style:{width:18,height:18,borderRadius:"50%",border:"2px solid "+(a?R:B),background:a?R:"#fff",display:"flex",alignItems:"center",justifyContent:"center"}},a&&h("div",{style:{width:7,height:7,borderRadius:"50%",background:"#fff"}})));
+}),
+h("div",{style:{background:C,borderRadius:12,padding:"11px 14px"}},h("div",{style:{display:"flex",justifyContent:"space-between"}},h("span",{style:{fontSize:12,color:"#888"}},"Total"),h("span",{style:{fontWeight:900,fontSize:17,color:R,fontFamily:"Georgia,serif"}},fmt(total))))),
 step==="confirmar"&&h("div",null,
 pay==="pix"&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
 h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12,color:"#1d4ed8"}},"Chave PIX"),
 h("p",{style:{margin:"0 0 10px",fontWeight:900,fontSize:15,color:"#1d4ed8",fontFamily:"monospace"}},"nobre@bistro.com.br"),
-h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText("nobre@bistro.com.br");},style:{background:"#1d4ed8",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer"}},"Copiar chave")
-),
+h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText("nobre@bistro.com.br");},style:{background:"#1d4ed8",color:"#fff",border:"none",borderRadius:8,padding:"6px 14px",fontSize:11,fontWeight:700,cursor:"pointer"}},"Copiar chave")),
 h("div",{style:{background:C,borderRadius:12,padding:"12px 14px"}},
-cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}},h("span",{style:{color:"#555"}},i.qty+"x "+i.name),h("span",{style:{fontWeight:700}},fmt(i.price*i.qty)));} ),
-h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1px solid "+B,paddingTop:8,marginTop:4}},h("span",{style:{fontWeight:800}},"Total"),h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif"}},fmt(total)))
-)
-)
+cart.map(function(i){return h("div",{key:i.id,style:{display:"flex",justifyContent:"space-between",fontSize:12,marginBottom:4}},h("span",{style:{color:"#555"}},i.qty+"x "+i.name),h("span",{style:{fontWeight:700}},fmt(i.price*i.qty)));}),
+h("div",{style:{display:"flex",justifyContent:"space-between",borderTop:"1px solid "+B,paddingTop:8,marginTop:4}},h("span",{style:{fontWeight:800}},"Total"),h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif"}},fmt(total)))))
 ),
 h("div",{style:{padding:"11px 20px 28px",borderTop:"1px solid "+B,flexShrink:0}},
-step==="cart"&&h("button",{onClick:function(){setStep("dados");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Continuar -- "+fmt(total)),
+step==="cart"&&h("button",{onClick:function(){setStep("dados");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Continuar - "+fmt(total)),
 step==="dados"&&h("button",{onClick:function(){if(nome.trim())setStep("pagamento");},style:{width:"100%",background:nome.trim()?R:"#ccc",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Ir para Pagamento"),
 step==="pagamento"&&h("button",{onClick:function(){setStep("confirmar");},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:15,fontWeight:800,cursor:"pointer"}},"Confirmar Pedido"),
-step==="confirmar"&&h("button",{onClick:confirmar,style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Ja paguei -- Enviar para cozinha")
-)
-));
+step==="confirmar"&&h("button",{onClick:confirmar,style:{width:"100%",background:"#22c55e",color:"#fff",border:"none",borderRadius:25,padding:"14px 0",fontSize:14,fontWeight:800,cursor:"pointer"}},"Ja paguei - Enviar para cozinha")
+)));
 }
+
+function ProdCard(props){
+var p=props.p,onSel=props.onSel,onAdd=props.onAdd;
+var esg=p.stock===0;
+return h("div",{onClick:function(){if(!esg)onSel(p);},style:{display:"flex",gap:13,padding:"14px 0",borderBottom:"1px solid #f0ece6",cursor:esg?"default":"pointer",opacity:esg?0.5:1}},
+h("div",{style:{flex:1}},
+esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),
+!esg&&p.tag&&h("span",{style:{display:"inline-flex",alignItems:"center",background:R+"18",color:R,fontSize:9,fontWeight:800,borderRadius:20,padding:"2px 7px",marginBottom:5,textTransform:"uppercase",letterSpacing:"0.05em"}},"* "+p.tag),
+h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108",letterSpacing:"-0.01em",lineHeight:1.3}},p.name),
+p.desc&&h("p",{style:{margin:"4px 0 0",fontSize:12,color:"#aaa",lineHeight:1.5}},p.desc),
+h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:16,color:esg?"#ccc":R,fontFamily:"Georgia,serif"}},fmt(p.price))),
+h("div",{style:{position:"relative",flexShrink:0}},
+h("div",{style:{width:88,height:88,borderRadius:14,overflow:"hidden",background:"#f0ece8"}},
+p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})),
+!esg&&h("button",{onClick:function(e){e.stopPropagation();onAdd(p);},style:{position:"absolute",bottom:-6,right:0,width:32,height:32,borderRadius:"50%",background:R,border:"2.5px solid #fff",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(139,26,26,.35)"}},"+")));
+}
+
 function App(){
 var s1=us(PRODS),prods=s1[0],setProds=s1[1];
 var s2=us(PROFS),profs=s2[0],setProfs=s2[1];
@@ -117,64 +141,62 @@ return function(){clearInterval(poll);};
 },[]);
 var cc=cart.reduce(function(s,i){return s+i.qty;},0);
 var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
-var catProds=um(function(){var ap=prods.filter(function(p){return p.active;});if(search){var q=search.toLowerCase();return ap.filter(function(p){return p.name.toLowerCase().includes(q);});}return ap.filter(function(p){return p.cat===cat;});},[prods,cat,search]);
+var searchResults=um(function(){
+if(!search)return [];
+var q=search.toLowerCase();
+return prods.filter(function(p){return p.active&&p.name.toLowerCase().includes(q);});
+},[prods,search]);
 function addCart(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
 function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
 function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
-function handleConfirm(order){
-sbGet("nb_bA_orders").then(function(existing){
-var novos=(existing||[]).concat([order]);
-sbSet("nb_bA_orders",novos);
-});
-setCart([]);setShowCart(false);
-}
+function handleConfirm(order){sbGet("nb_bA_orders").then(function(existing){var novos=(existing||[]).concat([order]);sbSet("nb_bA_orders",novos);});setCart([]);setShowCart(false);}
+function scrollToCat(catId){setCat(catId);var el=document.getElementById("cat-"+catId);if(el){var top=el.getBoundingClientRect().top+window.pageYOffset-108;window.scrollTo({top:top,behavior:"smooth"});}}
 if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
 h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:3,color:R,textTransform:"uppercase"}},"Nobre Bistro"),
-h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}})
-);
+h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}}));
 return h("div",{style:{background:C,maxWidth:480,margin:"0 auto",minHeight:"100vh"}},
 h("div",{style:{background:"linear-gradient(135deg,#8B1A1A,#7a1515)",padding:"28px 20px 20px",textAlign:"center"}},
 h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:5,color:"rgba(255,255,255,.75)",textTransform:"uppercase",fontWeight:400}},"Nobre"),
 h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
-h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase"}},"Bistro")
-),
+h("div",{style:{fontSize:9,letterSpacing:5,color:"rgba(255,255,255,.5)",textTransform:"uppercase"}},"Bistro")),
 h("div",{style:{background:"#fff",padding:"8px 14px",display:"flex",justifyContent:"space-between",alignItems:"center",borderBottom:"1px solid "+B}},
 h("div",{style:{display:"flex",alignItems:"center",gap:6}},h("span",{style:{width:6,height:6,background:"#22c55e",borderRadius:"50%",display:"inline-block"}}),h("span",{style:{fontSize:11,fontWeight:700,color:"#16a34a"}},"Aberto")),
-h("span",{style:{fontFamily:"Georgia,serif",fontSize:10,letterSpacing:3,color:R,textTransform:"uppercase",fontWeight:700}},"Nobre Bistro")
-),
+h("span",{style:{fontFamily:"Georgia,serif",fontSize:10,letterSpacing:3,color:R,textTransform:"uppercase",fontWeight:700}},"Nobre Bistro")),
 h("div",{style:{padding:"8px 14px",background:"#fff",borderBottom:"1px solid "+B}},
-h("input",{value:search,onChange:function(e){setSearch(e.target.value);},placeholder:"Buscar no cardapio...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:20,padding:"8px 14px",fontSize:13,outline:"none",boxSizing:"border-box",background:C}})
-),
-!search&&h("div",{style:{display:"flex",overflowX:"auto",gap:6,padding:"10px 14px",background:"#fff",borderBottom:"1px solid "+B}},
-CATS.map(function(c){return h("button",{key:c.id,onClick:function(){setCat(c.id);var el=document.getElementById("cat-"+c.id);if(el){var top=el.getBoundingClientRect().top+window.pageYOffset-108;window.scrollTo({top:top,behavior:"smooth"});}},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+B,background:"#fff",color:"#555",fontSize:12,fontWeight:500,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})
-),
+h("input",{value:search,onChange:function(e){setSearch(e.target.value);},placeholder:"Buscar no cardapio...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:20,padding:"8px 14px",fontSize:13,outline:"none",boxSizing:"border-box",background:C}})),
+h("div",{style:{display:"flex",overflowX:"auto",gap:6,padding:"10px 14px",background:"#fff",borderBottom:"1px solid "+B}},
+CATS.map(function(c){return h("button",{key:c.id,onClick:function(){scrollToCat(c.id);},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+B,background:"#fff",color:"#555",fontSize:12,fontWeight:500,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})),
 h("div",{style:{background:"#fff",padding:"0 16px 110px"}},
-search?h("div",null,catProds.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum resultado"),catProds.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:13,padding:"14px 0",borderBottom:"1px solid #f0ece6",cursor:esg?"default":"pointer",opacity:esg?.5:1}},h("div",{style:{flex:1}},esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),!esg&&p.tag&&h("span",{style:{display:"inline-flex",alignItems:"center",background:R+"18",color:R,fontSize:9,fontWeight:800,borderRadius:20,padding:"2px 7px",marginBottom:5,textTransform:"uppercase"}},"* "+p.tag),h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108",letterSpacing:"-0.01em",lineHeight:1.3}},p.name),p.desc&&h("p",{style:{margin:"4px 0 0",fontSize:12,color:"#aaa",lineHeight:1.5}},p.desc),h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:16,color:esg?"#ccc":R,fontFamily:"Georgia,serif"}},fmt(p.price))),h("div",{style:{position:"relative",flexShrink:0}},h("div",{style:{width:88,height:88,borderRadius:14,overflow:"hidden",background:"#f0ece8"}},p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})),!esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-6,right:0,width:32,height:32,borderRadius:"50%",background:R,border:"2.5px solid #fff",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(139,26,26,.35)"}},"+")));})):h("div",null,CATS.map(function(catItem){var ps=prods.filter(function(p){return p.active&&p.cat===catItem.id;});if(!ps.length)return null;return h("div",{key:catItem.id,id:"cat-"+catItem.id},h("div",{style:{display:"flex",alignItems:"center",gap:8,paddingTop:20,paddingBottom:8}},h("h2",{style:{fontSize:9,fontWeight:800,color:"#bbb",letterSpacing:3,textTransform:"uppercase",margin:0,flexShrink:0}},catItem.label),h("div",{style:{flex:1,height:1,background:"#ede8e2"}})),ps.map(function(p){var esg=p.stock===0;return h("div",{key:p.id,onClick:function(){if(!esg)setSel(p);},style:{display:"flex",gap:13,padding:"14px 0",borderBottom:"1px solid #f0ece6",cursor:esg?"default":"pointer",opacity:esg?.5:1}},h("div",{style:{flex:1}},esg&&h("span",{style:{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:4}},"ESGOTADO"),!esg&&p.tag&&h("span",{style:{display:"inline-flex",alignItems:"center",background:R+"18",color:R,fontSize:9,fontWeight:800,borderRadius:20,padding:"2px 7px",marginBottom:5,textTransform:"uppercase"}},"* "+p.tag),h("p",{style:{margin:0,fontWeight:800,fontSize:14,color:"#1a1108",letterSpacing:"-0.01em",lineHeight:1.3}},p.name),p.desc&&h("p",{style:{margin:"4px 0 0",fontSize:12,color:"#aaa",lineHeight:1.5}},p.desc),h("p",{style:{margin:"6px 0 0",fontWeight:900,fontSize:16,color:esg?"#ccc":R,fontFamily:"Georgia,serif"}},fmt(p.price))),h("div",{style:{position:"relative",flexShrink:0}},h("div",{style:{width:88,height:88,borderRadius:14,overflow:"hidden",background:"#f0ece8"}},p.img&&h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""},loading:"lazy"})),!esg&&h("button",{onClick:function(e){e.stopPropagation();addCart(p);},style:{position:"absolute",bottom:-6,right:0,width:32,height:32,borderRadius:"50%",background:R,border:"2.5px solid #fff",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 2px 8px rgba(139,26,26,.35)"}},"+")));}));}))
+search?h("div",null,
+searchResults.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"40px 0",fontSize:13}},"Nenhum resultado"),
+searchResults.map(function(p){return h(ProdCard,{key:p.id,p:p,onSel:setSel,onAdd:addCart});})):
+h("div",null,
+CATS.map(function(catItem){
+var ps=prods.filter(function(p){return p.active&&p.cat===catItem.id;});
+if(!ps.length)return null;
+return h("div",{key:catItem.id,id:"cat-"+catItem.id},
+h("div",{style:{display:"flex",alignItems:"center",gap:8,paddingTop:20,paddingBottom:8}},
+h("h2",{style:{fontSize:9,fontWeight:800,color:"#bbb",letterSpacing:3,textTransform:"uppercase",margin:0,flexShrink:0}},catItem.label),
+h("div",{style:{flex:1,height:1,background:"#ede8e2"}})),
+ps.map(function(p){return h(ProdCard,{key:p.id,p:p,onSel:setSel,onAdd:addCart});}));
+}))),
 sel&&h("div",{onClick:function(){setSel(null);},style:{position:"fixed",inset:0,zIndex:400,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
 h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:"20px 20px 0 0",width:"100%",maxWidth:480}},
-h("div",{style:{height:220,overflow:"hidden",borderRadius:"22px 22px 0 0",background:"#f0ece8",position:"relative"}},
+h("div",{style:{height:220,overflow:"hidden",borderRadius:"20px 20px 0 0",background:"#f0ece8",position:"relative"}},
 sel.img&&h("img",{src:sel.img,style:{width:"100%",height:"100%",objectFit:"cover"}}),
-h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:14,right:14,background:"rgba(255,255,255,.92)",border:"none",width:36,height:36,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#555",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 4px rgba(0,0,0,.12)"}},"x")
-),
+h("button",{onClick:function(){setSel(null);},style:{position:"absolute",top:14,right:14,background:"rgba(255,255,255,.92)",border:"none",width:36,height:36,borderRadius:"50%",fontSize:16,cursor:"pointer",color:"#555",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 4px rgba(0,0,0,.12)"}},"x")),
 h("div",{style:{padding:"16px 20px 28px"}},
 h("h2",{style:{fontFamily:"Georgia,serif",fontSize:18,fontWeight:900,margin:"0 0 6px"}},sel.name),
 sel.desc&&h("p",{style:{fontSize:13,color:"#888",margin:"0 0 14px"}},sel.desc),
 h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
 h("span",{style:{fontFamily:"Georgia,serif",fontSize:20,fontWeight:900,color:R}},fmt(sel.price)),
-h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar")
-)
-)
-)
-),
+h("button",{onClick:function(){addCart(sel);},style:{background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 24px",fontSize:14,fontWeight:800,cursor:"pointer"}},"Adicionar"))))),
 cc>0&&h("div",{style:{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}},
 h("button",{onClick:function(){setShowCart(true);},style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:16,padding:"15px 22px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 8px 28px rgba(139,26,26,.45)",letterSpacing:"-0.01em"}},
 h("span",{style:{background:"rgba(255,255,255,.18)",borderRadius:8,padding:"3px 10px",fontSize:12,fontWeight:700}},cc+" "+(cc===1?"item":"itens")),
 h("span",null,"Ver pedido"),
-h("span",{style:{fontFamily:"Georgia,serif",fontSize:15,fontWeight:700}},fmt(ct))
-)
-),
-showCart&&h(CartDrawer,{cart:cart,profs:profs,onClose:function(){setShowCart(false);},onConfirm:handleConfirm,onDec:decCart,onInc:incCart})
-);
+h("span",{style:{fontFamily:"Georgia,serif",fontSize:15,fontWeight:700}},fmt(ct)))),
+showCart&&h(CartDrawer,{cart:cart,profs:profs,onClose:function(){setShowCart(false);},onConfirm:handleConfirm,onDec:decCart,onInc:incCart}));
 }
 ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
 </script>
