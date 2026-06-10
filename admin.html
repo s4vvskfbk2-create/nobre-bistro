@@ -215,7 +215,7 @@ function PedidosTab(props){
       );})
     ),
     h("div",{style:{display:"flex",overflowX:"auto",gap:5,marginBottom:10}},
-      Object.entries(STATUS).map(function(e){var a=filtro===e[0];return h("button",{key:e[0],onClick:function(){setFiltro(e[0]);},style:{flexShrink:0,padding:"5px 10px",borderRadius:16,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},e[1]);})
+      Object.entries(STATUS).map(function(e){var a=filtro===e[0];return h("button",{key:e[0],onClick:function(){setFiltro(e[0]);},style:{flexShrink:0,padding:"7px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#777",fontSize:11,fontWeight:a?800:500,cursor:"pointer",whiteSpace:"nowrap",transition:"all .12s"}},e[1]);})
     ),
     lista.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum pedido"),
     lista.map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"10px 12px",marginBottom:7}},
@@ -331,8 +331,8 @@ function CardapioTab(props){
       h("button",{onClick:function(){setSel(null);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888"}},"<"),
       h("h2",{style:{fontWeight:900,fontSize:16,margin:0}},sel==="novo"?"Novo Prato":"Editar Prato")
     ),
-    form.img&&h("img",{src:form.img,style:{width:"100%",height:130,objectFit:"cover",borderRadius:11,marginBottom:10}}),
-    h("label",{style:{display:"block",background:up?"#ccc":R,color:"#fff",borderRadius:9,padding:"10px 0",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"center",marginBottom:10}},
+    form.img&&h("img",{src:form.img,style:{width:"100%",height:160,objectFit:"cover",borderRadius:14,marginBottom:12}}),
+    h("label",{style:{display:"block",background:up?"#d1c9be":R,color:"#fff",borderRadius:11,padding:"12px 0",fontSize:12,fontWeight:700,cursor:"pointer",textAlign:"center",marginBottom:12,letterSpacing:"0.01em"}},
       up?"Enviando...":"Tirar ou Escolher Foto",
       h("input",{type:"file",accept:"image/*",style:{display:"none"},onChange:function(e){
         var file=e.target.files&&e.target.files[0];if(!file)return;setUp(true);
@@ -353,7 +353,7 @@ function CardapioTab(props){
     h("div",{style:{marginBottom:12}},
       h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:5,textTransform:"uppercase"}},"Tag"),
       h("div",{style:{display:"flex",gap:5,flexWrap:"wrap"}},
-        [{v:null,l:"Sem tag"},{v:"Mais Pedido",l:"Mais Pedido"},{v:"Chef Indica",l:"Chef Indica"},{v:"Novo",l:"Novo"}].map(function(t){var a=(form.tag||null)===(t.v||null);return h("button",{key:t.l,onClick:function(){setForm(Object.assign({},form,{tag:t.v||null}));},style:{padding:"5px 10px",borderRadius:16,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#666",fontSize:11,fontWeight:700,cursor:"pointer"}},t.l);})
+        [{v:null,l:"Sem tag"},{v:"Mais Pedido",l:"Mais Pedido"},{v:"Chef Indica",l:"Chef Indica"},{v:"Novo",l:"Novo"}].map(function(t){var a=(form.tag||null)===(t.v||null);return h("button",{key:t.l,onClick:function(){setForm(Object.assign({},form,{tag:t.v||null}));},style:{padding:"6px 12px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?"#fff5f5":"#fff",color:a?R:"#888",fontSize:11,fontWeight:a?800:500,cursor:"pointer",transition:"all .12s"}},t.l);})
       )
     ),
     h("div",{style:{display:"flex",gap:8}},h(Btn,{full:true,onClick:salvar,disabled:!form.name||!form.price},"Salvar"),h(Btn,{full:true,outline:true,onClick:function(){setSel(null);}},"Cancelar"))
@@ -364,11 +364,20 @@ function CardapioTab(props){
       h(Btn,{sm:true,onClick:novo},"+ Novo")
     ),
     h("div",{style:{display:"flex",overflowX:"auto",gap:5,marginBottom:10}},CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"5px 10px",borderRadius:16,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})),
-    prods.filter(function(p){return p.cat===cat;}).map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:10,border:"1px solid "+B,padding:"9px 11px",marginBottom:6,display:"flex",alignItems:"center",gap:9,opacity:p.active?1:.5}},
-      p.img&&h("div",{style:{width:46,height:38,borderRadius:7,overflow:"hidden",flexShrink:0}},h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover"}})),
-      h("div",{style:{flex:1,minWidth:0}},h("p",{style:{margin:0,fontWeight:700,fontSize:12}},p.name),h("p",{style:{margin:"1px 0 0",fontWeight:800,fontSize:11,color:R}},fmt(p.price)+" - "+p.stock+" un")),
+    prods.filter(function(p){return p.cat===cat;}).map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:"11px 13px",marginBottom:7,display:"flex",alignItems:"center",gap:10,opacity:p.active?1:.5,boxShadow:"0 1px 3px rgba(0,0,0,.05)"}},
+      p.img&&h("div",{style:{width:56,height:56,borderRadius:10,overflow:"hidden",flexShrink:0}},h("img",{src:p.img,alt:p.name,style:{width:"100%",height:"100%",objectFit:"cover"}})),
+      h("div",{style:{flex:1,minWidth:0}},h("div",{style:{display:"flex",alignItems:"center",gap:5}},
+  h("p",{style:{margin:0,fontWeight:700,fontSize:13,letterSpacing:"-0.01em"}},p.name),
+  !p.active&&h("span",{style:{fontSize:9,fontWeight:800,background:"#f3f4f6",color:"#9ca3af",borderRadius:4,padding:"1px 5px",letterSpacing:"0.02em"}},"INATIVO")
+),
+      h("div",{style:{display:"flex",alignItems:"center",gap:6,marginTop:2}},
+        h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:R}},fmt(p.price)),
+        h("span",{style:{fontSize:10,color:"#bbb"}},"·"),
+        h("p",{style:{margin:0,fontSize:10,color:"#aaa"}},p.stock+" un"),
+        p.tag&&h("span",{style:{fontSize:9,fontWeight:800,background:p.tag==="Mais Pedido"?"#fef3c7":p.tag==="Chef Indica"?"#f0fdf4":"#eff6ff",color:p.tag==="Mais Pedido"?"#92400e":p.tag==="Chef Indica"?"#166534":"#1e40af",borderRadius:4,padding:"1px 5px"}},p.tag)
+      )),
       h("div",{style:{display:"flex",gap:4}},
-        h("button",{onClick:function(){editar(p);},style:{background:C,border:"1px solid "+B,borderRadius:6,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}},"Edit"),
+        h("button",{onClick:function(){editar(p);},style:{background:C,border:"1px solid "+B,borderRadius:8,padding:"7px 11px",fontSize:11,fontWeight:700,cursor:"pointer",minHeight:36}},"Edit"),
         h("button",{onClick:function(){toggle(p.id);},style:{background:p.active?"#fef3c7":"#f0fdf4",border:"1px solid "+(p.active?"#fde68a":"#86efac"),borderRadius:6,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:p.active?"#92400e":"#15803d"}},p.active?"Off":"On"),
         h("button",{onClick:function(){excluir(p.id);},style:{background:"#fee2e2",border:"1px solid #fecaca",borderRadius:6,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b91c1c"}},"Del")
       )
