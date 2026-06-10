@@ -1394,6 +1394,7 @@ function TabReceitas(){
   }
 
   async function salvarReceita(){
+    var isEdit=!!editandoId;
     if(!formRec.nome.trim()){setFormErro("Nome obrigatorio.");return;}
     if(!formRec.preco_venda||isNaN(parseFloat(formRec.preco_venda))){setFormErro("Preco de venda obrigatorio.");return;}
     if(formItens.length===0){setFormErro("Adicione pelo menos 1 ingrediente.");return;}
