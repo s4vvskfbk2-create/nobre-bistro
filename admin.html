@@ -641,43 +641,40 @@ function HistoricoTab(props){
   ue(function(){var i=setInterval(function(){sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
   var s1=us("clientes"),tipo=s1[0],setTipo=s1[1];
   var s2=us(null),selNome=s2[0],setSelNome=s2[1];
-  var s3=us("quinzena"),modoPeriodo=s3[0],setModoPeriodo=s3[1];
-  var s4=us("atual"),periodoQ=s4[0],setPeriodoQ=s4[1];
-  var s5=us(""),dataIni=s5[0],setDataIni=s5[1];
-  var s6=us(""),dataFim=s6[0],setDataFim=s6[1];
-  var s7=us("salao"),subTipoFunc=s7[0],setSubTipoFunc=s7[1];
+  var s3=us("hoje"),modoPeriodo=s3[0],setModoPeriodo=s3[1];
+  var s4=us(""),dataIni=s4[0],setDataIni=s4[1];
+  var s5=us(""),dataFim=s5[0],setDataFim=s5[1];
+  var s6=us("salao"),subTipoFunc=s6[0],setSubTipoFunc=s6[1];
 
-  var hoje=new Date(),dia=hoje.getDate();
-  var inicioQ=new Date(hoje.getFullYear(),hoje.getMonth(),dia<=15?1:16);
-  var fimQ=new Date(hoje.getFullYear(),hoje.getMonth(),dia<=15?15:new Date(hoje.getFullYear(),hoje.getMonth()+1,0).getDate(),23,59,59);
-  var inicioQAnt=dia<=15?new Date(hoje.getFullYear(),hoje.getMonth()-1,16):new Date(hoje.getFullYear(),hoje.getMonth(),1);
-  var fimQAnt=dia<=15?new Date(hoje.getFullYear(),hoje.getMonth()-1,new Date(hoje.getFullYear(),hoje.getMonth(),0).getDate(),23,59,59):new Date(hoje.getFullYear(),hoje.getMonth(),15,23,59,59);
+  var _hoje=new Date();
+  var _hojeStr=_hoje.toLocaleDateString("pt-BR");
 
-  function parseDataBR(str){if(!str)return null;var pts=str.split("/");if(pts.length<3)return null;return new Date(parseInt(pts[2]),parseInt(pts[1])-1,parseInt(pts[0]));}
   function parseDataISO(str){if(!str)return null;var pts=str.split("-");if(pts.length<3)return null;return new Date(parseInt(pts[0]),parseInt(pts[1])-1,parseInt(pts[2]));}
 
-  function isNoPeriodo(o,inicio,fim){
+  function isNoPeriodo(o){
     if(!o.criadoEm)return false;
-    var pts=o.criadoEm.split(" ")[0].split("/");
-    if(pts.length<3)return false;
-    var d=new Date(parseInt(pts[2]),parseInt(pts[1])-1,parseInt(pts[0]));
-    return d>=inicio&&d<=fim;
+    if(modoPeriodo==="hoje")return o.criadoEm.indexOf(_hojeStr)===0;
+    if(modoPeriodo==="livre"){
+      var pts=o.criadoEm.split(" ")[0].split("/");
+      if(pts.length<3)return false;
+      var d=new Date(parseInt(pts[2]),parseInt(pts[1])-1,parseInt(pts[0]));
+      var ini=parseDataISO(dataIni);
+      var fim=parseDataISO(dataFim);
+      if(fim)fim.setHours(23,59,59);
+      if(ini&&d<ini)return false;
+      if(fim&&d>fim)return false;
+      return true;
+    }
+    return true;
   }
 
-  function getInicio(){
-    if(modoPeriodo==="livre"&&dataIni){var d=parseDataISO(dataIni);if(d)return d;}
-    return periodoQ==="atual"?inicioQ:inicioQAnt;
-  }
-  function getFim(){
-    if(modoPeriodo==="livre"&&dataFim){var d=parseDataISO(dataFim);d&&d.setHours(23,59,59);if(d)return d;}
-    return periodoQ==="atual"?fimQ:fimQAnt;
-  }
   function getPLabel(){
-    if(modoPeriodo==="livre"){return (dataIni||"inicio")+" ate "+(dataFim||"hoje");}
-    return periodoQ==="atual"?"Quinzena atual ("+inicioQ.toLocaleDateString("pt-BR")+" - "+fimQ.toLocaleDateString("pt-BR")+")":"Quinzena anterior ("+inicioQAnt.toLocaleDateString("pt-BR")+" - "+fimQAnt.toLocaleDateString("pt-BR")+")";
+    if(modoPeriodo==="hoje")return "Hoje - "+_hojeStr;
+    if(modoPeriodo==="livre")return (dataIni||"inicio")+" ate "+(dataFim||"hoje");
+    return "Todos os periodos";
   }
 
-  var ordersNoP=orders.filter(function(o){return isNoPeriodo(o,getInicio(),getFim());});
+  var ordersNoP=orders.filter(function(o){return isNoPeriodo(o);});
 
   if(tipo==="clientes"){
     var porCliente={};
@@ -720,9 +717,7 @@ function HistoricoTab(props){
       h("div",{style:{display:"flex",gap:5,marginBottom:8}},
         [["clientes","Clientes"],["funcionarios","Funcionarios"]].map(function(arr){var a=tipo===arr[0];return h("button",{key:arr[0],onClick:function(){setTipo(arr[0]);setSelNome(null);},style:{flex:1,padding:"7px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:800,cursor:"pointer"}},arr[1]);})),
       h("div",{style:{display:"flex",gap:5,marginBottom:8}},
-        [["quinzena","Quinzena"],["livre","Periodo Livre"]].map(function(arr){var a=modoPeriodo===arr[0];return h("button",{key:arr[0],onClick:function(){setModoPeriodo(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
-      modoPeriodo==="quinzena"&&h("div",{style:{display:"flex",gap:5,marginBottom:8}},
-        [["atual","Quinzena atual"],["ant","Quinzena anterior"]].map(function(arr){var a=periodoQ===arr[0];return h("button",{key:arr[0],onClick:function(){setPeriodoQ(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+        [["hoje","Hoje"],["livre","Periodo Livre"]].map(function(arr){var a=modoPeriodo===arr[0];return h("button",{key:arr[0],onClick:function(){setModoPeriodo(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
       modoPeriodo==="livre"&&h("div",{style:{display:"flex",gap:8,marginBottom:8,alignItems:"center"}},
         h("div",{style:{flex:1}},
           h("label",{style:{fontSize:9,color:"#aaa",display:"block",marginBottom:2}},"De"),
@@ -804,11 +799,9 @@ function HistoricoTab(props){
     h("div",{style:{display:"flex",gap:5,marginBottom:8}},
       [["clientes","Clientes"],["funcionarios","Funcionarios"]].map(function(arr){var a=tipo===arr[0];return h("button",{key:arr[0],onClick:function(){setTipo(arr[0]);setSelNome(null);},style:{flex:1,padding:"7px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:800,cursor:"pointer"}},arr[1]);})),
     tipo==="funcionarios"&&h("div",{style:{display:"flex",gap:5,marginBottom:8}},
-      [["salao","Funcionarios Salao"],["bistro","Funcionarios Bistro"]].map(function(arr){var a=subTipoFunc===arr[0];return h("button",{key:arr[0],onClick:function(){setSubTipoFunc(arr[0]);setSelNome(null);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+      [["salao","Func. Salao"],["bistro","Func. Bistro"]].map(function(arr){var a=subTipoFunc===arr[0];return h("button",{key:arr[0],onClick:function(){setSubTipoFunc(arr[0]);setSelNome(null);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
     h("div",{style:{display:"flex",gap:5,marginBottom:8}},
-      [["quinzena","Quinzena"],["livre","Periodo Livre"]].map(function(arr){var a=modoPeriodo===arr[0];return h("button",{key:arr[0],onClick:function(){setModoPeriodo(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
-    modoPeriodo==="quinzena"&&h("div",{style:{display:"flex",gap:5,marginBottom:8}},
-      [["atual","Quinzena atual"],["ant","Quinzena anterior"]].map(function(arr){var a=periodoQ===arr[0];return h("button",{key:arr[0],onClick:function(){setPeriodoQ(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
+      [["hoje","Hoje"],["livre","Periodo Livre"]].map(function(arr){var a=modoPeriodo===arr[0];return h("button",{key:arr[0],onClick:function(){setModoPeriodo(arr[0]);},style:{flex:1,padding:"6px 0",borderRadius:9,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:10,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})),
     modoPeriodo==="livre"&&h("div",{style:{display:"flex",gap:8,marginBottom:8,alignItems:"center"}},
       h("div",{style:{flex:1}},
         h("label",{style:{fontSize:9,color:"#aaa",display:"block",marginBottom:2}},"De"),
