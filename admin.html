@@ -1321,6 +1321,7 @@ function TabReceitas(){
   // Form nova receita
   var sfn=us({nome:"",categoria:"",preco_venda:"",rendimento:"1",observacoes:""}),formRec=sfn[0],setFormRec=sfn[1];
   var sfi=us([]),formItens=sfi[0],setFormItens=sfi[1];
+  var seid=us(null),editandoId=seid[0],setEditandoId=seid[1];
   var sfe=us(null),formErro=sfe[0],setFormErro=sfe[1];
   var sfok=us(false),formOk=sfok[0],setFormOk=sfok[1];
   var ssv=us(false),salvando=ssv[0],setSalvando=ssv[1];
@@ -1393,6 +1394,16 @@ function TabReceitas(){
     setFormItens(function(prev){return prev.filter(function(_,i){return i!==idx;});});
   }
 
+  async function editarReceita(rec){
+    setEditandoId(rec.id);
+    setFormRec({nome:rec.nome,categoria:rec.categoria||"",preco_venda:String(rec.preco_venda||""),rendimento:String(rec.rendimento||1),observacoes:rec.observacoes||""});
+    var r2=await fetch(U+"/rest/v1/ficha_ingredientes?ficha_id=eq."+rec.id+"&select=*",{headers:H});
+    var itens=await r2.json();
+    setFormItens(itens.map(function(it){return {id:Date.now()+Math.random(),tipo:it.sub_receita_id?"sub_receita":"ingrediente",ingrediente_id:it.ingrediente_id||"",sub_receita_id:it.sub_receita_id||"",quantidade:String(it.quantidade||""),unidade:it.unidade||""};}) );
+    setSel(null);
+    setAba("nova");
+  }
+
   async function salvarReceita(){
     var isEdit=!!editandoId;
     if(!formRec.nome.trim()){setFormErro("Nome obrigatorio.");return;}
@@ -1405,12 +1416,17 @@ function TabReceitas(){
     var precoVenda=parseFloat(formRec.preco_venda)||0;
     var cmvPct=precoVenda>0?(custoTotal/precoVenda)*100:0;
     try{
-      var rFicha=await fetch(U+"/rest/v1/fichas_tecnicas",{
-        method:"POST",headers:Object.assign({},H,{"Prefer":"return=representation"}),
+      var fichaUrl=isEdit?(U+"/rest/v1/fichas_tecnicas?id=eq."+editandoId):(U+"/rest/v1/fichas_tecnicas");
+      var fichaMethod=isEdit?"PATCH":"POST";
+      var fichaHeaders=Object.assign({},H,{"Prefer":"return=representation"});
+      if(isEdit){await fetch(U+"/rest/v1/ficha_ingredientes?ficha_id=eq."+editandoId,{method:"DELETE",headers:H});}
+      var rFicha=await fetch(fichaUrl,{
+        method:fichaMethod,headers:fichaHeaders,
         body:JSON.stringify({nome:formRec.nome,categoria:formRec.categoria,preco_venda:precoVenda,custo_total:custoTotal,cmv_percentual:cmvPct,rendimento:parseFloat(formRec.rendimento)||1,observacoes:formRec.observacoes,ativo:true})
       });
       var fichaData=await rFicha.json();
-      var fichaId=Array.isArray(fichaData)?fichaData[0].id:fichaData.id;
+      var fichaId=isEdit?editandoId:(Array.isArray(fichaData)?fichaId:fichaData.id);
+      var fichaId=Array.isArray(fichaData)?fichaId:fichaData.id;
       await Promise.all(itensValidos.map(function(it){
         var tipo=it.tipo||"ingrediente";
         var custoLinha=0;
@@ -1431,6 +1447,7 @@ function TabReceitas(){
           body:JSON.stringify(payload)
         });
       }));
+      setEditandoId(null);
       setFormOk(true);
       setFormRec({nome:"",categoria:"",preco_venda:"",rendimento:"1",observacoes:""});
       setFormItens([]);
@@ -1529,7 +1546,11 @@ function TabReceitas(){
         return h("div",{key:r.id,onClick:function(){setSel(r);},style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"11px 13px",marginBottom:8,cursor:"pointer"}},
           h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}},
             h("p",{style:{margin:0,fontWeight:800,fontSize:13}},r.nome),
-            h("span",{style:{background:cor+"18",color:cor,fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:20}},cmvPct.toFixed(1)+"%")
+            h("span",{style:{background:cor+"18",color:cor,fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:20}},cmvPct.toFixed(1)+"%"),
+            h("div",{style:{display:"flex",gap:4}},
+              h("button",{onClick:function(e){e.stopPropagation();editarReceita(r);},style:{background:"#2563eb",color:"#fff",border:"none",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}},"Editar"),
+              h("button",{onClick:function(e){e.stopPropagation();excluirReceita(r.id);},style:{background:"#ef4444",color:"#fff",border:"none",borderRadius:6,padding:"2px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}},"Excluir")
+            )
           ),
           h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#888"}},
             h("span",null,"Venda: "+fmt(r.preco_venda)),
