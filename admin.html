@@ -872,7 +872,7 @@ function App(){
     )
   );
 
-  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0],["clientes","Clientes",0],["centroIA","Centro IA",0]];
+  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0],["clientes","Clientes",0],["centroIA","Centro IA",0],["receitas","Receitas",0]];
   var TABS_A=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking]];
   var TABS_C=[["cozinha","Cozinha",cooking]];
   var tabs=nivel==="gerente"?TABS_G:nivel==="cozinha"?TABS_C:TABS_A;
@@ -897,6 +897,7 @@ function App(){
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
       tab==="centroIA"&&(nivel==="gerente")&&React.createElement(TabCentroIA,null),
+              tab==="receitas"&&(nivel==="gerente")&&React.createElement(TabReceitas,null),
               tab==="historico"&&(nivel==="gerente"?h(HistoricoTab,{orders:orders,profs:profs,setOrders:setOrders}):null),
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
@@ -1291,6 +1292,295 @@ function TabCentroIA(){
           React.createElement('span',{style:{fontSize:'0.7rem',fontWeight:700,padding:'2px 8px',borderRadius:'999px',background:ag.status==='active'?'#d1fae5':'#f3f4f6',color:ag.status==='active'?'#065f46':'#6b7280'}},ag.status==='active'?'ATIVO':'INATIVO')
         );})
       )
+    )
+  );
+}
+
+
+
+function TabReceitas(){
+  var U="https://zxpnguynjrsixsomaieg.supabase.co";
+  var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+  var H={"apikey":K,"Authorization":"Bearer "+K,"Content-Type":"application/json"};
+  var h=React.createElement,us=React.useState,ue=React.useEffect;
+  var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
+  var fmt=function(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});};
+
+  var sr=us([]),receitas=sr[0],setReceitas=sr[1];
+  var si=us([]),ingredientes=si[0],setIngredientes=si[1];
+  var sa=us("lista"),aba=sa[0],setAba=sa[1];
+  var sl=us(false),loading=sl[0],setLoading=sl[1];
+  var ss=us(null),sel=ss[0],setSel=ss[1];
+  var sc=us(30),cmvAlvo=sc[0],setCmvAlvo=sc[1];
+
+  // Form nova receita
+  var sfn=us({nome:"",categoria:"",preco_venda:"",rendimento:"1",observacoes:""}),formRec=sfn[0],setFormRec=sfn[1];
+  var sfi=us([]),formItens=sfi[0],setFormItens=sfi[1];
+  var sfe=us(null),formErro=sfe[0],setFormErro=sfe[1];
+  var sfok=us(false),formOk=sfok[0],setFormOk=sfok[1];
+  var ssv=us(false),salvando=ssv[0],setSalvando=ssv[1];
+
+  // Form novo ingrediente
+  var sfni=us({nome:"",unidade:"g",custo_unitario:"",categoria:""}),formIng=sfni[0],setFormIng=sfni[1];
+  var ssi=us(false),salvandoIng=ssi[0],setSalvandoIng=ssi[1];
+  var sei=us(null),erroIng=sei[0],setErroIng=sei[1];
+
+  function carregarDados(){
+    setLoading(true);
+    Promise.all([
+      fetch(U+"/rest/v1/fichas_tecnicas?order=nome.asc&select=*",{headers:H}).then(function(r){return r.json();}),
+      fetch(U+"/rest/v1/ingredientes?order=nome.asc&ativo=eq.true&select=*",{headers:H}).then(function(r){return r.json();})
+    ]).then(function(res){
+      setReceitas(Array.isArray(res[0])?res[0]:[]);
+      setIngredientes(Array.isArray(res[1])?res[1]:[]);
+      setLoading(false);
+    }).catch(function(){setLoading(false);});
+  }
+
+  ue(function(){carregarDados();},[]);
+
+  function calcCustoItens(itens,ings){
+    return itens.reduce(function(s,it){
+      var ing=ings.find(function(i){return i.id===it.ingrediente_id;});
+      if(!ing)return s;
+      return s+(parseFloat(it.quantidade)||0)*(parseFloat(ing.custo_unitario)||0);
+    },0);
+  }
+
+  function cmvCor(pct){
+    if(pct<=cmvAlvo)return "#16a34a";
+    if(pct<=cmvAlvo+10)return "#ca8a04";
+    return "#dc2626";
+  }
+
+  function addItemForm(){
+    setFormItens(function(prev){return prev.concat([{ingrediente_id:"",quantidade:"",unidade:"g"}]);});
+  }
+
+  function updItemForm(idx,campo,val){
+    setFormItens(function(prev){
+      return prev.map(function(it,i){
+        if(i!==idx)return it;
+        var novo=Object.assign({},it);
+        novo[campo]=val;
+        if(campo==="ingrediente_id"){
+          var ing=ingredientes.find(function(x){return String(x.id)===String(val);});
+          if(ing)novo.unidade=ing.unidade;
+        }
+        return novo;
+      });
+    });
+  }
+
+  function remItemForm(idx){
+    setFormItens(function(prev){return prev.filter(function(_,i){return i!==idx;});});
+  }
+
+  async function salvarReceita(){
+    if(!formRec.nome.trim()){setFormErro("Nome obrigatorio.");return;}
+    if(!formRec.preco_venda||isNaN(parseFloat(formRec.preco_venda))){setFormErro("Preco de venda obrigatorio.");return;}
+    if(formItens.length===0){setFormErro("Adicione pelo menos 1 ingrediente.");return;}
+    var itensValidos=formItens.filter(function(it){return it.ingrediente_id&&it.quantidade;});
+    if(itensValidos.length===0){setFormErro("Preencha os ingredientes corretamente.");return;}
+    setSalvando(true);setFormErro(null);
+    var custoTotal=calcCustoItens(itensValidos,ingredientes);
+    var precoVenda=parseFloat(formRec.preco_venda)||0;
+    var cmvPct=precoVenda>0?(custoTotal/precoVenda)*100:0;
+    try{
+      var rFicha=await fetch(U+"/rest/v1/fichas_tecnicas",{
+        method:"POST",headers:Object.assign({},H,{"Prefer":"return=representation"}),
+        body:JSON.stringify({nome:formRec.nome,categoria:formRec.categoria,preco_venda:precoVenda,custo_total:custoTotal,cmv_percentual:cmvPct,rendimento:parseFloat(formRec.rendimento)||1,observacoes:formRec.observacoes,ativo:true})
+      });
+      var fichaData=await rFicha.json();
+      var fichaId=Array.isArray(fichaData)?fichaData[0].id:fichaData.id;
+      await Promise.all(itensValidos.map(function(it){
+        var ing=ingredientes.find(function(x){return String(x.id)===String(it.ingrediente_id);});
+        var custoLinha=(parseFloat(it.quantidade)||0)*(ing?parseFloat(ing.custo_unitario)||0:0);
+        return fetch(U+"/rest/v1/ficha_ingredientes",{
+          method:"POST",headers:Object.assign({},H,{"Prefer":"return=minimal"}),
+          body:JSON.stringify({ficha_id:fichaId,ingrediente_id:parseInt(it.ingrediente_id),quantidade:parseFloat(it.quantidade),unidade:it.unidade,custo_linha:custoLinha})
+        });
+      }));
+      setFormOk(true);
+      setFormRec({nome:"",categoria:"",preco_venda:"",rendimento:"1",observacoes:""});
+      setFormItens([]);
+      setTimeout(function(){setFormOk(false);setAba("lista");carregarDados();},1500);
+    }catch(e){setFormErro("Erro ao salvar: "+(e.message||"tente novamente."));}
+    setSalvando(false);
+  }
+
+  async function salvarIngrediente(){
+    if(!formIng.nome.trim()){setErroIng("Nome obrigatorio.");return;}
+    if(!formIng.custo_unitario||isNaN(parseFloat(formIng.custo_unitario))){setErroIng("Custo obrigatorio.");return;}
+    setSalvandoIng(true);setErroIng(null);
+    try{
+      await fetch(U+"/rest/v1/ingredientes",{
+        method:"POST",headers:Object.assign({},H,{"Prefer":"return=minimal"}),
+        body:JSON.stringify({nome:formIng.nome,unidade:formIng.unidade,custo_unitario:parseFloat(formIng.custo_unitario),categoria:formIng.categoria,ativo:true})
+      });
+      setFormIng({nome:"",unidade:"g",custo_unitario:"",categoria:""});
+      carregarDados();
+      setErroIng("ok");
+      setTimeout(function(){setErroIng(null);},2000);
+    }catch(e){setErroIng("Erro: "+(e.message||"tente novamente."));}
+    setSalvandoIng(false);
+  }
+
+  async function excluirReceita(id){
+    if(!window.confirm("Excluir esta receita?"))return;
+    await fetch(U+"/rest/v1/ficha_ingredientes?ficha_id=eq."+id,{method:"DELETE",headers:H});
+    await fetch(U+"/rest/v1/fichas_tecnicas?id=eq."+id,{method:"DELETE",headers:H});
+    carregarDados();setSel(null);
+  }
+
+  var custoFormAtual=calcCustoItens(formItens.filter(function(it){return it.ingrediente_id&&it.quantidade;}),ingredientes);
+  var precoFormAtual=parseFloat(formRec.preco_venda)||0;
+  var cmvFormAtual=precoFormAtual>0?(custoFormAtual/precoFormAtual)*100:0;
+  var precoSugerido=cmvAlvo>0?(custoFormAtual/(cmvAlvo/100)):0;
+
+  var ABAS=[["lista","Receitas"],["nova","Nova Receita"],["ingredientes","Ingredientes"]];
+
+  if(sel){
+    var r=sel;
+    var cmvCl=cmvCor(r.cmv_percentual||0);
+    return h("div",{style:{padding:14}},
+      h("div",{style:{display:"flex",alignItems:"center",gap:8,marginBottom:14}},
+        h("button",{onClick:function(){setSel(null);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#888"}},"<"),
+        h("h2",{style:{margin:0,fontSize:17,fontWeight:900}},r.nome)
+      ),
+      h("div",{style:{background:R,borderRadius:12,padding:"12px 14px",marginBottom:12,color:"#fff",display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}},
+        [["Preco Venda",fmt(r.preco_venda)],["Custo Total",fmt(r.custo_total)],["CMV",(r.cmv_percentual||0).toFixed(1)+"%"]].map(function(a){
+          return h("div",{key:a[0]},h("p",{style:{margin:0,fontSize:9,opacity:.75,textTransform:"uppercase"}},"a[0]"),h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:15}},a[1]));
+        })
+      ),
+      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:12}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+          h("p",{style:{margin:0,fontWeight:700,fontSize:13}},"CMV: "+(r.cmv_percentual||0).toFixed(1)+"%"),
+          h("span",{style:{background:cmvCl+"18",color:cmvCl,fontSize:11,fontWeight:700,padding:"3px 10px",borderRadius:20}},
+            r.cmv_percentual<=cmvAlvo?"Dentro do alvo":r.cmv_percentual<=cmvAlvo+10?"Atencao":"Acima do alvo"
+          )
+        ),
+        h("div",{style:{background:"#f0f0f0",borderRadius:6,height:8,overflow:"hidden"}},
+          h("div",{style:{height:"100%",width:Math.min(100,r.cmv_percentual||0)+"%",background:cmvCl,borderRadius:6,transition:"width .3s"}})
+        ),
+        h("p",{style:{margin:"6px 0 0",fontSize:10,color:"#aaa"}},"Alvo: "+cmvAlvo+"% | Rendimento: "+(r.rendimento||1)+" porcao(s)")
+      ),
+      r.observacoes&&h("div",{style:{background:C,borderRadius:10,padding:"10px 12px",marginBottom:12}},
+        h("p",{style:{margin:0,fontSize:12,color:"#555"}},r.observacoes)
+      ),
+      h("div",{style:{display:"flex",gap:8}},
+        h("button",{onClick:function(){excluirReceita(r.id);},style:{flex:1,background:"#fee2e2",color:"#dc2626",border:"none",borderRadius:9,padding:"10px 0",fontSize:12,fontWeight:700,cursor:"pointer"}},"Excluir")
+      )
+    );
+  }
+
+  return h("div",{style:{padding:14}},
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
+      h("h2",{style:{margin:0,fontSize:17,fontWeight:900,fontFamily:"Georgia,serif"}},"Receitas"),
+      h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+        h("span",{style:{fontSize:10,color:"#888"}},"CMV alvo:"),
+        h("input",{type:"number",value:cmvAlvo,onChange:function(e){setCmvAlvo(parseInt(e.target.value)||30);},style:{width:46,border:"1.5px solid "+B,borderRadius:7,padding:"4px 6px",fontSize:12,fontWeight:700,color:R,outline:"none",textAlign:"center"}}),
+        h("span",{style:{fontSize:10,color:"#888"}},"%")
+      )
+    ),
+    h("div",{style:{display:"flex",gap:5,marginBottom:14}},
+      ABAS.map(function(a){var at=aba===a[0];return h("button",{key:a[0],onClick:function(){setAba(a[0]);},style:{flex:1,padding:"7px 0",borderRadius:9,border:"1.5px solid "+(at?R:B),background:at?R:"#fff",color:at?"#fff":"#666",fontSize:11,fontWeight:at?800:600,cursor:"pointer"}},a[1]);})
+    ),
+
+    aba==="lista"&&h("div",null,
+      loading&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Carregando..."),
+      !loading&&receitas.length===0&&h("div",{style:{textAlign:"center",padding:"3rem",background:C,borderRadius:12}},
+        h("p",{style:{margin:0,fontWeight:700,color:"#555"}},"Nenhuma receita cadastrada"),
+        h("p",{style:{margin:"4px 0 0",fontSize:12,color:"#aaa"}},"Clique em Nova Receita para comecar")
+      ),
+      !loading&&receitas.map(function(r){
+        var cmvPct=r.cmv_percentual||0;
+        var cor=cmvCor(cmvPct);
+        return h("div",{key:r.id,onClick:function(){setSel(r);},style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:"11px 13px",marginBottom:8,cursor:"pointer"}},
+          h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}},
+            h("p",{style:{margin:0,fontWeight:800,fontSize:13}},r.nome),
+            h("span",{style:{background:cor+"18",color:cor,fontSize:10,fontWeight:800,padding:"2px 8px",borderRadius:20}},cmvPct.toFixed(1)+"%")
+          ),
+          h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:11,color:"#888"}},
+            h("span",null,"Venda: "+fmt(r.preco_venda)),
+            h("span",null,"Custo: "+fmt(r.custo_total)),
+            h("span",null,(r.categoria||"Sem categoria"))
+          ),
+          h("div",{style:{background:"#f0f0f0",borderRadius:4,height:4,marginTop:6,overflow:"hidden"}},
+            h("div",{style:{height:"100%",width:Math.min(100,cmvPct)+"%",background:cor,borderRadius:4}})
+          )
+        );
+      })
+    ),
+
+    aba==="nova"&&h("div",null,
+      formOk&&h("div",{style:{background:"#f0fdf4",border:"1px solid #86efac",borderRadius:10,padding:"12px",marginBottom:12,textAlign:"center",fontWeight:700,color:"#15803d"}},"Receita salva com sucesso!"),
+      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:10}},
+        h("p",{style:{margin:"0 0 8px",fontWeight:700,fontSize:12}},"Dados da Receita"),
+        h("input",{placeholder:"Nome da receita *",value:formRec.nome,onChange:function(e){setFormRec(Object.assign({},formRec,{nome:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}},
+          h("input",{placeholder:"Categoria",value:formRec.categoria,onChange:function(e){setFormRec(Object.assign({},formRec,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}}),
+          h("input",{placeholder:"Rendimento (porcoes)",type:"number",value:formRec.rendimento,onChange:function(e){setFormRec(Object.assign({},formRec,{rendimento:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("input",{placeholder:"Preco de venda R$ *",type:"number",value:formRec.preco_venda,onChange:function(e){setFormRec(Object.assign({},formRec,{preco_venda:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
+        h("textarea",{placeholder:"Observacoes (modo de preparo, etc)",value:formRec.observacoes,onChange:function(e){setFormRec(Object.assign({},formRec,{observacoes:e.target.value}));},rows:2,style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",resize:"none",boxSizing:"border-box"}})
+      ),
+      custoFormAtual>0&&h("div",{style:{background:cmvCor(cmvFormAtual)+"18",border:"1px solid "+cmvCor(cmvFormAtual)+"44",borderRadius:10,padding:"10px 12px",marginBottom:10}},
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
+          [["Custo",fmt(custoFormAtual)],["CMV",cmvFormAtual.toFixed(1)+"%"],["Preco sugerido",precoSugerido>0?fmt(precoSugerido):"--"]].map(function(a){
+            return h("div",{key:a[0],style:{textAlign:"center"}},
+              h("p",{style:{margin:0,fontSize:9,color:"#666",textTransform:"uppercase"}},"a[0]"),
+              h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:13,color:cmvCor(cmvFormAtual)}},a[1])
+            );
+          })
+        )
+      ),
+      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:10}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}},
+          h("p",{style:{margin:0,fontWeight:700,fontSize:12}},"Ingredientes ("+(formItens.length)+")"),
+          h("button",{onClick:addItemForm,style:{background:R,color:"#fff",border:"none",borderRadius:7,padding:"5px 10px",fontSize:11,fontWeight:700,cursor:"pointer"}},"+ Add")
+        ),
+        ingredientes.length===0&&h("p",{style:{fontSize:11,color:"#f59e0b",margin:0}},"Cadastre ingredientes primeiro na aba Ingredientes"),
+        formItens.map(function(it,idx){
+          return h("div",{key:idx,style:{display:"grid",gridTemplateColumns:"1fr 80px 30px",gap:5,marginBottom:6}},
+            h("select",{value:it.ingrediente_id,onChange:function(e){updItemForm(idx,"ingrediente_id",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none",background:"#fff"}},
+              h("option",{value:""},"Ingrediente..."),
+              ingredientes.map(function(ing){return h("option",{key:ing.id,value:ing.id},ing.nome+" (R$/"+ing.unidade+")");})
+            ),
+            h("input",{type:"number",placeholder:"Qtd",value:it.quantidade,onChange:function(e){updItemForm(idx,"quantidade",e.target.value);},style:{border:"1.5px solid "+B,borderRadius:7,padding:"6px 8px",fontSize:12,outline:"none"}}),
+            h("button",{onClick:function(){remItemForm(idx);},style:{background:"#fee2e2",border:"none",borderRadius:7,color:"#dc2626",fontWeight:700,cursor:"pointer"}},"x")
+          );
+        })
+      ),
+      formErro&&h("p",{style:{color:"#dc2626",fontSize:12,marginBottom:8}},formErro),
+      h("button",{onClick:salvarReceita,disabled:salvando,style:{width:"100%",background:salvando?"#ccc":R,color:"#fff",border:"none",borderRadius:10,padding:"13px 0",fontSize:13,fontWeight:800,cursor:salvando?"not-allowed":"pointer"}},salvando?"Salvando...":"Salvar Receita")
+    ),
+
+    aba==="ingredientes"&&h("div",null,
+      h("div",{style:{background:"#fff",borderRadius:11,border:"1px solid "+B,padding:12,marginBottom:12}},
+        h("p",{style:{margin:"0 0 8px",fontWeight:700,fontSize:12}},"Novo Ingrediente"),
+        h("input",{placeholder:"Nome *",value:formIng.nome,onChange:function(e){setFormIng(Object.assign({},formIng,{nome:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:6,boxSizing:"border-box"}}),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:6}},
+          h("select",{value:formIng.unidade,onChange:function(e){setFormIng(Object.assign({},formIng,{unidade:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",background:"#fff"}},
+            ["g","kg","ml","l","un","porcao"].map(function(u){return h("option",{key:u,value:u},u);})
+          ),
+          h("input",{placeholder:"Categoria",value:formIng.categoria,onChange:function(e){setFormIng(Object.assign({},formIng,{categoria:e.target.value}));},style:{border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:12,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("input",{placeholder:"Custo unitario R$ *",type:"number",value:formIng.custo_unitario,onChange:function(e){setFormIng(Object.assign({},formIng,{custo_unitario:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B,borderRadius:8,padding:"8px 10px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        erroIng==="ok"?h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,marginBottom:6}},"Ingrediente salvo!"):erroIng&&h("p",{style:{color:"#dc2626",fontSize:12,marginBottom:6}},erroIng),
+        h("button",{onClick:salvarIngrediente,disabled:salvandoIng,style:{width:"100%",background:salvandoIng?"#ccc":R,color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:12,fontWeight:700,cursor:salvandoIng?"not-allowed":"pointer"}},salvandoIng?"Salvando...":"Salvar Ingrediente")
+      ),
+      h("p",{style:{fontWeight:700,fontSize:12,marginBottom:6}},"Ingredientes cadastrados ("+ingredientes.length+")"),
+      ingredientes.length===0&&h("p",{style:{color:"#ccc",fontSize:12,textAlign:"center",padding:"20px 0"}},"Nenhum ingrediente cadastrado"),
+      ingredientes.map(function(ing){
+        return h("div",{key:ing.id,style:{background:"#fff",borderRadius:9,border:"1px solid "+B,padding:"8px 11px",marginBottom:5,display:"flex",justifyContent:"space-between",alignItems:"center"}},
+          h("div",null,
+            h("p",{style:{margin:0,fontWeight:700,fontSize:12}},ing.nome),
+            h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},(ing.categoria||"Sem categoria")+" - "+ing.unidade)
+          ),
+          h("p",{style:{margin:0,fontWeight:800,fontSize:13,color:R}},fmt(ing.custo_unitario)+"/"+ing.unidade)
+        );
+      })
     )
   );
 }
