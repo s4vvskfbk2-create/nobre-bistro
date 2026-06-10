@@ -67,7 +67,7 @@ var PROFS_DEFAULT=[
 
 function Inp(props){return h("div",{style:{marginBottom:10}},props.label&&h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:3,textTransform:"uppercase"}},props.label),props.textarea?h("textarea",{value:props.value,onChange:function(e){props.onChange(e.target.value);},rows:props.rows||2,placeholder:props.placeholder,style:{width:"100%",border:"1.5px solid "+B,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",resize:"none",fontFamily:"inherit",boxSizing:"border-box"}}):h("input",{type:props.type||"text",value:props.value,onChange:function(e){props.onChange(e.target.value);},placeholder:props.placeholder,style:{width:"100%",border:"1.5px solid "+B,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),props.hint&&h("p",{style:{fontSize:9,color:"#aaa",margin:"2px 0 0"}},props.hint));}
 function Btn(props){var c=props.color||R;return h("button",{onClick:props.onClick,disabled:props.disabled,style:Object.assign({},{padding:props.sm?"6px 12px":props.lg?"13px 0":"9px 16px",borderRadius:9,border:"1.5px solid "+(props.outline?c:"transparent"),background:props.outline?"transparent":props.disabled?"#ccc":c,color:props.outline?c:"#fff",fontSize:props.sm?11:13,fontWeight:800,cursor:props.disabled?"not-allowed":"pointer",width:props.full?"100%":"auto"},props.style||{})},props.children);}
-function Modal(props){if(!props.open)return null;return h("div",{onClick:props.onClose,style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:440,maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}},h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid "+B,position:"sticky",top:0,background:"#fff"}},h("span",{style:{fontWeight:800,fontSize:15}},props.title),h("button",{onClick:props.onClose,style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#aaa"}},"x")),h("div",{style:{padding:"12px 16px"}},props.children)));}
+function Modal(props){if(!props.open)return null;return h("div",{onClick:props.onClose,style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:440,maxHeight:"90vh",overflow:"auto",boxShadow:"0 20px 60px rgba(0,0,0,.2)"}},h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"12px 16px",borderBottom:"1px solid #f0ece6",position:"sticky",top:0,background:"#fff"}},h("span",{style:{fontWeight:800,fontSize:15}},props.title),h("button",{onClick:props.onClose,style:{background:"none",border:"none",fontSize:20,cursor:"pointer",color:"#aaa"}},"x")),h("div",{style:{padding:"12px 16px"}},props.children)));}
 
 function BalcaoTab(props){
   var prods=props.prods,profs=props.profs,setOrders=props.setOrders,setProds=props.setProds;
@@ -126,8 +126,8 @@ function BalcaoTab(props){
     )
   );
   return h("div",{style:{padding:"16px 14px"}},
-    h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 10px",fontFamily:"Georgia,serif"}},"Balcao"),
-    h("input",{value:busca,onChange:function(e){setBusca(e.target.value);},placeholder:"Buscar produto...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:9,padding:"8px 11px",fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:8}}),
+    h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 12px",letterSpacing:"-0.02em",fontFamily:"Georgia,serif"}},"Balcao"),
+    h("input",{value:busca,onChange:function(e){setBusca(e.target.value);},placeholder:"Buscar produto...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:24,padding:"10px 16px",fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:10,background:"#fff"}}),
     !busca&&h("div",{style:{display:"flex",overflowX:"auto",gap:5,marginBottom:8}},CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"5px 11px",borderRadius:18,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})),
     h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}},
       prodsFilt.map(function(p){var esg=p.stock===0;return h("button",{key:p.id,onClick:function(){if(!esg)addItem(p);},disabled:esg,style:{background:esg?"#f5f5f5":"#fff",border:"1.5px solid "+B,borderRadius:10,padding:"9px",cursor:esg?"not-allowed":"pointer",textAlign:"left",opacity:esg?.5:1}},
@@ -156,7 +156,7 @@ function BalcaoTab(props){
           profs.filter(function(p){return p.active;}).map(function(p){return h("button",{key:p.id,onClick:function(){setProfSel(profSel===p.name?"":p.name);},style:{padding:"4px 9px",borderRadius:16,border:"1.5px solid "+(profSel===p.name?R:B),background:profSel===p.name?"#fff5f5":"#fff",color:profSel===p.name?R:"#666",fontSize:11,fontWeight:700,cursor:"pointer"}},p.name);}))
       ),
       h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:8}},
-        [["pix","PIX"],["cartao_credito","Credito"],["cartao_debito","Debito"],["dinheiro","Dinheiro"]].map(function(arr){return h("button",{key:arr[0],onClick:function(){setPay(arr[0]);setFiado(false);},style:{padding:"7px 0",borderRadius:8,border:"1.5px solid "+(pay===arr[0]&&!fiado?R:B),background:pay===arr[0]&&!fiado?"#fff5f5":"#fff",color:pay===arr[0]&&!fiado?R:"#666",fontSize:11,fontWeight:700,cursor:"pointer"}},arr[1]);})),
+        [["pix","PIX"],["cartao_credito","Credito"],["cartao_debito","Debito"],["dinheiro","Dinheiro"]].map(function(arr){return h("button",{key:arr[0],onClick:function(){setPay(arr[0]);setFiado(false);},style:{padding:"9px 0",borderRadius:20,border:"1.5px solid "+(pay===arr[0]&&!fiado?R:B),background:pay===arr[0]&&!fiado?"#fff5f5":"#fff",color:pay===arr[0]&&!fiado?R:"#666",fontSize:11,fontWeight:700,cursor:"pointer"}},arr[1]);})),
       profSel&&h("label",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:8,cursor:"pointer",fontSize:12,fontWeight:fiado?700:400,color:fiado?R:"#666"}},
         h("input",{type:"checkbox",checked:fiado,onChange:function(e){setFiado(e.target.checked);},style:{width:14,height:14,accentColor:R}}),
         "Fiado para "+profSel
@@ -196,7 +196,7 @@ function PedidosTab(props){
   var lista=orders.slice().reverse().filter(function(o){return filtro==="todos"||o.status===filtro;});
   var aguard=orders.filter(function(o){return o.status==="aguardando_pagamento";});
   return h("div",{style:{padding:"16px 14px"}},
-    h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 10px",fontFamily:"Georgia,serif"}},"Pedidos"),
+    h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 12px",letterSpacing:"-0.02em",fontFamily:"Georgia,serif"}},"Pedidos"),
     aguard.length>0&&h("div",{style:{background:"#eff6ff",border:"1.5px solid #3b82f6",borderRadius:12,padding:"10px 12px",marginBottom:10}},
       h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:7}},
         h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:"#1d4ed8"}},aguard.length+" aguardando pagamento"),
@@ -298,7 +298,7 @@ function CozinhaTab(props){
         h(TempoDecorrido,{criadoEm:o.criadoEm,inicioProducao:o.inicioProducao})
       ),
       h("p",{style:{margin:"0 0 8px",fontSize:11,color:"#888"}},o.nome+" - "+o.criadoEm),
-      (o.items||[]).map(function(i){return h("div",{key:i.id,style:{display:"flex",gap:10,padding:"5px 0",borderBottom:"1px solid "+B}},
+      (o.items||[]).map(function(i){return h("div",{key:i.id,style:{display:"flex",gap:10,padding:"5px 0",borderBottom:"1px solid #f0ece6"}},
         h("span",{style:{fontWeight:800,fontSize:14}},i.qty+"x"),h("span",{style:{fontSize:13}},i.name)
       );}),
       h("button",{onClick:function(){concluir(o.id);},style:{width:"100%",marginTop:9,background:"#22c55e",color:"#fff",border:"none",borderRadius:9,padding:"11px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Concluido")
@@ -444,7 +444,7 @@ function CaixaTab(props){
       h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:11}},
         h("p",{style:{fontWeight:800,fontSize:12,margin:"0 0 8px"}},"Vendas pagas ("+pagos.length+")"),
         pagos.length===0&&h("p",{style:{fontSize:11,color:"#ccc"}},"Nenhuma venda paga hoje"),
-        pagos.slice().reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:5,marginBottom:5,borderBottom:"1px solid "+B}},
+        pagos.slice().reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",alignItems:"center",paddingBottom:5,marginBottom:5,borderBottom:"1px solid #f0ece6"}},
           h("div",null,h("p",{style:{margin:0,fontSize:11,fontWeight:700}},"#"+o.id+" "+o.nome),h("p",{style:{margin:0,fontSize:9,color:"#aaa"}},o.criadoEm+" - "+(PAY[o.payment]||o.payment||""))),
           h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:R}},fmt(o.total))
         );})
@@ -617,7 +617,7 @@ function HorariosTab(props){
       Object.entries(horarios).map(function(entry){
         var dia=parseInt(entry[0]),hn=entry[1];
         var isHoje=new Date().getDay()===dia;
-        return h("div",{key:dia,style:{padding:"10px 12px",borderBottom:"1px solid "+B,background:isHoje?"#fafaf8":"#fff"}},
+        return h("div",{key:dia,style:{padding:"10px 12px",borderBottom:"1px solid #f0ece6",background:isHoje?"#fafaf8":"#fff"}},
           h("div",{style:{display:"flex",alignItems:"center",gap:8}},
             h("div",{style:{width:62,flexShrink:0}},h("span",{style:{fontSize:11,fontWeight:isHoje?800:600,color:isHoje?R:"#555"}},DIAS[dia]),(isHoje&&h("span",{style:{fontSize:9,color:R,marginLeft:3}},"hoje"))),
             h("label",{style:{display:"flex",alignItems:"center",gap:4,cursor:"pointer",flexShrink:0}},
@@ -773,7 +773,10 @@ function HistoricoTab(props){
           [["Consumo",fmt(totalBruto)],["Desc "+desc+"%","-"+fmt(descValor)],["Na folha",fmt(liquido)]].map(function(arr){return h("div",{key:arr[0],style:{background:"rgba(255,255,255,.12)",borderRadius:7,padding:"6px 8px"}},h("p",{style:{margin:0,fontSize:8,opacity:.75}},arr[0]),h("p",{style:{margin:0,fontWeight:900,fontSize:12,fontFamily:"Georgia,serif"}},arr[1]));})
         )
       ),
-      dadosP.orders.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"20px 0"}},"Nenhum registro"),
+      dadosP.orders.length===0&&h("div",{style:{textAlign:"center",padding:"32px 0",color:"#bbb"}},
+  h("p",{style:{fontSize:28,marginBottom:4}},""),
+  h("p",{style:{fontSize:13,fontWeight:600,color:"#ccc",letterSpacing:"-0.01em"}},"Nenhum registro encontrado")
+),
       dadosP.orders.slice().reverse().map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:10,border:"1px solid "+B,padding:"10px 12px",marginBottom:8}},
         h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:7}},
           h("p",{style:{margin:0,fontSize:10,color:"#aaa"}},o.criadoEm),
@@ -890,7 +893,7 @@ function App(){
         h("button",{onClick:function(){setNivel(null);},style:{background:"rgba(255,255,255,.22)",border:"1px solid rgba(255,255,255,.3)",color:"#fff",fontSize:11,fontWeight:700,padding:"6px 12px",borderRadius:20,cursor:"pointer",letterSpacing:"0.01em"}},"Sair")
       )
     ),
-    h("div",{style:{display:"flex",overflowX:"auto",background:"#fff",borderBottom:"1px solid "+B}},
+    h("div",{style:{display:"flex",overflowX:"auto",background:"#fff",borderBottom:"1px solid #f0ece6"}},
       tabs.map(function(t){var a=tab===t[0];return h("button",{key:t[0],onClick:function(){setTab(t[0]);},style:{flexShrink:0,padding:"10px 12px",border:"none",borderBottom:"2.5px solid "+(a?R:"transparent"),background:a?"#fff":"#fff",color:a?R:"#888",fontSize:11,fontWeight:a?800:500,cursor:"pointer",whiteSpace:"nowrap",display:"flex",alignItems:"center",gap:3,transition:"color .15s,border-color .15s",letterSpacing:"-0.01em"}},
         t[1],t[2]>0&&h("span",{style:{background:"#ef4444",color:"#fff",fontSize:9,fontWeight:800,borderRadius:10,padding:"2px 5px",minWidth:16,textAlign:"center"}},t[2])
       );})
@@ -1006,7 +1009,7 @@ top5.map(function(e,i){return h("div",{key:e[0],style:{display:"flex",alignItems
 h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:13}},
 h("p",{style:{margin:"0 0 10px",fontWeight:700,fontSize:13}},"Pedidos de Hoje ("+pedHoje+")"),
 pedHoje===0&&h("p",{style:{textAlign:"center",color:"#ccc",fontSize:12,padding:"14px 0"}},"Nenhum pedido hoje"),
-[...todayOrders].reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid "+B,fontSize:12}},h("div",null,h("span",{style:{fontWeight:700}},"#"+o.id),h("span",{style:{color:"#888",marginLeft:5}},o.nome||"Balcao"),o.profissional&&h("span",{style:{color:"#aaa",fontSize:10,marginLeft:4}},"- "+o.profissional)),h("span",{style:{fontWeight:700,color:R}},fmt(o.total)));})
+[...todayOrders].reverse().map(function(o){return h("div",{key:o.id,style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid #f0ece6",fontSize:12}},h("div",null,h("span",{style:{fontWeight:700}},"#"+o.id),h("span",{style:{color:"#888",marginLeft:5}},o.nome||"Balcao"),o.profissional&&h("span",{style:{color:"#aaa",fontSize:10,marginLeft:4}},"- "+o.profissional)),h("span",{style:{fontWeight:700,color:R}},fmt(o.total)));})
 )
 );}
 
@@ -1082,7 +1085,7 @@ erro&&h("div",{style:{background:"#fee2e2",borderRadius:11,padding:"11px 13px",m
 h("p",{style:{margin:0,fontSize:12,color:"#b91c1c",fontWeight:700}},erro)
 ),
 analise&&h("div",{style:{background:"#fff",borderRadius:13,border:"1px solid "+B,padding:14}},
-h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,paddingBottom:10,borderBottom:"1px solid "+B}},
+h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10,paddingBottom:10,borderBottom:"1px solid #f0ece6"}},
 h("p",{style:{margin:0,fontWeight:800,fontSize:13}},FOCOS.find(function(f){return f[0]===foco;})[1]),
 h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText(analise);},style:{background:C,border:"1px solid "+B,borderRadius:8,padding:"5px 10px",fontSize:11,fontWeight:700,color:"#555",cursor:"pointer"}},"Copiar")
 ),
@@ -1257,7 +1260,10 @@ function TabCentroIA(){
     React.createElement('div',{style:{display:'flex',gap:'0.5rem',marginBottom:'1.5rem',borderBottom:'2px solid #e5e7eb'}},
       STABS.map(function(st){return React.createElement('button',{key:st.id,onClick:function(){setSubTab(st.id);},style:{padding:'0.6rem 1rem',border:'none',background:'transparent',borderBottom:subTab===st.id?'2px solid #2563eb':'2px solid transparent',color:subTab===st.id?'#2563eb':'#6b7280',fontWeight:subTab===st.id?700:400,cursor:'pointer',fontSize:'0.85rem',marginBottom:'-2px'}},st.label);})
     ),
-    loading&&React.createElement('div',{style:{textAlign:'center',padding:'2rem',color:'#9ca3af'}},'Carregando...'),
+    loading&&React.createElement('div',{style:{textAlign:'center',padding:'2rem',color:'#9ca3af'}},
+  React.createElement('div',{style:{fontSize:13,fontWeight:600,color:'#bbb',letterSpacing:'-0.01em'}},'Carregando...'),
+  React.createElement('div',{style:{width:20,height:20,border:'2px solid #e5e7eb',borderTop:'2px solid #8B1A1A',borderRadius:'50%',animation:'spin 0.8s linear infinite',margin:'8px auto 0'}})
+),
     !loading&&subTab==='eventos'&&React.createElement('div',null,
       eventos.length===0
         ?React.createElement('div',{style:{textAlign:'center',padding:'3rem',color:'#9ca3af',background:'#f9fafb',borderRadius:'12px'}},
