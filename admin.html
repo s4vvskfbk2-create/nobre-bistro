@@ -1096,7 +1096,7 @@ function TabClientes(props){
           [["Nome dos pontos","nomeMoeda","text"],["Pontos por R$1 gasto","pontosPerReal","number"],["Pontos para 1 resgate","pontosParaDesconto","number"],["Valor do desconto (R$)","valorDesconto","number"]].map(function(field){
             return h("div",{key:field[1]},
               h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase",letterSpacing:".4px"}},field[0]),
-              h("input",{type:field[2],value:formCfg[field[1]],onChange:function(e){var v=field[2]==="number"?parseFloat(e.target.value)||0:e.target.value;setFormCfg(function(prev){return Object.assign({},prev,{[field[1]]:v});});},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:14,outline:"none",boxSizing:"border-box"}})
+              h("input",{type:field[2],value:formCfg[field[1]],onChange:function(e){var v=field[2]==="number"?parseFloat(e.target.value)||0:e.target.value;var upd={};upd[field[1]]=v;setFormCfg(function(prev){return Object.assign({},prev,upd);});},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:14,outline:"none",boxSizing:"border-box"}})
             );
           })
         ),
@@ -1112,7 +1112,7 @@ function TabClientes(props){
           [["Nome *","nome","text","Nome completo"],["Telefone","telefone","tel","(11) 99999-9999"]].map(function(f){
             return h("div",{key:f[1]},
               h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},(f[0])),
-              h("input",{type:f[2],value:formCad[f[1]],onChange:function(e){var k=f[1];setFormCad(function(prev){return Object.assign({},prev,[k&&{[k]:e.target.value}][0]);});},placeholder:f[3],style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:14,outline:"none",boxSizing:"border-box"}})
+              h("input",{type:f[2],value:formCad[f[1]],onChange:function(e){var k=f[1];var upd2={};upd2[k]=e.target.value;setFormCad(function(prev){return Object.assign({},prev,upd2);});},placeholder:f[3],style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"10px 12px",fontSize:14,outline:"none",boxSizing:"border-box"}})
             );
           })
         ),
