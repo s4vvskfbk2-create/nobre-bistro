@@ -1457,7 +1457,7 @@ function App(){
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
       tab==="equipe"&&(nivel==="gerente"?h(EquipeTab,{profs:profs,setProfs:setProfs,orders:orders}):null),
-      tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders}),tab==="consultor"&&nivel==="gerente"&&h(TabConsultor,{orders:orders}),,tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null)
+      tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders}),tab==="consultor"&&nivel==="gerente"&&h(TabConsultor,{orders:orders}),tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null)
     )
   );
 }
