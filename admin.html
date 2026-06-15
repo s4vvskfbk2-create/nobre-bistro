@@ -1226,72 +1226,36 @@ function TabClientes(props){
         return "https://api.qrserver.com/v1/create-qr-code/?data="+encodeURIComponent(texto)+"&size="+tam+"x"+tam+"&bgcolor=faf8f5&color=8B1A1A&qzone=2&format=svg";
       }
       var mesas=Array.from({length:numMesas},function(_,i){return {numero:i+1,url:urlBase+"?mesa="+(i+1)};});
-      function imprimirMesa(mesa){
-        var w=window.open("","_blank","width=400,height=500");
-        var hh="<!DOCTYPE html><html><head><title>Mesa "+mesa.numero+"</title>";
-        hh+="<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Georgia,serif;}body{padding:30px;text-align:center;background:#faf8f5;}";
-        hh+=".logo{font-size:11px;letter-spacing:4px;color:#8B1A1A;text-transform:uppercase;font-weight:700;}";
-        hh+="hr{border:none;border-top:1px solid #8B1A1A;margin:4px 30px;}h1{font-size:32px;font-weight:700;color:#1a1a1a;margin:12px 0 4px;}";
-        hh+="p{font-size:13px;color:#888;margin-bottom:20px;}img{width:240px;height:240px;margin:0 auto;display:block;}";
-        hh+="</style></head><body>";
-        hh+="<div class='logo'>Nobre</div><hr/><div class='logo' style='font-size:8px;letter-spacing:5px'>Bistro</div>";
-        hh+="<h1>Mesa "+mesa.numero+"</h1><p>Escaneie para ver o cardapio e fazer seu pedido</p>";
-        hh+="<img src='"+qrUrl(mesa.url,300)+"' alt='QR Mesa "+mesa.numero+"'/>";
-        hh+="<p style='font-size:11px;color:#aaa;margin-top:16px;'>Aponte a camera do celular para o QR code</p>";
-        hh+="</body></html>";
-        w.document.write(hh);w.document.close();setTimeout(function(){w.print();},600);
-      }
-      function imprimirTodas(){
-        var itens=mesas.map(function(m){
-          return "<div class='mesa'><div class='logo'>Nobre</div><hr/><div class='logo' style='font-size:7px;letter-spacing:4px'>Bistro</div><h2>Mesa "+m.numero+"</h2><img src='"+qrUrl(m.url,200)+"'/><p>Escaneie para pedir</p></div>";
-        }).join("");
-        var w=window.open("","_blank");
-        var hh2="<!DOCTYPE html><html><head><title>QR Codes</title>";
-        hh2+="<style>*{margin:0;padding:0;box-sizing:border-box;font-family:Georgia,serif;}body{background:#fff;padding:16px;}";
-        hh2+=".grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}";
-        hh2+=".mesa{border:1px solid #ede9e3;border-radius:12px;padding:16px;text-align:center;page-break-inside:avoid;}";
-        hh2+=".logo{font-size:9px;letter-spacing:3px;color:#8B1A1A;text-transform:uppercase;font-weight:700;}";
-        hh2+="hr{border:none;border-top:1px solid #8B1A1A;margin:2px 20px;}h2{font-size:20px;font-weight:700;color:#1a1a1a;margin:8px 0 4px;}";
-        hh2+="img{width:140px;height:140px;display:block;margin:0 auto;}p{font-size:10px;color:#aaa;margin-top:6px;}";
-        hh2+="</style></head><body><div class='grid'>"+itens+"</div></body></html>";
-        w.document.write(hh2);w.document.close();setTimeout(function(){w.print();},800);
-      }
       return h("div",{style:{padding:14}},
-        h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 4px",letterSpacing:"-0.02em"}},"QR Code por Mesa"),
-        h("p",{style:{fontSize:11,color:"#888",margin:"0 0 12px"}},"QR code unico por mesa — cliente escaneia e abre o cardapio"),
+        h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 4px"}},"QR Code por Mesa"),
+        h("p",{style:{fontSize:11,color:"#888",margin:"0 0 12px"}},"Cada mesa tem um QR unico — a cliente escaneia e abre o cardapio direto"),
         h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:14,marginBottom:12}},
           h("p",{style:{margin:"0 0 10px",fontWeight:800,fontSize:13}},"Configuracao"),
           h("div",{style:{marginBottom:10}},
-            h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"URL do cardapio"),
-            h("input",{value:urlBase,onChange:function(e){setUrlBase(e.target.value);},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"9px 11px",fontSize:12,outline:"none",boxSizing:"border-box"}}),
-            h("p",{style:{margin:"3px 0 0",fontSize:10,color:"#aaa"}},"URL que abre quando escanear o QR")
+            h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"URL base do cardapio"),
+            h("input",{value:urlBase,onChange:function(e){setUrlBase(e.target.value);},style:{width:"100%",border:"1.5px solid "+B,borderRadius:10,padding:"9px 11px",fontSize:12,outline:"none",boxSizing:"border-box"}})
           ),
-          h("div",{style:{marginBottom:12}},
+          h("div",null,
             h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:6,textTransform:"uppercase"}},"Numero de mesas"),
             h("div",{style:{display:"flex",alignItems:"center",gap:10}},
-              h("button",{onClick:function(){setNumMesas(function(n){return Math.max(1,n-1);});},style:{width:36,height:36,borderRadius:"50%",border:"1.5px solid "+R,background:"#fff",color:R,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}},"-"),
+              h("button",{onClick:function(){setNumMesas(function(n){return Math.max(1,n-1);});},style:{width:36,height:36,borderRadius:"50%",border:"1.5px solid "+R,background:"#fff",color:R,fontSize:18,cursor:"pointer",fontWeight:700}},"-"),
               h("span",{style:{fontSize:20,fontWeight:800,minWidth:30,textAlign:"center"}},numMesas),
-              h("button",{onClick:function(){setNumMesas(function(n){return n+1;});},style:{width:36,height:36,borderRadius:"50%",border:"1.5px solid "+R,background:"#fff",color:R,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}},"+")
+              h("button",{onClick:function(){setNumMesas(function(n){return n+1;});},style:{width:36,height:36,borderRadius:"50%",border:"1.5px solid "+R,background:"#fff",color:R,fontSize:18,cursor:"pointer",fontWeight:700}},"+")
             )
-          ),
-          h("button",{onClick:imprimirTodas,style:{width:"100%",background:R,color:"#fff",border:"none",borderRadius:11,padding:"12px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},
-            "Imprimir Todos os QR Codes ("+numMesas+" mesas)"
           )
         ),
-        h("p",{style:{fontWeight:800,fontSize:13,margin:"0 0 9px"}},"Mesas individuais"),
+        h("p",{style:{fontWeight:800,fontSize:13,margin:"0 0 9px"}},"Mesas"),
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
           mesas.map(function(mesa){
             return h("div",{key:mesa.numero,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:12,textAlign:"center"}},
               h("p",{style:{margin:"0 0 8px",fontWeight:800,fontSize:14}},"Mesa "+mesa.numero),
-              h("img",{src:qrUrl(mesa.url,120),alt:"QR Mesa "+mesa.numero,style:{width:100,height:100,margin:"0 auto 8px",display:"block",borderRadius:8}}),
-              h("p",{style:{margin:"0 0 8px",fontSize:9,color:"#aaa",wordBreak:"break-all",lineHeight:1.3}},mesa.url),
-              h("button",{onClick:function(){imprimirMesa(mesa);},style:{width:"100%",background:C,border:"1px solid "+B,borderRadius:9,padding:"7px 0",fontSize:11,fontWeight:700,color:"#555",cursor:"pointer"}},"Imprimir")
+              h("img",{src:qrUrl(mesa.url,120),alt:"QR "+mesa.numero,style:{width:100,height:100,margin:"0 auto 8px",display:"block",borderRadius:8}}),
+              h("a",{href:qrUrl(mesa.url,300),download:"mesa-"+mesa.numero+".svg",target:"_blank",style:{display:"block",width:"100%",background:C,border:"1px solid "+B,borderRadius:9,padding:"7px 0",fontSize:11,fontWeight:700,color:"#555",cursor:"pointer",textDecoration:"none",boxSizing:"border-box"}},"Baixar QR")
             );
           })
         )
       );
     })()
-
     ,
 
     // ABA PWA
