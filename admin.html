@@ -1311,45 +1311,18 @@ function TabClientes(props){
         h("p",{style:{margin:"0 0 10px",fontWeight:800,fontSize:13}},"Como a cliente instala"),
         h("div",{style:{background:"#f8f8f8",borderRadius:10,padding:"11px 13px"}},
           h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12}},"iPhone (Safari):"),
-          h("p",{style:{margin:"0 0 10px",fontSize:11,color:"#555",lineHeight:1.7}},"1. Abra o cardapio no Safari
-2. Toque no icone compartilhar
-3. Role e toque Adicionar a Tela de Inicio
-4. Toque Adicionar"),
+          h("p",{style:{margin:"0 0 10px",fontSize:11,color:"#555",lineHeight:1.7}},"1. Abra o cardapio no Safari\n2. Toque no icone compartilhar\n3. Role e toque Adicionar a Tela de Inicio\n4. Toque Adicionar"),
           h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12}},"Android (Chrome):"),
-          h("p",{style:{margin:0,fontSize:11,color:"#555",lineHeight:1.7}},"1. Abra o cardapio no Chrome
-2. Toque nos 3 pontos
-3. Toque Adicionar a tela inicial
-4. Confirme")
+          h("p",{style:{margin:0,fontSize:11,color:"#555",lineHeight:1.7}},"1. Abra o cardapio no Chrome\n2. Toque nos 3 pontos\n3. Toque Adicionar a tela inicial\n4. Confirme")
         )
       ),
       h("p",{style:{fontWeight:800,fontSize:13,margin:"0 0 4px"}},"Implementacao tecnica"),
       h("p",{style:{fontSize:11,color:"#888",margin:"0 0 11px"}},"4 passos para ativar no Vercel:"),
       [
-        ["1","manifest.json","Coloque na raiz. Define nome, icones e cores do app.",'{
-  "name": "Nobre Bistro",
-  "short_name": "Nobre",
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#8B1A1A",
-  "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]
-}'],
-        ["2","sw.js","Service Worker — permite funcionar offline.",'const CACHE="nobre-v1";
-self.addEventListener("install",e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["/"])));
-  self.skipWaiting();
-});
-self.addEventListener("fetch",e=>{
-  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
-});'],
-        ["3","index.html <head>","Conecta o manifest para iOS e Android.",'<link rel="manifest" href="/manifest.json"/>
-<meta name="theme-color" content="#8B1A1A"/>
-<meta name="apple-mobile-web-app-capable" content="yes"/>
-<link rel="apple-touch-icon" href="/icon-192.png"/>'],
-        ["4","index.html <body>","Registra o Service Worker.",'<script>
-  if("serviceWorker" in navigator){
-    navigator.serviceWorker.register("/sw.js");
-  }
-<\/script>']
+        ["1","manifest.json","Coloque na raiz. Define nome, icones e cores do app.",'{\n  "name": "Nobre Bistro",\n  "short_name": "Nobre",\n  "start_url": "/",\n  "display": "standalone",\n  "theme_color": "#8B1A1A",\n  "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]\n}'],
+        ["2","sw.js","Service Worker — permite funcionar offline.",'const CACHE="nobre-v1";\nself.addEventListener("install",e=>{\n  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["/"])));\n  self.skipWaiting();\n});\nself.addEventListener("fetch",e=>{\n  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));\n});'],
+        ["3","index.html <head>","Conecta o manifest para iOS e Android.",'<link rel="manifest" href="/manifest.json"/>\n<meta name="theme-color" content="#8B1A1A"/>\n<meta name="apple-mobile-web-app-capable" content="yes"/>\n<link rel="apple-touch-icon" href="/icon-192.png"/>'],
+        ["4","index.html <body>","Registra o Service Worker.",'<script>\n  if("serviceWorker" in navigator){\n    navigator.serviceWorker.register("/sw.js");\n  }\n<\/script>']
       ].map(function(p){
         return h("div",{key:p[0],style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:13,marginBottom:10}},
           h("div",{style:{display:"flex",gap:8,alignItems:"center",marginBottom:7}},
@@ -1364,9 +1337,7 @@ self.addEventListener("fetch",e=>{
       }),
       h("div",{style:{background:"#f0fdf4",borderRadius:11,padding:"11px 13px",border:"1px solid #bbf7d0"}},
         h("p",{style:{margin:"0 0 5px",fontWeight:800,fontSize:12,color:"#15803d"}},"Requisitos"),
-        h("p",{style:{margin:0,fontSize:11,color:"#166534",lineHeight:1.7}},"HTTPS obrigatorio (Vercel ja fornece)
-manifest.json e sw.js na raiz do projeto
-Icones icon-192.png e icon-512.png (crie em canva.com)")
+        h("p",{style:{margin:0,fontSize:11,color:"#166534",lineHeight:1.7}},"HTTPS obrigatorio (Vercel ja fornece)\nmanifest.json e sw.js na raiz do projeto\nIcones icon-192.png e icon-512.png (crie em canva.com)")
       )
     )
   );
