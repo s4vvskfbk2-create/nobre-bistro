@@ -1307,6 +1307,249 @@ function TabClientes(props){
   );
 }
 
+/* ════ ERP API helper ════ */
+var SBH_ERP={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=representation"};
+async function erpGet(path){var r=await fetch(SBU+"/rest/v1/"+path,{headers:SBH_ERP});if(!r.ok)return[];return r.json();}
+async function erpPost(path,body){var r=await fetch(SBU+"/rest/v1/"+path,{method:"POST",headers:SBH_ERP,body:JSON.stringify(body)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function erpPatch(path,body){var r=await fetch(SBU+"/rest/v1/"+path,{method:"PATCH",headers:SBH_ERP,body:JSON.stringify(body)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function erpDel(path){await fetch(SBU+"/rest/v1/"+path,{method:"DELETE",headers:Object.assign({},SBH_ERP,{Prefer:""})});}
+
+function cmvBadge(v){var cls=v<=30?"#22c55e":v<=45?"#f59e0b":"#ef4444";var bg=v<=30?"#f0fdf4":v<=45?"#fffbeb":"#fee2e2";return h("span",{style:{background:bg,color:cls,fontSize:9,fontWeight:800,padding:"2px 8px",borderRadius:18}},v.toFixed(1)+"%");}
+
+/* ── ERP: Cardapio ── */
+function TabErpCardapio(){
+  var sd=us({cats:[],prods:[],ings:[]}),data=sd[0],setData=sd[1];
+  var sl=us(true),loading=sl[0],setLoading=sl[1];
+  var sm=us(null),modal=sm[0],setModal=sm[1];
+  var sf=us({nome:"",descricao:"",preco_venda:"",categoria_id:"",ingrediente_id:""}),form=sf[0],setForm=sf[1];
+  var sa=us(null),alerta=sa[0],setAlerta=sa[1];
+  function toast(msg,ok){setAlerta({msg:msg,ok:ok!==false});setTimeout(function(){setAlerta(null);},3500);}
+  function load(){setLoading(true);Promise.all([erpGet("categorias?order=ordem"),erpGet("produto?order=nome&select=*,categorias(nome),ingredientes(nome,custo_unitario)"),erpGet("ingredientes?order=nome&ativo=eq.true")]).then(function(res){setData({cats:res[0]||[],prods:res[1]||[],ings:res[2]||[]});setLoading(false);}).catch(function(){setLoading(false);});}
+  ue(function(){load();},[]);
+  function openNovo(){setForm({nome:"",descricao:"",preco_venda:"",categoria_id:"",ingrediente_id:""});setModal("prod");}
+  function openEdit(p){setForm({id:p.id,nome:p.nome,descricao:p.descricao||"",preco_venda:String(p.preco_venda||""),categoria_id:String(p.categoria_id||""),ingrediente_id:String(p.ingrediente_id||"")});setModal("prod");}
+  function salvarProd(){var body={nome:form.nome,descricao:form.descricao||null,preco_venda:parseFloat(form.preco_venda)||0,categoria_id:parseInt(form.categoria_id)||null,ingrediente_id:parseInt(form.ingrediente_id)||null};if(!body.nome){toast("Nome obrigatorio",false);return;}var p=form.id?erpPatch("produto?id=eq."+form.id,body):erpPost("produto",body);p.then(function(){setModal(null);toast("Salvo!");load();}).catch(function(e){toast(e.message,false);});}
+  function excluir(id){if(!confirm("Remover produto?"))return;erpDel("produto?id=eq."+id).then(function(){toast("Removido");load();});}
+  function toggleDisp(p){erpPatch("produto?id=eq."+p.id,{disponivel:!p.disponivel}).then(function(){load();});}
+  function openNovaCat(){setForm({nome:"",ordem:"0"});setModal("cat");}
+  function salvarCat(){if(!form.nome){toast("Nome obrigatorio",false);return;}erpPost("categorias",{nome:form.nome,ordem:parseInt(form.ordem)||0}).then(function(){setModal(null);toast("Categoria criada!");load();}).catch(function(e){toast(e.message,false);});}
+  var B2="#e8e2da";
+  return h("div",{style:{padding:"16px 14px"}},
+    alerta&&h("div",{style:{background:alerta.ok?"#f0fdf4":"#fee2e2",border:"1px solid "+(alerta.ok?"#86efac":"#fca5a5"),borderRadius:10,padding:"9px 13px",marginBottom:10,fontSize:12,fontWeight:600,color:alerta.ok?"#15803d":"#b91c1c"}},alerta.msg),
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
+      h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Cardapio ERP"),
+      h("div",{style:{display:"flex",gap:6}},
+        h("button",{onClick:openNovaCat,style:{background:"#6b7280",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Cat"),
+        h("button",{onClick:openNovo,style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Produto")
+      )
+    ),
+    loading&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Carregando..."),
+    !loading&&data.prods.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum produto. Crie o primeiro."),
+    !loading&&data.prods.map(function(p){
+      return h("div",{key:p.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+B2,padding:"10px 13px",marginBottom:7,display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}},
+        h("div",{style:{flex:1,minWidth:0}},
+          h("p",{style:{margin:0,fontWeight:700,fontSize:13}},p.nome),
+          h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},(p.categorias&&p.categorias.nome)||"Sem cat"," · ",fmt(p.preco_venda)," · Custo: ",fmt(p.custo_unitario||0)),
+          h("div",{style:{marginTop:3}},cmvBadge(p.cmv_pct||0))
+        ),
+        h("div",{style:{display:"flex",gap:5,flexShrink:0}},
+          h("button",{onClick:function(){toggleDisp(p);},style:{background:p.disponivel?"#f0fdf4":"#f3f4f6",border:"1px solid "+(p.disponivel?"#86efac":"#d1d5db"),borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:p.disponivel?"#15803d":"#6b7280"}},p.disponivel?"ON":"OFF"),
+          h("button",{onClick:function(){openEdit(p);},style:{background:"#faf8f5",border:"1px solid "+B2,borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer"}},"Edit"),
+          h("button",{onClick:function(){excluir(p.id);},style:{background:"#fee2e2",border:"1px solid #fecaca",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b91c1c"}},"Del")
+        )
+      );
+    }),
+    modal==="prod"&&h("div",{onClick:function(){setModal(null);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:440,maxHeight:"90vh",overflow:"auto",padding:"16px"}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},h("span",{style:{fontWeight:800,fontSize:15}},form.id?"Editar Produto":"Novo Produto"),h("button",{onClick:function(){setModal(null);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
+        h("input",{value:form.nome,onChange:function(e){setForm(Object.assign({},form,{nome:e.target.value}));},placeholder:"Nome *",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("input",{type:"number",value:form.preco_venda,onChange:function(e){setForm(Object.assign({},form,{preco_venda:e.target.value}));},placeholder:"Preco de venda R$",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("select",{value:form.categoria_id,onChange:function(e){setForm(Object.assign({},form,{categoria_id:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,background:"#fff"}},h("option",{value:""},"Sem categoria"),data.cats.map(function(c){return h("option",{key:c.id,value:c.id},c.nome);})),
+        h("select",{value:form.ingrediente_id,onChange:function(e){setForm(Object.assign({},form,{ingrediente_id:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:12,background:"#fff"}},h("option",{value:""},"Insumo (CMV automatico)"),data.ings.map(function(i){return h("option",{key:i.id,value:i.id},i.nome+" — "+fmt(i.custo_unitario||0));})),
+        h("div",{style:{display:"flex",gap:8}},
+          h("button",{onClick:salvarProd,style:{flex:1,background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Salvar"),
+          h("button",{onClick:function(){setModal(null);},style:{flex:1,background:"#fff",color:"#666",border:"1.5px solid "+B2,borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Cancelar")
+        )
+      )
+    ),
+    modal==="cat"&&h("div",{onClick:function(){setModal(null);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:380,padding:"16px"}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},h("span",{style:{fontWeight:800,fontSize:15}},"Nova Categoria"),h("button",{onClick:function(){setModal(null);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
+        h("input",{value:form.nome,onChange:function(e){setForm(Object.assign({},form,{nome:e.target.value}));},placeholder:"Nome da categoria *",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("input",{type:"number",value:form.ordem,onChange:function(e){setForm(Object.assign({},form,{ordem:e.target.value}));},placeholder:"Ordem",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:12,boxSizing:"border-box"}}),
+        h("div",{style:{display:"flex",gap:8}},
+          h("button",{onClick:salvarCat,style:{flex:1,background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Salvar"),
+          h("button",{onClick:function(){setModal(null);},style:{flex:1,background:"#fff",color:"#666",border:"1.5px solid "+B2,borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Cancelar")
+        )
+      )
+    )
+  );
+}
+
+/* ── ERP: Insumos ── */
+function TabErpInsumos(){
+  var sd=us([]),data=sd[0],setData=sd[1];
+  var sl=us(true),loading=sl[0],setLoading=sl[1];
+  var sm=us(false),modal=sm[0],setModal=sm[1];
+  var sf=us({nome:"",unidade:"un",custo_unitario:"",estoque_atual:"0",estoque_minimo:"0"}),form=sf[0],setForm=sf[1];
+  var sa=us(null),alerta=sa[0],setAlerta=sa[1];
+  var B2="#e8e2da";
+  function toast(msg,ok){setAlerta({msg:msg,ok:ok!==false});setTimeout(function(){setAlerta(null);},3500);}
+  function load(){setLoading(true);erpGet("ingredientes?order=nome").then(function(r){setData(r||[]);setLoading(false);}).catch(function(){setLoading(false);});}
+  ue(function(){load();},[]);
+  function salvar(){var body={nome:form.nome,unidade:form.unidade||"un",custo_unitario:parseFloat(form.custo_unitario)||0,estoque_atual:parseFloat(form.estoque_atual)||0,estoque_minimo:parseFloat(form.estoque_minimo)||0};if(!body.nome){toast("Nome obrigatorio",false);return;}erpPost("ingredientes",body).then(function(){setModal(false);setForm({nome:"",unidade:"un",custo_unitario:"",estoque_atual:"0",estoque_minimo:"0"});toast("Salvo!");load();}).catch(function(e){toast(e.message,false);});}
+  function excluir(id){if(!confirm("Remover?"))return;erpDel("ingredientes?id=eq."+id).then(function(){toast("Removido");load();});}
+  var baixos=data.filter(function(i){return (i.estoque_atual||0)<=(i.estoque_minimo||0)&&(i.estoque_minimo||0)>0;});
+  return h("div",{style:{padding:"16px 14px"}},
+    alerta&&h("div",{style:{background:alerta.ok?"#f0fdf4":"#fee2e2",border:"1px solid "+(alerta.ok?"#86efac":"#fca5a5"),borderRadius:10,padding:"9px 13px",marginBottom:10,fontSize:12,fontWeight:600,color:alerta.ok?"#15803d":"#b91c1c"}},alerta.msg),
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
+      h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Insumos"),
+      h("button",{onClick:function(){setModal(true);},style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Novo")
+    ),
+    baixos.length>0&&h("div",{style:{background:"#fff7ed",border:"1px solid #fed7aa",borderRadius:10,padding:"10px 13px",marginBottom:10}},
+      h("p",{style:{margin:0,fontSize:12,fontWeight:700,color:"#92400e"}},baixos.length+" abaixo do minimo"),
+      baixos.map(function(i){return h("p",{key:i.id,style:{margin:"3px 0 0",fontSize:11,color:"#78350f"}},i.nome+": "+Number(i.estoque_atual||0).toFixed(2)+" "+i.unidade);})
+    ),
+    loading&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Carregando..."),
+    !loading&&data.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum insumo cadastrado."),
+    !loading&&data.map(function(i){
+      var baixo=(i.estoque_atual||0)<=(i.estoque_minimo||0)&&(i.estoque_minimo||0)>0;
+      return h("div",{key:i.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+(baixo?"#fed7aa":B2),padding:"10px 13px",marginBottom:7,display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        h("div",null,
+          h("p",{style:{margin:0,fontWeight:700,fontSize:13}},i.nome),
+          h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},"Custo: "+fmt(i.custo_unitario||0)+"/"+i.unidade+" · Estoque: ",h("span",{style:{fontWeight:700,color:baixo?"#ea580c":"#15803d"}},Number(i.estoque_atual||0).toFixed(2)+" "+i.unidade))
+        ),
+        h("button",{onClick:function(){excluir(i.id);},style:{background:"#fee2e2",border:"1px solid #fecaca",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b91c1c"}},"Del")
+      );
+    }),
+    modal&&h("div",{onClick:function(){setModal(false);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:380,padding:"16px"}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},h("span",{style:{fontWeight:800,fontSize:15}},"Novo Insumo"),h("button",{onClick:function(){setModal(false);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
+        h("input",{value:form.nome,onChange:function(e){setForm(Object.assign({},form,{nome:e.target.value}));},placeholder:"Nome *",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}},
+          h("select",{value:form.unidade,onChange:function(e){setForm(Object.assign({},form,{unidade:e.target.value}));},style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",background:"#fff"}},["un","kg","g","L","ml"].map(function(u){return h("option",{key:u,value:u},u);})),
+          h("input",{type:"number",value:form.custo_unitario,onChange:function(e){setForm(Object.assign({},form,{custo_unitario:e.target.value}));},placeholder:"Custo R$",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}},
+          h("input",{type:"number",value:form.estoque_atual,onChange:function(e){setForm(Object.assign({},form,{estoque_atual:e.target.value}));},placeholder:"Estoque atual",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),
+          h("input",{type:"number",value:form.estoque_minimo,onChange:function(e){setForm(Object.assign({},form,{estoque_minimo:e.target.value}));},placeholder:"Estoque minimo",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("div",{style:{display:"flex",gap:8}},
+          h("button",{onClick:salvar,style:{flex:1,background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Salvar"),
+          h("button",{onClick:function(){setModal(false);},style:{flex:1,background:"#fff",color:"#666",border:"1.5px solid "+B2,borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Cancelar")
+        )
+      )
+    )
+  );
+}
+
+/* ── ERP: Fornecedores ── */
+function TabErpFornecedores(){
+  var sd=us([]),data=sd[0],setData=sd[1];
+  var sl=us(true),loading=sl[0],setLoading=sl[1];
+  var sm=us(false),modal=sm[0],setModal=sm[1];
+  var sf=us({nome:"",cnpj:"",telefone:"",contato:"",email:""}),form=sf[0],setForm=sf[1];
+  var sa=us(null),alerta=sa[0],setAlerta=sa[1];
+  var B2="#e8e2da";
+  function toast(msg,ok){setAlerta({msg:msg,ok:ok!==false});setTimeout(function(){setAlerta(null);},3500);}
+  function load(){setLoading(true);erpGet("fornecedores?order=nome").then(function(r){setData(r||[]);setLoading(false);}).catch(function(){setLoading(false);});}
+  ue(function(){load();},[]);
+  function salvar(){if(!form.nome){toast("Nome obrigatorio",false);return;}erpPost("fornecedores",{nome:form.nome,cnpj:form.cnpj||null,telefone:form.telefone||null,contato:form.contato||null,email:form.email||null}).then(function(){setModal(false);setForm({nome:"",cnpj:"",telefone:"",contato:"",email:""});toast("Salvo!");load();}).catch(function(e){toast(e.message,false);});}
+  function excluir(id){if(!confirm("Remover?"))return;erpDel("fornecedores?id=eq."+id).then(function(){toast("Removido");load();});}
+  return h("div",{style:{padding:"16px 14px"}},
+    alerta&&h("div",{style:{background:alerta.ok?"#f0fdf4":"#fee2e2",border:"1px solid "+(alerta.ok?"#86efac":"#fca5a5"),borderRadius:10,padding:"9px 13px",marginBottom:10,fontSize:12,fontWeight:600,color:alerta.ok?"#15803d":"#b91c1c"}},alerta.msg),
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
+      h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Fornecedores"),
+      h("button",{onClick:function(){setModal(true);},style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Novo")
+    ),
+    loading&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Carregando..."),
+    !loading&&data.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum fornecedor."),
+    !loading&&data.map(function(f){
+      return h("div",{key:f.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+B2,padding:"10px 13px",marginBottom:7,display:"flex",justifyContent:"space-between",alignItems:"center"}},
+        h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:13}},f.nome),h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},[f.cnpj,f.contato,f.telefone].filter(Boolean).join(" · ")||"Sem dados")),
+        h("div",{style:{display:"flex",gap:5}},
+          f.telefone&&h("button",{onClick:function(){abrirWpp(f.telefone,"Ola "+f.nome+"!");},style:{background:"#dcfce7",border:"1px solid #86efac",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#15803d"}},"WPP"),
+          h("button",{onClick:function(){excluir(f.id);},style:{background:"#fee2e2",border:"1px solid #fecaca",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b91c1c"}},"Del")
+        )
+      );
+    }),
+    modal&&h("div",{onClick:function(){setModal(false);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:380,padding:"16px"}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},h("span",{style:{fontWeight:800,fontSize:15}},"Novo Fornecedor"),h("button",{onClick:function(){setModal(false);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
+        h("input",{value:form.nome,onChange:function(e){setForm(Object.assign({},form,{nome:e.target.value}));},placeholder:"Nome *",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}},
+          h("input",{value:form.cnpj,onChange:function(e){setForm(Object.assign({},form,{cnpj:e.target.value}));},placeholder:"CNPJ",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),
+          h("input",{value:form.telefone,onChange:function(e){setForm(Object.assign({},form,{telefone:e.target.value}));},placeholder:"Telefone",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}},
+          h("input",{value:form.contato,onChange:function(e){setForm(Object.assign({},form,{contato:e.target.value}));},placeholder:"Contato",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),
+          h("input",{type:"email",value:form.email,onChange:function(e){setForm(Object.assign({},form,{email:e.target.value}));},placeholder:"Email",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("div",{style:{display:"flex",gap:8}},
+          h("button",{onClick:salvar,style:{flex:1,background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Salvar"),
+          h("button",{onClick:function(){setModal(false);},style:{flex:1,background:"#fff",color:"#666",border:"1.5px solid "+B2,borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Cancelar")
+        )
+      )
+    )
+  );
+}
+
+/* ── ERP: Compras ── */
+function TabErpCompras(){
+  var sd=us({compras:[],ings:[],forns:[]}),data=sd[0],setData=sd[1];
+  var sl=us(true),loading=sl[0],setLoading=sl[1];
+  var sm=us(false),modal=sm[0],setModal=sm[1];
+  var sf=us({fornecedor_id:"",data_compra:new Date().toISOString().slice(0,10),numero_nf:"",total_nf:"",ingrediente_id:"",quantidade:"",valor_unitario:""}),form=sf[0],setForm=sf[1];
+  var sa=us(null),alerta=sa[0],setAlerta=sa[1];
+  var B2="#e8e2da";
+  function toast(msg,ok){setAlerta({msg:msg,ok:ok!==false});setTimeout(function(){setAlerta(null);},3500);}
+  function load(){setLoading(true);Promise.all([erpGet("compras?order=created_at.desc&limit=40&select=*,fornecedores(nome)"),erpGet("ingredientes?order=nome&ativo=eq.true"),erpGet("fornecedores?order=nome")]).then(function(res){setData({compras:res[0]||[],ings:res[1]||[],forns:res[2]||[]});setLoading(false);}).catch(function(){setLoading(false);});}
+  ue(function(){load();},[]);
+  function salvar(){var ingId=parseInt(form.ingrediente_id),qtd=parseFloat(form.quantidade),vun=parseFloat(form.valor_unitario);if(!ingId||!qtd||!vun){toast("Insumo, quantidade e valor sao obrigatorios",false);return;}var total=parseFloat(form.total_nf)||(qtd*vun);erpPost("compras",{fornecedor_id:parseInt(form.fornecedor_id)||null,data_compra:form.data_compra,numero_nf:form.numero_nf||null,total_nf:total,status:"pendente"}).then(function(res){var compraId=Array.isArray(res)?res[0].id:res.id;var ing=data.ings.find(function(i){return i.id===ingId;});return erpPost("compra_itens",{compra_id:compraId,ingrediente_id:ingId,descricao:ing?ing.nome:"Item",quantidade:qtd,unidade:ing?ing.unidade:"un",valor_unitario:vun,valor_total:qtd*vun});}).then(function(){setModal(false);setForm({fornecedor_id:"",data_compra:new Date().toISOString().slice(0,10),numero_nf:"",total_nf:"",ingrediente_id:"",quantidade:"",valor_unitario:""});toast("Compra registrada!");load();}).catch(function(e){toast(e.message,false);});}
+  function avancar(c){var next=c.status==="pendente"?"conferida":"lancada";erpPatch("compras?id=eq."+c.id,{status:next}).then(function(){toast(next==="lancada"?"Lancada — estoque atualizado!":"Conferida.");load();}).catch(function(e){toast(e.message,false);});}
+  var STATUS_COR={pendente:"#f59e0b",conferida:"#3b82f6",lancada:"#22c55e"};
+  return h("div",{style:{padding:"16px 14px"}},
+    alerta&&h("div",{style:{background:alerta.ok?"#f0fdf4":"#fee2e2",border:"1px solid "+(alerta.ok?"#86efac":"#fca5a5"),borderRadius:10,padding:"9px 13px",marginBottom:10,fontSize:12,fontWeight:600,color:alerta.ok?"#15803d":"#b91c1c"}},alerta.msg),
+    h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
+      h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Compras"),
+      h("button",{onClick:function(){setModal(true);},style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Registrar")
+    ),
+    h("div",{style:{background:"#eff6ff",border:"1px solid #bfdbfe",borderRadius:10,padding:"10px 13px",marginBottom:12,fontSize:11,color:"#1e40af"}},"Pendente → Conferida → Lancada. Ao lancar, o estoque sobe automaticamente."),
+    loading&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Carregando..."),
+    !loading&&data.compras.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhuma compra."),
+    !loading&&data.compras.map(function(c){
+      return h("div",{key:c.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+B2,padding:"10px 13px",marginBottom:7}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}},
+          h("div",null,h("p",{style:{margin:0,fontWeight:700,fontSize:13}},(c.fornecedores&&c.fornecedores.nome)||"Sem fornecedor"),h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},new Date(c.data_compra+"T12:00:00").toLocaleDateString("pt-BR"),(c.numero_nf?" · NF "+c.numero_nf:"")," · ",fmt(c.total_nf||0))),
+          h("span",{style:{background:STATUS_COR[c.status]||"#aaa",color:"#fff",fontSize:9,fontWeight:800,padding:"2px 8px",borderRadius:18}},c.status)
+        ),
+        c.status!=="lancada"&&h("button",{onClick:function(){avancar(c);},style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:7,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}},c.status==="pendente"?"Marcar Conferida":"Lancar no Estoque")
+      );
+    }),
+    modal&&h("div",{onClick:function(){setModal(false);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:440,maxHeight:"90vh",overflow:"auto",padding:"16px"}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},h("span",{style:{fontWeight:800,fontSize:15}},"Registrar Compra"),h("button",{onClick:function(){setModal(false);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}},
+          h("input",{type:"date",value:form.data_compra,onChange:function(e){setForm(Object.assign({},form,{data_compra:e.target.value}));},style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),
+          h("input",{value:form.numero_nf,onChange:function(e){setForm(Object.assign({},form,{numero_nf:e.target.value}));},placeholder:"No. NF (opcional)",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("select",{value:form.fornecedor_id,onChange:function(e){setForm(Object.assign({},form,{fornecedor_id:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,background:"#fff"}},h("option",{value:""},"Sem fornecedor"),data.forns.map(function(f){return h("option",{key:f.id,value:f.id},f.nome);})),
+        h("select",{value:form.ingrediente_id,onChange:function(e){setForm(Object.assign({},form,{ingrediente_id:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,background:"#fff"}},h("option",{value:""},"Insumo *"),data.ings.map(function(i){return h("option",{key:i.id,value:i.id},i.nome+" ("+i.unidade+")");})),
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}},
+          h("input",{type:"number",value:form.quantidade,onChange:function(e){setForm(Object.assign({},form,{quantidade:e.target.value}));},placeholder:"Quantidade *",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),
+          h("input",{type:"number",value:form.valor_unitario,onChange:function(e){setForm(Object.assign({},form,{valor_unitario:e.target.value}));},placeholder:"Valor unit. R$ *",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("input",{type:"number",value:form.total_nf,onChange:function(e){setForm(Object.assign({},form,{total_nf:e.target.value}));},placeholder:"Total NF R$ (auto)",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:12,boxSizing:"border-box"}}),
+        h("div",{style:{display:"flex",gap:8}},
+          h("button",{onClick:salvar,style:{flex:1,background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Salvar"),
+          h("button",{onClick:function(){setModal(false);},style:{flex:1,background:"#fff",color:"#666",border:"1.5px solid "+B2,borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Cancelar")
+        )
+      )
+    )
+  );
+}
+
+
 function App(){
   var s1=us(null),nivel=s1[0],setNivel=s1[1];
   var s2=us(""),pass=s2[0],setPass=s2[1];
@@ -1361,7 +1604,7 @@ function App(){
     )
   );
 
-  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0],["clientes","Clientes",0],["centroIA","Centro IA",0],["receitas","Receitas",0]];
+  var TABS_G=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking],["cardapio","Cardapio",0],["caixa","Caixa",0],["historico","Historico",0],["fiado","Fiado",0],["quinzena","Quinzena",0],["equipe","Equipe",0],["horarios","Horarios",0],["financeiro","Financeiro",0],["consultor","Consultor",0],["clientes","Clientes",0],["centroIA","Centro IA",0],["receitas","Receitas",0],["erp_cardapio","Cad.ERP",0],["erp_insumos","Insumos",0],["erp_fornecedores","Fornecedores",0],["erp_compras","Compras",0]];
   var TABS_A=[["balcao","Balcao",0],["pedidos","Pedidos",pending],["cozinha","Cozinha",cooking]];
   var TABS_C=[["cozinha","Cozinha",cooking]];
   var tabs=nivel==="gerente"?TABS_G:nivel==="cozinha"?TABS_C:TABS_A;
@@ -1392,7 +1635,11 @@ function App(){
       tab==="fiado"&&(nivel==="gerente"?h(FiadoTab,{orders:orders,profs:profs}):null),
       tab==="quinzena"&&(nivel==="gerente"?h(QuinzenaTab,{orders:orders,profs:profs}):null),
       tab==="equipe"&&(nivel==="gerente"?h(EquipeTab,{profs:profs,setProfs:setProfs,orders:orders}):null),
-      tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders}),tab==="consultor"&&nivel==="gerente"&&h(TabConsultor,{orders:orders}),tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null)
+      tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders}),tab==="consultor"&&nivel==="gerente"&&h(TabConsultor,{orders:orders}),tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null),
+      tab==="erp_cardapio"&&nivel==="gerente"&&h(TabErpCardapio,null),
+      tab==="erp_insumos"&&nivel==="gerente"&&h(TabErpInsumos,null),
+      tab==="erp_fornecedores"&&nivel==="gerente"&&h(TabErpFornecedores,null),
+      tab==="erp_compras"&&nivel==="gerente"&&h(TabErpCompras,null)
     )
   );
 }
