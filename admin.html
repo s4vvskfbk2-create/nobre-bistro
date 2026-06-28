@@ -35,6 +35,31 @@ async function sbGet(k){try{var r=await fetch(SBU+"/rest/v1/config?key=eq."+k+"&
 async function sbSet(k,v){try{await fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})});}catch(e){}}
 async function uploadFoto(file){var fname=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"-");var buf=await file.arrayBuffer();var r=await fetch(SBU+"/storage/v1/object/produtos/"+fname,{method:"POST",headers:{"Authorization":"Bearer "+SBK,"Content-Type":file.type,"x-upsert":"true"},body:buf});if(r.ok)return SBU+"/storage/v1/object/public/produtos/"+fname;return null;}
 function abrirWpp(tel,msg){var t=(tel||"").replace(/\D/g,"");if(t.length>=10)t="55"+t;window.open("https://wa.me/"+t+"?text="+encodeURIComponent(msg),"_blank");}
+function buildFiadoResumo(nome,ordens,descPct){
+  var porDia={};
+  ordens.forEach(function(o){
+    var dia=(o.criadoEm||"").split(" ")[0]||"?";
+    if(!porDia[dia])porDia[dia]={ordens:[],sub:0};
+    porDia[dia].ordens.push(o);
+    porDia[dia].sub+=Number(o.total||0);
+  });
+  var total=ordens.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var descValor=total*(descPct/100);
+  var aDescontar=total-descValor;
+  var msg="Oi "+nome.split(" ")[0]+"! Seu fiado no Nobre Bistro:\n";
+  Object.keys(porDia).sort().forEach(function(dia){
+    var d=porDia[dia];
+    msg+="\n📅 "+dia+"\n";
+    d.ordens.forEach(function(o){
+      (o.items||[]).forEach(function(i){msg+="  - "+i.qty+"x "+i.name+" = "+fmt(i.price*i.qty)+"\n";});
+    });
+    if(d.ordens.length>1||Object.keys(porDia).length>1)msg+="  Subtotal do dia: "+fmt(d.sub)+"\n";
+  });
+  msg+="\n💳 Total acumulado: "+fmt(total);
+  if(descPct>0){msg+="\n✂️ Desconto "+descPct+"%: -"+fmt(descValor)+"\n📌 A descontar na folha: "+fmt(aDescontar);}
+  msg+="\n\nNobre Bistro";
+  return msg;
+}
 
 var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
 var DIAS=["Domingo","Segunda","Terca","Quarta","Quinta","Sexta","Sabado"];
@@ -99,8 +124,8 @@ function BalcaoTab(props){
         var fiadosAnt=prev.filter(function(o){return o.fiado&&o.profFiado===profSel&&!o.fiadoPago;});
         var totalAcum=fiadosAnt.reduce(function(s,o){return s+o.total;},0)+order.total;
         var desc=profObj?(profObj.desconto||0):0;
-        var aDescontar=totalAcum*(1-desc/100);
-        var msgFiado="Oi "+profSel.split(" ")[0]+"! Lancei no seu fiado:\n\n"+cart.map(function(i){return "- "+i.qty+"x "+i.name+" = "+fmt(i.price*i.qty);}).join("\n")+"\n\nEste lancamento: "+fmt(total)+"\nAcumulado quinzena: "+fmt(totalAcum)+(desc>0?"\nDesconto "+desc+"%: -"+fmt(totalAcum*desc/100)+"\nA descontar na folha: "+fmt(aDescontar):"")+"\n\nNobre Bistro";
+        var todosOrdens=fiadosAnt.concat([order]);
+        var msgFiado=buildFiadoResumo(profSel,todosOrdens,desc);
         if(profObj&&profObj.telefone){
           setTimeout(function(){abrirWpp(profObj.telefone,msgFiado);},800);
         }
@@ -579,10 +604,7 @@ function FiadoTab(props){
         ),
         h("div",{style:{display:"flex",gap:6,marginTop:9}},
           profObj&&profObj.telefone?h("button",{onClick:function(){
-            var msg="Oi "+nome.split(" ")[0]+"! Saldo do seu fiado no Nobre Bistro:\n\n";
-            dados.orders.forEach(function(o){msg+="📅 "+o.criadoEm+"\n";(o.items||[]).forEach(function(i){msg+="  - "+i.qty+"x "+i.name+" = "+fmt(i.price*i.qty)+"\n";});msg+="  Subtotal: "+fmt(o.total)+"\n\n";});
-            msg+="💳 Total: "+fmt(dados.total)+(desc>0?"\n✂️ Desconto "+desc+"%: -"+fmt(descValor)+"\n📌 A descontar na folha: "+fmt(saldo):"")+"\n\nNobre Bistro";
-            abrirWpp(profObj.telefone,msg);
+            abrirWpp(profObj.telefone,buildFiadoResumo(nome,dados.orders,desc));
           },style:{flex:1,background:"#25D366",color:"#fff",border:"none",borderRadius:8,padding:"8px 0",fontSize:11,fontWeight:700,cursor:"pointer"}},"📲 Enviar WPP"):
           h("p",{style:{flex:1,fontSize:9,color:"#aaa",margin:0,padding:"8px 0",textAlign:"center"}},"Sem telefone (cadastre em Equipe)"),
           h("button",{onClick:function(){marcarPago(nome);},style:{flex:1,background:"#fff",border:"1.5px solid #22c55e",color:"#16a34a",borderRadius:8,padding:"8px 0",fontSize:11,fontWeight:700,cursor:"pointer"}},"✓ Marcar pago")
@@ -609,10 +631,7 @@ function QuinzenaTab(props){
   }).filter(function(p){return p.totalQ>0;});
   function enviarWPP(p){
     if(!p.telefone)return;
-    var msg="Oi "+p.name.split(" ")[0]+"! Fechamento da quinzena no Nobre Bistro:\n\n";
-    p.fiadosQ.forEach(function(o){msg+="📅 "+o.criadoEm+"\n";(o.items||[]).forEach(function(i){msg+="  - "+i.qty+"x "+i.name+" = "+fmt(i.price*i.qty)+"\n";});msg+="  Subtotal: "+fmt(o.total)+"\n\n";});
-    msg+="💳 Total consumido: "+fmt(p.totalQ)+"\n✂️ Desconto "+p.desconto+"%: -"+fmt(p.descValor)+"\n📌 A descontar na folha: "+fmt(p.liquido)+"\n\nNobre Bistro";
-    abrirWpp(p.telefone,msg);
+    abrirWpp(p.telefone,buildFiadoResumo(p.name,p.fiadosQ,p.desconto));
   }
   function fecharQuinzena(){
     if(!window.confirm("Fechar a quinzena e marcar todos os fiados como pagos/descontados?"))return;
