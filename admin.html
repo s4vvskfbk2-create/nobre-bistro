@@ -56,7 +56,7 @@ function buildFiadoResumo(nome,ordens,descPct){
     if(d.ordens.length>1||Object.keys(porDia).length>1)msg+="  Subtotal do dia: "+fmt(d.sub)+"\n";
   });
   msg+="\n💳 Total acumulado: "+fmt(total);
-  if(descPct>0){msg+="\n✂️ Desconto "+descPct+"%: -"+fmt(descValor)+"\n📌 A descontar na folha: "+fmt(aDescontar);}
+  if(descPct>0){msg+="\n✂️ Desconto "+descPct+"%: -"+fmt(descValor)+"\n📌 Total a pagar ao Nobre Bistro: "+fmt(aDescontar);}
   msg+="\n\nNobre Bistro";
   return msg;
 }
@@ -556,7 +556,7 @@ function FiadoTab(props){
   var lista=Object.entries(porProf).sort(function(a,b){return b[1].total-a[1].total;});
   var totalGeral=lista.reduce(function(s,e){return s+e[1].total;},0);
   function marcarPago(nome){
-    if(!window.confirm("Marcar fiado de "+nome+" como pago/descontado na folha?"))return;
+    if(!window.confirm("Marcar fiado de "+nome+" como pago ao Nobre Bistro?"))return;
     var n=orders.map(function(o){return (o.fiado&&o.profFiado===nome&&!o.fiadoPago)?Object.assign({},o,{fiadoPago:true,pagoEm:nowStr()}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);
   }
@@ -583,7 +583,7 @@ function FiadoTab(props){
             ),
             h("div",{style:{textAlign:"right"}},
               h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:R}},fmt(dados.total)),
-              desc>0&&h("p",{style:{margin:"2px 0 0",fontSize:10,color:"#16a34a",fontWeight:700}},"Desc "+desc+"% → folha: "+fmt(saldo))
+              desc>0&&h("p",{style:{margin:"2px 0 0",fontSize:10,color:"#16a34a",fontWeight:700}},"Desc "+desc+"% → a pagar: "+fmt(saldo))
             )
           )
         ),
@@ -591,7 +591,7 @@ function FiadoTab(props){
           [
             ["Consumo bruto",fmt(dados.total),"#555"],
             desc>0&&["Desconto "+desc+"%","− "+fmt(descValor),"#16a34a"],
-            ["A descontar na folha",fmt(saldo),R]
+            ["A pagar ao Nobre Bistro",fmt(saldo),R]
           ].filter(Boolean).map(function(arr,i,all){return h("div",{key:i,style:{display:"flex",justifyContent:"space-between",fontSize:11,padding:i===all.length-1?"5px 0 0":"3px 0",borderTop:i===all.length-1?"1px solid "+B:"none",marginTop:i===all.length-1?3:0,fontWeight:i===all.length-1?800:400}},h("span",{style:{color:arr[2]}},arr[0]),h("span",{style:{fontWeight:700,color:arr[2]}},arr[1]));})
         ),
         aberto&&h("div",{style:{marginTop:10,borderTop:"1px solid "+B,paddingTop:10}},
@@ -645,7 +645,7 @@ function QuinzenaTab(props){
     h("p",{style:{fontSize:11,color:"#888",margin:"0 0 10px"}},qLabel),
     eDiaFechamento&&!fechouHoje&&h("div",{style:{background:"#fef9c3",border:"1.5px solid #ca8a04",borderRadius:11,padding:"13px 14px",marginBottom:12}},
       h("p",{style:{margin:"0 0 4px",fontWeight:800,fontSize:13,color:"#92400e"}},"Hoje é dia "+dia+" — hora de fechar!"),
-      h("p",{style:{margin:"0 0 10px",fontSize:11,color:"#78350f"}},"Clique em Fechar Quinzena para descontar os fiados e enviar o WPP para cada uma automaticamente."),
+      h("p",{style:{margin:"0 0 10px",fontSize:11,color:"#78350f"}},"Clique em Fechar Quinzena para cobrar o fiado e enviar o WPP para cada uma automaticamente."),
       metricas.length>0?h("button",{onClick:fecharQuinzena,style:{width:"100%",background:"#ca8a04",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Fechar quinzena e enviar WPP para todas"):
       h("p",{style:{fontSize:11,color:"#aaa",textAlign:"center"}},"Nenhum fiado em aberto nesta quinzena")
     ),
@@ -655,7 +655,7 @@ function QuinzenaTab(props){
     metricas.length===0&&!eDiaFechamento&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum fiado nesta quinzena"),
     metricas.length>0&&h("div",{style:{background:R,borderRadius:11,padding:"11px 13px",marginBottom:12,color:"#fff",display:"flex",justifyContent:"space-between",alignItems:"center"}},
       h("div",null,
-        h("p",{style:{margin:"0 0 2px",fontSize:9,fontWeight:700,opacity:.75,textTransform:"uppercase"}},"Total a descontar"),
+        h("p",{style:{margin:"0 0 2px",fontSize:9,fontWeight:700,opacity:.75,textTransform:"uppercase"}},"Total a receber"),
         h("p",{style:{margin:0,fontWeight:900,fontSize:20}},fmt(metricas.reduce(function(s,p){return s+p.liquido;},0)))
       ),
       !eDiaFechamento&&h("button",{onClick:fecharQuinzena,style:{background:"rgba(255,255,255,.18)",border:"1.5px solid rgba(255,255,255,.4)",color:"#fff",borderRadius:8,padding:"7px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"Fechar e enviar WPP")
@@ -663,10 +663,10 @@ function QuinzenaTab(props){
     metricas.map(function(p){return h("div",{key:p.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"11px 12px",marginBottom:9}},
       h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:9}},
         h("div",null,h("p",{style:{margin:0,fontWeight:800,fontSize:13}},p.name),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},p.fiadosQ.length+" lançamento"+(p.fiadosQ.length!==1?"s":""))),
-        h("div",{style:{textAlign:"right"}},h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:R}},fmt(p.liquido)),h("p",{style:{margin:"1px 0 0",fontSize:9,color:"#aaa"}},"a descontar"))
+        h("div",{style:{textAlign:"right"}},h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:R}},fmt(p.liquido)),h("p",{style:{margin:"1px 0 0",fontSize:9,color:"#aaa"}},"a receber"))
       ),
       h("div",{style:{background:C,borderRadius:8,padding:"7px 9px",marginBottom:9}},
-        [["Consumo bruto",fmt(p.totalQ),"#555"],["Desconto "+p.desconto+"%","− "+fmt(p.descValor),"#16a34a"],["A descontar na folha",fmt(p.liquido),R]].map(function(arr,i){return h("div",{key:i,style:{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:i<2?4:0,borderTop:i===2?"1px solid "+B:"none",paddingTop:i===2?5:0,marginTop:i===2?3:0,fontWeight:i===2?800:400}},h("span",{style:{color:arr[2]}},arr[0]),h("span",{style:{fontWeight:700,color:arr[2]}},arr[1]));})
+        [["Consumo bruto",fmt(p.totalQ),"#555"],["Desconto "+p.desconto+"%","− "+fmt(p.descValor),"#16a34a"],["A pagar ao Nobre Bistro",fmt(p.liquido),R]].map(function(arr,i){return h("div",{key:i,style:{display:"flex",justifyContent:"space-between",fontSize:11,marginBottom:i<2?4:0,borderTop:i===2?"1px solid "+B:"none",paddingTop:i===2?5:0,marginTop:i===2?3:0,fontWeight:i===2?800:400}},h("span",{style:{color:arr[2]}},arr[0]),h("span",{style:{fontWeight:700,color:arr[2]}},arr[1]));})
       ),
       p.telefone?h("button",{onClick:function(){enviarWPP(p);},style:{width:"100%",background:"#25D366",color:"#fff",border:"none",borderRadius:8,padding:"8px 0",fontSize:11,fontWeight:700,cursor:"pointer"}},"📲 Enviar resumo WPP"):
       h("p",{style:{fontSize:9,color:"#aaa",textAlign:"center",margin:0}},"Sem telefone — cadastre em Equipe")
@@ -920,7 +920,7 @@ function HistoricoTab(props){
           h("p",{style:{margin:0,fontSize:11,opacity:.75}},dadosP.orders.length+" pedidos")
         ),
         h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:6}},
-          [["Consumo",fmt(totalBruto)],["Desc "+desc+"%","-"+fmt(descValor)],["Na folha",fmt(liquido)]].map(function(arr){return h("div",{key:arr[0],style:{background:"rgba(255,255,255,.12)",borderRadius:7,padding:"6px 8px"}},h("p",{style:{margin:0,fontSize:8,opacity:.75}},arr[0]),h("p",{style:{margin:0,fontWeight:900,fontSize:12,fontFamily:"Georgia,serif"}},arr[1]));})
+          [["Consumo",fmt(totalBruto)],["Desc "+desc+"%","-"+fmt(descValor)],["A pagar",fmt(liquido)]].map(function(arr){return h("div",{key:arr[0],style:{background:"rgba(255,255,255,.12)",borderRadius:7,padding:"6px 8px"}},h("p",{style:{margin:0,fontSize:8,opacity:.75}},arr[0]),h("p",{style:{margin:0,fontWeight:900,fontSize:12,fontFamily:"Georgia,serif"}},arr[1]));})
         )
       ),
       dadosP.orders.length===0&&h("div",{style:{textAlign:"center",padding:"32px 0",color:"#bbb"}},
@@ -940,7 +940,7 @@ function HistoricoTab(props){
         )
       );}),
       profObj&&profObj.telefone&&h("button",{onClick:function(){
-        var msg="Oi "+selNome.split(" ")[0]+"! Resumo do fiado:\n\n"+getPLabel()+"\n\nTotal consumido: "+fmt(totalBruto)+"\nDesconto "+desc+"%: -"+fmt(descValor)+"\nDesconto na folha: "+fmt(liquido)+"\n\nNobre Bistro";
+        var msg="Oi "+selNome.split(" ")[0]+"! Resumo do fiado:\n\n"+getPLabel()+"\n\nTotal consumido: "+fmt(totalBruto)+"\nDesconto "+desc+"%: -"+fmt(descValor)+"\nTotal a pagar ao Nobre Bistro: "+fmt(liquido)+"\n\nNobre Bistro";
         abrirWpp(profObj.telefone,msg);
       },style:{width:"100%",marginTop:10,background:"#25D366",color:"#fff",border:"none",borderRadius:9,padding:"9px 0",fontSize:12,fontWeight:700,cursor:"pointer"}},"Enviar resumo WPP")
     );
