@@ -1674,7 +1674,7 @@ function App(){
       ),
       h("div",{style:{background:"#fff",borderRadius:18,padding:28,border:"1px solid "+B,boxShadow:"0 4px 24px rgba(0,0,0,.08)"}},
         h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Senha ou PIN"),
-        h("input",{type:"password",value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:function(e){if(e.key==="Enter")fazerLogin(pass);},placeholder:"Digite sua senha ou PIN",inputMode:"numeric",autoFocus:true,style:{width:"100%",border:"1.5px solid "+(err?"#fca5a5":B),borderRadius:9,padding:"12px",fontSize:16,outline:"none",boxSizing:"border-box",letterSpacing:3,textAlign:"center"}}),
+        h("input",{type:"password",value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:function(e){if(e.key==="Enter")fazerLogin(pass);},placeholder:"Digite sua senha ou PIN",inputMode:"text",autoCapitalize:"none",autoFocus:true,style:{width:"100%",border:"1.5px solid "+(err?"#fca5a5":B),borderRadius:9,padding:"12px",fontSize:16,outline:"none",boxSizing:"border-box",letterSpacing:3,textAlign:"center"}}),
         err&&h("p",{style:{color:"#ef4444",fontSize:11,margin:"4px 0 0",fontWeight:600}},"Senha ou PIN incorreto"),
         h("button",{onClick:function(){fazerLogin(pass);},style:{width:"100%",marginTop:10,background:R,color:"#fff",border:"none",borderRadius:11,padding:"14px 0",minHeight:48,fontSize:14,fontWeight:800,cursor:"pointer",letterSpacing:"-0.01em"}},"Entrar"),
         h("div",{style:{marginTop:14,borderTop:"1px solid "+B,paddingTop:12}},
