@@ -645,7 +645,7 @@ function EquipeTab(props){
         h(Inp,{label:"PIN de login",value:String(form.pin||""),onChange:function(v){setForm(Object.assign({},form,{pin:v.replace(/[^0-9]/g,"")}));},type:"text",placeholder:"Ex: 1234",hint:"Só números. Deixe vazio se não usa o sistema."}),
         h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Pode acessar como"),
         h("div",{style:{display:"flex",gap:5}},
-          [["atendente","Atendente"],["cozinha","Cozinha"],["gerente","Gerente"]].map(function(arr){var a=(form.papel||"atendente")===arr[0];return h("button",{key:arr[0],onClick:function(){setForm(Object.assign({},form,{papel:arr[0]}));},style:{flex:1,padding:"7px 0",borderRadius:8,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})
+          [["atendente","Atendente"],["gerente","Gerente"]].map(function(arr){var a=(form.papel||"atendente")===arr[0];return h("button",{key:arr[0],onClick:function(){setForm(Object.assign({},form,{papel:arr[0]}));},style:{flex:1,padding:"7px 0",borderRadius:8,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer"}},arr[1]);})
         )
       ),
       h("label",{style:{display:"flex",alignItems:"center",gap:6,cursor:"pointer",fontSize:12,fontWeight:700,color:"#555",marginBottom:14}},
@@ -1611,6 +1611,70 @@ function TabErpCompras(){
   );
 }
 
+function TabMeuDesempenho(props){
+  var orders=props.orders||[];var operador=props.operador||"";var profs=props.profs||[];
+  var today=todayKey();
+  var pedidosHoje=orders.filter(function(o){return (o.criadoEm||"").indexOf(today)===0;});
+  var meusPedidos=pedidosHoje.filter(function(o){return o.operador===operador;});
+  var totalDia=pedidosHoje.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var meuTotal=meusPedidos.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var pct=totalDia>0?((meuTotal/totalDia)*100):0;
+  var prof=profs.find(function(p){return p.name===operador;});
+  var comissaoPct=prof?(prof.comissao||0):0;
+  var comissaoValor=meuTotal*comissaoPct/100;
+  return h("div",{style:{padding:16}},
+    h("div",{style:{background:R,borderRadius:16,padding:"18px 16px",color:"#fff",marginBottom:14}},
+      h("p",{style:{fontSize:11,fontWeight:700,opacity:.7,marginBottom:4,textTransform:"uppercase"}},"Olá,"),
+      h("h2",{style:{fontSize:22,fontWeight:900,letterSpacing:"-0.03em",marginBottom:2}},operador),
+      h("p",{style:{fontSize:11,opacity:.7}},today)
+    ),
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}},
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:14}},
+        h("p",{style:{fontSize:10,color:"#888",fontWeight:700,textTransform:"uppercase",marginBottom:6}},"Minhas vendas"),
+        h("p",{style:{fontSize:18,fontWeight:900,color:R,letterSpacing:"-0.03em"}},fmt(meuTotal))
+      ),
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:14}},
+        h("p",{style:{fontSize:10,color:"#888",fontWeight:700,textTransform:"uppercase",marginBottom:6}},"Do total do dia"),
+        h("p",{style:{fontSize:18,fontWeight:900,color:pct>0?"#16a34a":"#aaa",letterSpacing:"-0.03em"}},pct.toFixed(1)+"%")
+      ),
+      h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:14}},
+        h("p",{style:{fontSize:10,color:"#888",fontWeight:700,textTransform:"uppercase",marginBottom:6}},"Pedidos"),
+        h("p",{style:{fontSize:18,fontWeight:900,color:TX,letterSpacing:"-0.03em"}},meusPedidos.length)
+      ),
+      comissaoPct>0&&h("div",{style:{background:C,borderRadius:14,border:"1.5px solid "+R+"40",padding:14}},
+        h("p",{style:{fontSize:10,color:"#888",fontWeight:700,textTransform:"uppercase",marginBottom:6}},"Comissão ("+comissaoPct+"%)"),
+        h("p",{style:{fontSize:18,fontWeight:900,color:R,letterSpacing:"-0.03em"}},fmt(comissaoValor))
+      )
+    ),
+    totalDia>0&&h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,padding:14,marginBottom:14}},
+      h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:8}},
+        h("span",{style:{fontSize:12,fontWeight:700}},"Participação no dia"),
+        h("span",{style:{fontSize:12,fontWeight:900,color:R}},pct.toFixed(1)+"%")
+      ),
+      h("div",{style:{height:10,background:"#f0ece6",borderRadius:10,overflow:"hidden"}},
+        h("div",{style:{height:"100%",width:Math.min(pct,100)+"%",background:R,borderRadius:10,transition:"width .6s ease"}})
+      ),
+      h("div",{style:{display:"flex",justifyContent:"space-between",marginTop:6}},
+        h("span",{style:{fontSize:10,color:"#aaa"}},"Meu total: "+fmt(meuTotal)),
+        h("span",{style:{fontSize:10,color:"#aaa"}},"Total dia: "+fmt(totalDia))
+      )
+    ),
+    h("p",{style:{fontWeight:800,fontSize:13,marginBottom:8}},"Meus pedidos hoje"),
+    meusPedidos.length===0?h("p",{style:{fontSize:12,color:"#aaa",textAlign:"center",padding:"20px 0"}},"Nenhum pedido lançado hoje ainda"):
+    h("div",{style:{display:"flex",flexDirection:"column",gap:6}},
+      meusPedidos.slice().reverse().map(function(o){
+        return h("div",{key:o.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+B,padding:"10px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}},
+          h("div",null,
+            h("p",{style:{fontSize:12,fontWeight:700,marginBottom:2}},o.nome||"—"),
+            h("p",{style:{fontSize:10,color:"#aaa"}},(o.criadoEm||"").split(" ")[1]||"")
+          ),
+          h("span",{style:{fontWeight:900,fontSize:14,color:R}},fmt(o.total))
+        );
+      })
+    )
+  );
+}
+
 function App(){
   var s1=us(null),nivel=s1[0],setNivel=s1[1];
   var s2=us(""),pass=s2[0],setPass=s2[1];
@@ -1624,7 +1688,7 @@ function App(){
   var s10=us("pedidos"),tab=s10[0],setTab=s10[1];
   var s11=us("oper"),grupo=s11[0],setGrupo=s11[1];
   var s12=us(""),operador=s12[0],setOperador=s12[1];
-  var SENHAS_DEFAULT={gerente:"nobre2025",atendente:"balcao",cozinha:"cozinha",cancelPin:"nobre2025"};
+  var SENHAS_DEFAULT={gerente:"nobre2025",atendente:"balcao",cancelPin:"nobre2025"};
   var s13=us(SENHAS_DEFAULT),senhas=s13[0],setSenhas=s13[1];
 
   ue(function(){
@@ -1653,14 +1717,12 @@ function App(){
 
   function irPara(role){
     if(role==="gerente"){setGrupo("oper");setTab("dashboard");}
-    else if(role==="cozinha"){setGrupo("oper");setTab("cozinha");}
     else{setGrupo("oper");setTab("balcao");}
   }
   function fazerLogin(valor){
     var v=(valor||"").trim();
     if(v===senhas.gerente||v==="nobre2025"){setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");return;}
     if(v===senhas.atendente){setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");return;}
-    if(v===senhas.cozinha){setOperador("Cozinha");setNivel("cozinha");irPara("cozinha");setPass("");return;}
     var p=profs.filter(function(x){return x.active!==false&&x.pin&&String(x.pin)===v;})[0];
     if(p){var role=p.papel||"atendente";setOperador(p.name);setNivel(role);irPara(role);setPass("");return;}
     setErr(true);setTimeout(function(){setErr(false);},2000);setPass("");
@@ -1690,7 +1752,7 @@ function App(){
 
   var TAB_META={
     dashboard:{l:"Resumo",i:"🏠"},
-    balcao:{l:"Balcão",i:"🛎️"},pedidos:{l:"Pedidos",i:"📋"},cozinha:{l:"Cozinha",i:"👨‍🍳"},
+    balcao:{l:"Balcão",i:"🛎️"},pedidos:{l:"Pedidos",i:"📋"},cozinha:{l:"Cozinha",i:"👨‍🍳"},meu_desempenho:{l:"Minhas Vendas",i:"📈"},
     caixa:{l:"Caixa do dia",i:"💵"},financeiro:{l:"Relatórios",i:"📊"},fechamento:{l:"Fechar caixa",i:"🔐"},despesas:{l:"Despesas",i:"🧾"},consultor:{l:"Consultor IA",i:"🤖"},
     fiado:{l:"Em aberto",i:"📒"},quinzena:{l:"Fechar quinzena",i:"🗓️"},historico:{l:"Histórico",i:"🕘"},
     cardapio:{l:"Cardápio",i:"📖"},receitas:{l:"Receitas/CMV",i:"🍳"},
@@ -1700,14 +1762,14 @@ function App(){
   };
   var BADGE={pedidos:pending,cozinha:cooking};
   var ALL_GROUPS=[
-    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","balcao","pedidos","cozinha"]},
+    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","balcao","pedidos","cozinha","meu_desempenho"]},
     {id:"caixa",l:"Dinheiro",i:"💰",tabs:["caixa","financeiro","fechamento","despesas","consultor"]},
     {id:"fiado",l:"Fiado",i:"📒",tabs:["fiado","quinzena","historico"]},
     {id:"cardapio",l:"Cardápio",i:"📖",tabs:["cardapio","receitas","erp_cardapio","erp_insumos","erp_fornecedores","erp_compras"]},
     {id:"clientes",l:"Clientes",i:"⭐",tabs:["clientes","centroIA"]},
     {id:"equipe",l:"Equipe",i:"👥",tabs:["equipe","comissoes","horarios","config"]}
   ];
-  var allowedTabs=nivel==="gerente"?null:nivel==="cozinha"?["cozinha"]:["balcao","pedidos","cozinha"];
+  var allowedTabs=nivel==="gerente"?null:["balcao","pedidos","meu_desempenho"];
   var groups=ALL_GROUPS.map(function(g){
     var ts=allowedTabs?g.tabs.filter(function(t){return allowedTabs.indexOf(t)>=0;}):g.tabs;
     return Object.assign({},g,{tabs:ts});
@@ -1750,6 +1812,7 @@ function App(){
       tab==="balcao"&&h(BalcaoTab,{prods:prods,profs:profs,orders:orders,setOrders:setOrders,setProds:setProds,operador:operador}),
       tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders,nivel:nivel,operador:operador,senhaCancel:senhas.cancelPin}),
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
+      tab==="meu_desempenho"&&h(TabMeuDesempenho,{orders:orders,operador:operador,profs:profs}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
       tab==="fechamento"&&(nivel==="gerente"?h(TabFechamento,{orders:orders,operador:operador}):null),
@@ -2759,14 +2822,14 @@ function TabDashboard(props){
 
 function TabConfig(props){
   var senhas=props.senhas,setSenhas=props.setSenhas;
-  var s1=us(Object.assign({gerente:"",atendente:"",cozinha:"",cancelPin:""},senhas)),f=s1[0],setF=s1[1];
+  var s1=us(Object.assign({gerente:"",atendente:"",cancelPin:""},senhas)),f=s1[0],setF=s1[1];
   var s2=us(false),okS=s2[0],setOkS=s2[1];
   var s3=us(""),metaDia=s3[0],setMetaDia=s3[1];
   var s4=us(false),okM=s4[0],setOkM=s4[1];
   ue(function(){sbGet("nb_bA_meta").then(function(m){if(m&&m.diaria!=null)setMetaDia(String(m.diaria));});},[]);
   function up(k,v){var o={};o[k]=v;setF(Object.assign({},f,o));}
   function salvarSenhas(){
-    if(!f.gerente||!f.atendente||!f.cozinha||!f.cancelPin){window.alert("Preencha todas as senhas.");return;}
+    if(!f.gerente||!f.atendente||!f.cancelPin){window.alert("Preencha todas as senhas.");return;}
     setSenhas(f);sbSet("nb_bA_senhas",f);setOkS(true);setTimeout(function(){setOkS(false);},2500);
   }
   function salvarMeta(){sbSet("nb_bA_meta",{diaria:parseFloat(metaDia)||0});setOkM(true);setTimeout(function(){setOkM(false);},2500);}
@@ -2777,7 +2840,6 @@ function TabConfig(props){
       h("p",{style:{margin:"0 0 12px",fontSize:11,color:"#888"}},"Troque aqui sem mexer no código. Vale na hora pra todos."),
       h(Inp,{label:"Senha do Gerente",value:f.gerente,onChange:function(v){up("gerente",v);}}),
       h(Inp,{label:"Senha do Atendente",value:f.atendente,onChange:function(v){up("atendente",v);}}),
-      h(Inp,{label:"Senha da Cozinha",value:f.cozinha,onChange:function(v){up("cozinha",v);}}),
       h(Inp,{label:"Senha para cancelar pedido",value:f.cancelPin,onChange:function(v){up("cancelPin",v);},hint:"Pedida toda vez que alguém cancela uma venda"}),
       okS&&h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,margin:"0 0 8px"}},"Senhas salvas!"),
       h(Btn,{full:true,onClick:salvarSenhas},"Salvar senhas")
