@@ -31,10 +31,6 @@ function todayKey(){
   var yyyy=d.getFullYear();
   return dd+"/"+mm+"/"+yyyy;
 }
-function isHoje(criadoEm){
-  if(!criadoEm)return false;
-  return criadoEm.indexOf(todayKey())===0;
-}
 async function sbGet(k){try{var r=await fetch(SBU+"/rest/v1/config?key=eq."+k+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}});var d=await r.json();return d&&d.length?d[0].value:null;}catch(e){return null;}}
 async function sbSet(k,v){try{await fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})});}catch(e){}}
 async function uploadFoto(file){var fname=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"-");var buf=await file.arrayBuffer();var r=await fetch(SBU+"/storage/v1/object/produtos/"+fname,{method:"POST",headers:{"Authorization":"Bearer "+SBK,"Content-Type":file.type,"x-upsert":"true"},body:buf});if(r.ok)return SBU+"/storage/v1/object/public/produtos/"+fname;return null;}
@@ -129,11 +125,12 @@ function BalcaoTab(props){
     h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 12px",letterSpacing:"-0.02em",fontFamily:"Georgia,serif"}},"Balcao"),
     h("input",{value:busca,onChange:function(e){setBusca(e.target.value);},placeholder:"Buscar produto...",style:{width:"100%",border:"1.5px solid "+B,borderRadius:24,padding:"10px 16px",fontSize:13,outline:"none",boxSizing:"border-box",marginBottom:10,background:"#fff"}}),
     !busca&&h("div",{style:{display:"flex",overflowX:"auto",gap:5,marginBottom:8}},CATS.map(function(c){var a=cat===c.id;return h("button",{key:c.id,onClick:function(){setCat(c.id);},style:{flexShrink:0,padding:"5px 11px",borderRadius:18,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:11,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},c.label);})),
-    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:12}},
-      prodsFilt.map(function(p){var esg=p.stock===0;return h("button",{key:p.id,onClick:function(){if(!esg)addItem(p);},disabled:esg,style:{background:esg?"#f5f5f5":"#fff",border:"1.5px solid "+B,borderRadius:10,padding:"9px",cursor:esg?"not-allowed":"pointer",textAlign:"left",opacity:esg?.5:1}},
-        h("p",{style:{margin:"0 0 2px",fontWeight:700,fontSize:12,color:"#1a1a1a"}},p.name),
-        h("p",{style:{margin:0,fontWeight:900,fontSize:13,color:R,fontFamily:"Georgia,serif"}},fmt(p.price)),
-        h("p",{style:{margin:"1px 0 0",fontSize:9,color:"#aaa"}},esg?"Esgotado":p.stock+" un")
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:12}},
+      prodsFilt.map(function(p){var esg=p.stock===0;return h("button",{key:p.id,onClick:function(){if(!esg)addItem(p);},disabled:esg,style:{background:esg?"#f5f5f5":"#fff",border:"1.5px solid "+(esg?"#f0ece6":B),borderRadius:12,padding:"11px 10px",cursor:esg?"not-allowed":"pointer",textAlign:"left",opacity:esg?.45:1,minHeight:70,position:"relative",boxShadow:"0 1px 3px rgba(0,0,0,.05)"}},
+        h("p",{style:{margin:"0 0 3px",fontWeight:700,fontSize:13,color:"#1a1a1a",lineHeight:1.2}},p.name),
+        h("p",{style:{margin:0,fontWeight:900,fontSize:15,color:esg?"#ccc":R,fontFamily:"Georgia,serif"}},fmt(p.price)),
+        h("p",{style:{margin:"3px 0 0",fontSize:10,color:esg?"#e88":"#aaa",fontWeight:esg?700:400}},esg?"Esgotado":p.stock+" un"),
+        !esg&&h("span",{style:{position:"absolute",top:8,right:8,width:22,height:22,borderRadius:"50%",background:R,color:"#fff",fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}},"+")
       );})),
     cart.length>0&&h("div",{style:{background:"#fff",borderRadius:12,border:"1px solid "+B,padding:11,marginBottom:10}},
       h("p",{style:{fontWeight:800,fontSize:13,margin:"0 0 7px"}},"Itens"),
@@ -234,7 +231,7 @@ function PedidosTab(props){
     lista.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum pedido"),
     lista.map(function(o){return h("div",{key:o.id,style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"10px 12px",marginBottom:7}},
       h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:5}},
-        h("div",null,h("p",{style:{margin:0,fontWeight:800,fontSize:12}},"#"+o.id+" - "+o.nome),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},o.criadoEm+" - "+(o.canal==="balcao"?"Balcao":"App"))),
+        h("div",null,h("p",{style:{margin:0,fontWeight:800,fontSize:12}},"#"+o.id+" - "+o.nome),h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#aaa"}},o.criadoEm+" · "+(o.canal==="balcao"?"🛎️ Balcão":"📱 Mesa "+(o.mesa||"online")))),
         h("div",{style:{textAlign:"right"}},h("span",{style:{background:CORES[o.status]||"#aaa",color:"#fff",fontSize:9,fontWeight:800,padding:"2px 6px",borderRadius:16,display:"inline-block"}},STATUS[o.status]||o.status),h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:12,color:R}},fmt(o.total)))
       ),
       h("p",{style:{margin:"0 0 5px",fontSize:11,color:"#666"}},(o.items||[]).map(function(i){return i.qty+"x "+i.name;}).join(", ")),
@@ -1654,7 +1651,7 @@ function App(){
   );
 
   function irPara(role){
-    if(role==="gerente"){setGrupo("inicio");setTab("dashboard");}
+    if(role==="gerente"){setGrupo("oper");setTab("dashboard");}
     else if(role==="cozinha"){setGrupo("oper");setTab("cozinha");}
     else{setGrupo("oper");setTab("balcao");}
   }
@@ -1702,15 +1699,12 @@ function App(){
   };
   var BADGE={pedidos:pending,cozinha:cooking};
   var ALL_GROUPS=[
-    {id:"inicio",l:"Início",i:"🏠",tabs:["dashboard"]},
-    {id:"oper",l:"Operação",i:"🍽️",tabs:["balcao","pedidos","cozinha"]},
+    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","balcao","pedidos","cozinha"]},
     {id:"caixa",l:"Dinheiro",i:"💰",tabs:["caixa","financeiro","fechamento","despesas","consultor"]},
     {id:"fiado",l:"Fiado",i:"📒",tabs:["fiado","quinzena","historico"]},
-    {id:"cardapio",l:"Cardápio",i:"📖",tabs:["cardapio","receitas"]},
+    {id:"cardapio",l:"Cardápio",i:"📖",tabs:["cardapio","receitas","erp_cardapio","erp_insumos","erp_fornecedores","erp_compras"]},
     {id:"clientes",l:"Clientes",i:"⭐",tabs:["clientes","centroIA"]},
-    {id:"equipe",l:"Equipe",i:"👥",tabs:["equipe","comissoes"]},
-    {id:"estoque",l:"Estoque",i:"📦",tabs:["erp_cardapio","erp_insumos","erp_fornecedores","erp_compras"]},
-    {id:"ajustes",l:"Ajustes",i:"⚙️",tabs:["horarios","config"]}
+    {id:"equipe",l:"Equipe",i:"👥",tabs:["equipe","comissoes","horarios","config"]}
   ];
   var allowedTabs=nivel==="gerente"?null:nivel==="cozinha"?["cozinha"]:["balcao","pedidos","cozinha"];
   var groups=ALL_GROUPS.map(function(g){
