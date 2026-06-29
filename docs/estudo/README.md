@@ -14,6 +14,16 @@ referência conceitual e de especificação para um novo módulo/projeto de
 | [`02-tecnologias-gerenciais-3-abas.md`](./02-tecnologias-gerenciais-3-abas.md) | Livro "Tecnologias Gerenciais de Restaurantes" (Marcelo Trad Fonseca), compilado em MD + JSON | **Especificação prática (3 abas, fórmulas, benchmarks)** (nível prato) |
 | [`03-prime-cost-cmo-modelo-tra.md`](./03-prime-cost-cmo-modelo-tra.md) | Guia completo do mesmo livro (metodologia TRA): Prime Cost, CMO, custos operacionais, DRE, indicadores | **Gestão financeira do negócio** (nível DRE/empresa) |
 | [`04-benchmark-menucontrol.md`](./04-benchmark-menucontrol.md) | Análise de 19 prints do MenuControl (concorrente): IA do app, modelo de dados, fichas operacional/gerencial, precificação, rótulo nutricional, mercadorias | **Benchmark de produto / UX** (referência de mercado) |
+| [`05-spec-projeto-mvp.md`](./05-spec-projeto-mvp.md) | Especificação do novo app: arquitetura, modelo de dados Supabase, fórmulas, export Excel com fórmulas vivas, escopo MVP × fase 2 | **Spec de implementação** (o que vamos construir) |
+
+## ✅ Decisões tomadas (2026-06-29)
+- **Projeto separado** (repo próprio, não é módulo do Nobre Bistro).
+- **Multi-estabelecimento desde já**: Nobre Bistrô + Úrica Maison + Sushi Boys.
+- **MVP**: Mercadorias → Ficha técnica (operacional + gerencial) → **export Excel
+  com fórmulas vivas** + PDF padronizado.
+- **Stack**: React + Vite + TypeScript · Supabase · ExcelJS · PDF.
+- **Repo**: o Breno vai criar um repositório novo e conceder acesso; a
+  implementação começa lá. (Detalhes em `05-spec-projeto-mvp.md`.)
 
 ## Materiais originais recebidos
 1. `Bastones_di_Cogumelos__fatima.xlsx` — ficha técnica preenchida (exemplo).
