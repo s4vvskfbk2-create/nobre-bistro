@@ -1895,17 +1895,18 @@ function App(){
     balcao:{l:"Balcão",i:"🛎️"},pedidos:{l:"Pedidos",i:"📋"},cozinha:{l:"Cozinha",i:"👨‍🍳"},meu_desempenho:{l:"Minhas Vendas",i:"📈"},
     caixa:{l:"Caixa do dia",i:"💵"},financeiro:{l:"Relatórios",i:"📊"},fechamento:{l:"Fechar caixa",i:"🔐"},despesas:{l:"Despesas",i:"🧾"},consultor:{l:"Consultor IA",i:"🤖"},
     fiado:{l:"Em aberto",i:"📒"},quinzena:{l:"Fechar quinzena",i:"🗓️"},historico:{l:"Histórico",i:"🕘"},
-    cardapio:{l:"Cardápio",i:"📖"},receitas:{l:"Receitas/CMV",i:"🍳"},
+    cardapio:{l:"Cardápio",i:"📖"},receitas:{l:"Receitas/CMV",i:"🍳"},eng_cardapio:{l:"Eng. Cardápio",i:"🎯"},
+    proprietario:{l:"Proprietário",i:"👑"},
     clientes:{l:"Clientes",i:"⭐"},centroIA:{l:"Centro IA",i:"🧠"},
     equipe:{l:"Pessoas",i:"👥"},comissoes:{l:"Comissões",i:"🏆"},horarios:{l:"Horários",i:"🕒"},config:{l:"Senhas e metas",i:"⚙️"},
     erp_cardapio:{l:"Produtos",i:"🍔"},erp_insumos:{l:"Insumos",i:"🥕"},erp_fornecedores:{l:"Fornecedores",i:"🚚"},erp_compras:{l:"Compras",i:"🛒"}
   };
   var BADGE={pedidos:pending,cozinha:cooking};
   var ALL_GROUPS=[
-    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","balcao","pedidos","cozinha","meu_desempenho"]},
+    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","proprietario","balcao","pedidos","cozinha","meu_desempenho"]},
     {id:"caixa",l:"Dinheiro",i:"💰",tabs:["caixa","financeiro","fechamento","despesas","consultor"]},
     {id:"fiado",l:"Fiado",i:"📒",tabs:["fiado","quinzena","historico"]},
-    {id:"cardapio",l:"Cardápio",i:"📖",tabs:["cardapio","receitas","erp_cardapio","erp_insumos","erp_fornecedores","erp_compras"]},
+    {id:"cardapio",l:"Cardápio",i:"📖",tabs:["cardapio","receitas","eng_cardapio","erp_cardapio","erp_insumos","erp_fornecedores","erp_compras"]},
     {id:"clientes",l:"Clientes",i:"⭐",tabs:["clientes","centroIA"]},
     {id:"equipe",l:"Equipe",i:"👥",tabs:["equipe","comissoes","horarios","config"]}
   ];
@@ -1966,6 +1967,8 @@ function App(){
       tab==="comissoes"&&(nivel==="gerente"?h(TabComissoes,{orders:orders,profs:profs}):null),
       tab==="despesas"&&(nivel==="gerente"?h(TabDespesas,null):null),
       tab==="financeiro"&&nivel==="gerente"&&h(TabFinanceiro,{orders:orders,prods:prods}),tab==="consultor"&&nivel==="gerente"&&h(TabConsultor,{orders:orders}),tab==="horarios"&&(nivel==="gerente"?h(HorariosTab,{horarios:horarios,setHorarios:setHorarios,fechamentoManual:fechamentoManual,setFechamentoManual:setFechamentoManual}):null),
+      tab==="eng_cardapio"&&nivel==="gerente"&&h(TabEngCardapio,{orders:orders,prods:prods}),
+      tab==="proprietario"&&nivel==="gerente"&&h(TabProprietario,{orders:orders,prods:prods,profs:profs}),
       tab==="erp_cardapio"&&nivel==="gerente"&&h(TabErpCardapio,null),
       tab==="erp_insumos"&&nivel==="gerente"&&h(TabErpInsumos,null),
       tab==="erp_fornecedores"&&nivel==="gerente"&&h(TabErpFornecedores,null),
@@ -2697,6 +2700,253 @@ function TabReceitas(){
           h("p",{style:{margin:0,fontWeight:800,fontSize:13,color:R}},fmt(ing.custo_unitario)+"/"+ing.unidade)
         );
       })
+    )
+  );
+}
+
+function TabEngCardapio(props){
+  var orders=props.orders||[];
+  var prods=props.prods||[];
+  var sf=us([]),fichas=sf[0],setFichas=sf[1];
+  var sl=us(true),loading=sl[0],setLoading=sl[1];
+  var sv=us("quadrante"),view=sv[0],setView=sv[1];
+  ue(function(){
+    fetch(SBU+"/rest/v1/fichas_tecnicas?order=nome.asc&select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+      .then(function(r){return r.json();})
+      .then(function(d){setFichas(Array.isArray(d)?d:[]);setLoading(false);})
+      .catch(function(){setLoading(false);});
+  },[]);
+  var popularidade=um(function(){
+    var map={};
+    orders.filter(function(o){return o.status==="concluido";}).forEach(function(o){
+      (o.items||[]).forEach(function(i){var k=(i.name||"").toLowerCase().trim();map[k]=(map[k]||0)+Number(i.qty||1);});
+    });
+    return map;
+  },[orders]);
+  var fichaMap=um(function(){
+    var map={};fichas.forEach(function(f){map[(f.nome||"").toLowerCase().trim()]=f;});return map;
+  },[fichas]);
+  var classified=um(function(){
+    var pops=Object.values(popularidade);
+    if(!pops.length)return [];
+    var sorted=pops.slice().sort(function(a,b){return a-b;});
+    var medPop=sorted[Math.floor(sorted.length/2)];
+    var margins=fichas.filter(function(f){return f.cmv_percentual>0;}).map(function(f){return f.cmv_percentual;}).sort(function(a,b){return a-b;});
+    var medMargin=margins.length?margins[Math.floor(margins.length/2)]:30;
+    return prods.map(function(p){
+      var k=(p.name||"").toLowerCase().trim();
+      var pop=popularidade[k]||0;
+      var ficha=fichaMap[k];
+      var cmv=ficha?ficha.cmv_percentual:null;
+      var classe;
+      if(cmv===null||cmv===undefined||cmv===0){classe="sem_dados";}
+      else if(pop>=medPop&&cmv<=medMargin){classe="estrela";}
+      else if(pop>=medPop&&cmv>medMargin){classe="cavalo";}
+      else if(pop<medPop&&cmv<=medMargin){classe="puzzle";}
+      else{classe="abacaxi";}
+      return {id:p.id,nome:p.name,pop:pop,cmv:cmv,preco:p.price||0,classe:classe};
+    }).sort(function(a,b){return b.pop-a.pop;});
+  },[orders,prods,fichas,popularidade,fichaMap]);
+  var CLASSES={
+    estrela:{i:"⭐",l:"Estrela",desc:"Alta popularidade, alta margem",color:"#856404",bg:"#fff3cd",border:"#ffc107",acao:function(){return "Mantenha em destaque. Explore combos e versões premium.";}},
+    cavalo:{i:"🐴",l:"Cavalo de Batalha",desc:"Alta popularidade, baixa margem — revise custos",color:"#0c5460",bg:"#d1ecf1",border:"#17a2b8",acao:function(p){return "Revise fornecedores ou ajuste preço. CMV atual: "+(p.cmv?p.cmv.toFixed(1)+"%":"?");}},
+    puzzle:{i:"🧩",l:"Quebra-cabeça",desc:"Baixa popularidade, alta margem — promova mais",color:"#155724",bg:"#d4edda",border:"#28a745",acao:function(){return "Destaque no cardápio digital e treine equipe para sugerir.";}},
+    abacaxi:{i:"🍍",l:"Abacaxi",desc:"Baixa popularidade, baixa margem — reavalie",color:"#721c24",bg:"#f8d7da",border:"#dc3545",acao:function(){return "Considere remover do cardápio ou reformular a receita.";}},
+    sem_dados:{i:"❓",l:"Sem ficha técnica",desc:"Cadastre CMV para classificar",color:"#888",bg:"#f5f5f5",border:"#ccc",acao:function(){return "Cadastre a ficha técnica na aba Receitas/CMV.";}}
+  };
+  var counts=um(function(){
+    var c={estrela:0,cavalo:0,puzzle:0,abacaxi:0,sem_dados:0};
+    classified.forEach(function(p){c[p.classe]=(c[p.classe]||0)+1;});
+    return c;
+  },[classified]);
+  if(loading)return h("div",{style:{padding:40,textAlign:"center",color:R}},"Carregando engenharia de cardápio...");
+  return h("div",{style:{paddingBottom:32}},
+    h("div",{style:{background:R,padding:"16px 16px 12px",marginBottom:12}},
+      h("p",{style:{margin:0,color:"#fff",fontSize:18,fontWeight:900,fontFamily:"Georgia,serif"}},"🎯 Engenharia de Cardápio"),
+      h("p",{style:{margin:"4px 0 0",color:"rgba(255,255,255,.8)",fontSize:12}},"Matriz BCG — identifique estrelas e abacaxis")
+    ),
+    h("div",{style:{display:"flex",gap:6,padding:"0 12px 12px",flexWrap:"wrap"}},
+      ["estrela","cavalo","puzzle","abacaxi","sem_dados"].map(function(k){
+        var cl=CLASSES[k];
+        return h("div",{key:k,style:{background:cl.bg,border:"1px solid "+cl.border,borderRadius:16,padding:"4px 10px",fontSize:11,fontWeight:700,color:cl.color}},cl.i+" "+counts[k]+" "+cl.l);
+      })
+    ),
+    h("div",{style:{display:"flex",gap:6,padding:"0 12px 12px"}},
+      [{k:"quadrante",l:"Por grupo"},{k:"lista",l:"Lista"},{k:"acoes",l:"Ações IA"}].map(function(v){
+        return h("button",{key:v.k,onClick:function(){setView(v.k);},style:{flex:1,padding:"7px 0",borderRadius:8,border:"1px solid "+(view===v.k?R:"#ddd"),background:view===v.k?R:"#fff",color:view===v.k?"#fff":"#555",fontWeight:700,fontSize:12,cursor:"pointer"}},v.l);
+      })
+    ),
+    view==="quadrante"&&h("div",{style:{padding:"0 12px"}},
+      ["estrela","cavalo","puzzle","abacaxi","sem_dados"].map(function(k){
+        var items=classified.filter(function(p){return p.classe===k;});
+        if(!items.length)return null;
+        var cl=CLASSES[k];
+        return h("div",{key:k,style:{marginBottom:14,background:"#fff",borderRadius:10,border:"1px solid "+cl.border,overflow:"hidden"}},
+          h("div",{style:{background:cl.bg,padding:"8px 12px",borderBottom:"1px solid "+cl.border}},
+            h("p",{style:{margin:0,fontWeight:800,color:cl.color,fontSize:13}},cl.i+" "+cl.l),
+            h("p",{style:{margin:"2px 0 0",fontSize:10,color:cl.color,opacity:.8}},cl.desc)
+          ),
+          items.map(function(p){
+            return h("div",{key:p.id,style:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 12px",borderBottom:"1px solid #f5f5f5"}},
+              h("div",null,
+                h("p",{style:{margin:0,fontWeight:700,fontSize:12,color:"#333"}},p.nome),
+                h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#888"}},p.pop+" vendas"+(p.cmv?" · CMV "+p.cmv.toFixed(1)+"%":""))
+              ),
+              h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:R}},"R$ "+Number(p.preco).toFixed(2).replace(".",","))
+            );
+          })
+        );
+      })
+    ),
+    view==="lista"&&h("div",{style:{padding:"0 12px"}},
+      h("div",{style:{background:"#fff",borderRadius:10,border:"1px solid #e0d9d0",overflow:"hidden"}},
+        classified.map(function(p,i){
+          var cl=CLASSES[p.classe];
+          return h("div",{key:p.id,style:{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderBottom:i<classified.length-1?"1px solid #f0ece6":"none"}},
+            h("span",{style:{fontSize:16}},cl.i),
+            h("div",{style:{flex:1}},
+              h("p",{style:{margin:0,fontWeight:700,fontSize:12,color:"#222"}},p.nome),
+              h("p",{style:{margin:"1px 0 0",fontSize:10,color:"#888"}},p.pop+" vendas"+(p.cmv?" · CMV "+p.cmv.toFixed(1)+"%":"")+" · "+cl.l)
+            ),
+            h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:R}},"R$ "+Number(p.preco).toFixed(2).replace(".",","))
+          );
+        })
+      )
+    ),
+    view==="acoes"&&h("div",{style:{padding:"0 12px"}},
+      h("div",{style:{background:"#fff3cd",border:"1px solid #ffc107",borderRadius:10,padding:"10px 12px",marginBottom:10}},
+        h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:"#856404"}},"🤖 Recomendações da IA"),
+        h("p",{style:{margin:"4px 0 0",fontSize:11,color:"#856404"}},"Baseadas em popularidade e margem dos pedidos")
+      ),
+      classified.filter(function(p){return p.classe!=="sem_dados";}).map(function(p){
+        var cl=CLASSES[p.classe];
+        return h("div",{key:p.id,style:{background:"#fff",borderRadius:10,border:"1px solid "+cl.border,padding:"10px 12px",marginBottom:8}},
+          h("div",{style:{display:"flex",alignItems:"center",gap:6,marginBottom:4}},
+            h("span",null,cl.i),
+            h("p",{style:{margin:0,fontWeight:800,fontSize:12,color:cl.color}},p.nome),
+            h("span",{style:{marginLeft:"auto",fontSize:10,color:"#888"}},p.pop+" vendas")
+          ),
+          h("p",{style:{margin:0,fontSize:11,color:"#555"}},cl.acao(p))
+        );
+      }),
+      classified.filter(function(p){return p.classe==="sem_dados";}).length>0&&
+        h("div",{style:{background:"#f5f5f5",borderRadius:10,border:"1px solid #ddd",padding:"10px 12px"}},
+          h("p",{style:{margin:0,fontWeight:700,fontSize:11,color:"#888"}},"❓ "+classified.filter(function(p){return p.classe==="sem_dados";}).length+" produto(s) sem ficha técnica"),
+          h("p",{style:{margin:"4px 0 0",fontSize:11,color:"#aaa"}},"Cadastre fichas técnicas para classificar todos os produtos.")
+        )
+    )
+  );
+}
+
+function TabProprietario(props){
+  var orders=props.orders||[];
+  var prods=props.prods||[];
+  var sinf=us([]),ingredientes=sinf[0],setIngredientes=sinf[1];
+  var sfi=us([]),fichas=sfi[0],setFichas=sfi[1];
+  var sdp=us([]),despesas=sdp[0],setDespesas=sdp[1];
+  ue(function(){
+    fetch(SBU+"/rest/v1/ingredientes?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+      .then(function(r){return r.json();}).then(function(d){setIngredientes(Array.isArray(d)?d:[]);}).catch(function(){});
+    fetch(SBU+"/rest/v1/fichas_tecnicas?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+      .then(function(r){return r.json();}).then(function(d){setFichas(Array.isArray(d)?d:[]);}).catch(function(){});
+    sbGet("nb_bA_despesas").then(function(d){if(d)setDespesas(d);});
+  },[]);
+  var now=new Date();
+  var today=now.toLocaleDateString("pt-BR");
+  var mStart=new Date(now.getFullYear(),now.getMonth(),1);
+  function toDate(str){if(!str)return null;var p=str.split(" ");var dm=(p[0]||"").split("/");if(dm.length<3)return null;return new Date(parseInt(dm[2]),parseInt(dm[1])-1,parseInt(dm[0]));}
+  function fmtP(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
+  var done=orders.filter(function(o){return o.status==="concluido";});
+  var mesOrds=done.filter(function(o){var d=toDate(o.criadoEm);return d&&d>=mStart;});
+  var todayOrds=done.filter(function(o){return (o.criadoEm||"").indexOf(today)===0;});
+  var receitaHoje=todayOrds.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var receitaMes=mesOrds.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var fichaMap={};fichas.forEach(function(f){fichaMap[(f.nome||"").toLowerCase().trim()]=f;});
+  var cmvTotal=0,receitaComFicha=0;
+  mesOrds.forEach(function(o){
+    (o.items||[]).forEach(function(i){
+      var f=fichaMap[(i.name||"").toLowerCase().trim()];
+      if(f&&f.custo_total&&f.preco_venda){
+        receitaComFicha+=Number(i.qty||1)*Number(f.preco_venda||0);
+        cmvTotal+=Number(i.qty||1)*Number(f.custo_total||0);
+      }
+    });
+  });
+  var cmvPct=receitaComFicha>0?(cmvTotal/receitaComFicha*100):null;
+  var despMes=despesas.filter(function(x){var dm=(x.data||"").split("/");if(dm.length<3)return false;return (parseInt(dm[1])-1)===now.getMonth()&&parseInt(dm[2])===now.getFullYear();}).reduce(function(s,x){return s+(x.valor||0);},0);
+  var custoMes=mesOrds.reduce(function(s,o){return s+(o.items||[]).reduce(function(ss,i){var p=prods.filter(function(x){return x.id===i.id;})[0];return ss+(p?(p.custo||0)*Number(i.qty||1):0);},0);},0);
+  var lucroMes=receitaMes-custoMes-despMes;
+  var criticos=ingredientes.filter(function(i){return i.ativo!==false&&i.estoque_atual!=null&&i.estoque_minimo!=null&&Number(i.estoque_atual)<=Number(i.estoque_minimo);});
+  var fiadoAberto=orders.filter(function(o){return o.fiado&&!o.fiadoPago;});
+  var totalFiado=fiadoAberto.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var popHoje={};
+  todayOrds.forEach(function(o){(o.items||[]).forEach(function(i){var k=i.name||"";popHoje[k]=(popHoje[k]||0)+Number(i.qty||1);});});
+  var topProd=Object.keys(popHoje).sort(function(a,b){return popHoje[b]-popHoje[a];})[0];
+  var alertas=[];
+  if(cmvPct!==null&&cmvPct>35)alertas.push({tipo:"danger",msg:"CMV em "+cmvPct.toFixed(1)+"% — acima do alvo de 35%. Revise fichas técnicas."});
+  if(criticos.length>0)alertas.push({tipo:"danger",msg:criticos.length+" ingrediente(s) crítico(s): "+criticos.slice(0,2).map(function(i){return i.nome;}).join(", ")+(criticos.length>2?"…":"")+"."});
+  if(totalFiado>200)alertas.push({tipo:"warn",msg:"Fiado em aberto: "+fmtP(totalFiado)+" — "+fiadoAberto.length+" pedido(s)."});
+  if(receitaHoje<200&&now.getHours()>12)alertas.push({tipo:"warn",msg:"Receita baixa hoje ("+fmtP(receitaHoje)+"). Considere ativar promoção."});
+  var oport=null;
+  if(cmvPct!==null&&cmvPct<=30)oport="CMV saudável ("+cmvPct.toFixed(1)+"%). Momento ideal para investir em promoções.";
+  else if(topProd&&popHoje[topProd]>=3)oport='"'+topProd+'" é o hit do dia com '+popHoje[topProd]+' vendas. Destaque no app agora!';
+  return h("div",{style:{paddingBottom:32}},
+    h("div",{style:{background:"linear-gradient(135deg,"+R+" 0%,#6B1212 100%)",padding:"20px 16px 16px"}},
+      h("p",{style:{margin:0,color:"rgba(255,255,255,.7)",fontSize:11,fontWeight:700,textTransform:"uppercase",letterSpacing:1}},"👑 Visão do Proprietário"),
+      h("p",{style:{margin:"4px 0 8px",color:"#fff",fontSize:26,fontWeight:900,fontFamily:"Georgia,serif"}},fmtP(receitaHoje)),
+      h("p",{style:{margin:0,color:"rgba(255,255,255,.75)",fontSize:11}},"receita hoje · "+fmtP(receitaMes)+" no mês")
+    ),
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,padding:"12px 12px 0"}},
+      h("div",{style:{background:cmvPct===null?"#f9f9f9":cmvPct<=30?"#d4edda":cmvPct<=35?"#fff3cd":"#f8d7da",borderRadius:10,padding:"10px 12px",border:"1px solid "+(cmvPct===null?"#ddd":cmvPct<=30?"#28a745":cmvPct<=35?"#ffc107":"#dc3545")}},
+        h("p",{style:{margin:0,fontSize:10,fontWeight:700,color:"#555",textTransform:"uppercase"}},"CMV do mês"),
+        h("p",{style:{margin:"4px 0 0",fontSize:22,fontWeight:900,color:cmvPct===null?"#aaa":cmvPct<=30?"#155724":cmvPct<=35?"#856404":"#721c24"}},cmvPct!==null?cmvPct.toFixed(1)+"%":"—"),
+        h("p",{style:{margin:"2px 0 0",fontSize:9,color:"#888"}},cmvPct===null?"Cadastre fichas":cmvPct<=30?"✅ Excelente":cmvPct<=35?"⚠️ Atenção":"🚨 Alto")
+      ),
+      h("div",{style:{background:"#fff",borderRadius:10,padding:"10px 12px",border:"1px solid #e0d9d0"}},
+        h("p",{style:{margin:0,fontSize:10,fontWeight:700,color:"#555",textTransform:"uppercase"}},"Lucro estimado/mês"),
+        h("p",{style:{margin:"4px 0 0",fontSize:18,fontWeight:900,color:lucroMes>=0?R:"#dc3545"}},fmtP(lucroMes)),
+        h("p",{style:{margin:"2px 0 0",fontSize:9,color:"#888"}},"após custos e despesas")
+      ),
+      h("div",{style:{background:criticos.length?"#f8d7da":"#d4edda",borderRadius:10,padding:"10px 12px",border:"1px solid "+(criticos.length?"#dc3545":"#28a745")}},
+        h("p",{style:{margin:0,fontSize:10,fontWeight:700,color:"#555",textTransform:"uppercase"}},"Estoque crítico"),
+        h("p",{style:{margin:"4px 0 0",fontSize:22,fontWeight:900,color:criticos.length?"#721c24":"#155724"}},criticos.length||"✓"),
+        h("p",{style:{margin:"2px 0 0",fontSize:9,color:"#888"}},criticos.length?"ingrediente(s) em falta":"tudo ok")
+      ),
+      h("div",{style:{background:fiadoAberto.length?"#fff3cd":"#fff",borderRadius:10,padding:"10px 12px",border:"1px solid "+(fiadoAberto.length?"#ffc107":"#e0d9d0")}},
+        h("p",{style:{margin:0,fontSize:10,fontWeight:700,color:"#555",textTransform:"uppercase"}},"Fiado em aberto"),
+        h("p",{style:{margin:"4px 0 0",fontSize:18,fontWeight:900,color:fiadoAberto.length?"#856404":R}},fmtP(totalFiado)),
+        h("p",{style:{margin:"2px 0 0",fontSize:9,color:"#888"}},fiadoAberto.length+" pedido(s) pendente(s)")
+      )
+    ),
+    alertas.length>0&&h("div",{style:{padding:"12px 12px 0"}},
+      h("p",{style:{margin:"0 0 6px",fontSize:11,fontWeight:800,color:"#333",textTransform:"uppercase",letterSpacing:.5}},"🚨 Alertas"),
+      alertas.map(function(a,i){
+        return h("div",{key:i,style:{background:a.tipo==="danger"?"#f8d7da":"#fff3cd",border:"1px solid "+(a.tipo==="danger"?"#dc3545":"#ffc107"),borderRadius:8,padding:"8px 12px",marginBottom:6}},
+          h("p",{style:{margin:0,fontSize:11,color:a.tipo==="danger"?"#721c24":"#856404"}},a.msg)
+        );
+      })
+    ),
+    oport&&h("div",{style:{padding:"12px 12px 0"}},
+      h("div",{style:{background:"#d4edda",border:"1px solid #28a745",borderRadius:8,padding:"10px 12px"}},
+        h("p",{style:{margin:"0 0 2px",fontSize:11,fontWeight:800,color:"#155724"}},"💡 Oportunidade do dia"),
+        h("p",{style:{margin:0,fontSize:11,color:"#155724"}},oport)
+      )
+    ),
+    h("div",{style:{padding:"12px 12px 0"}},
+      h("p",{style:{margin:"0 0 6px",fontSize:11,fontWeight:800,color:"#333",textTransform:"uppercase",letterSpacing:.5}},"📊 Hoje em números"),
+      h("div",{style:{background:"#fff",borderRadius:10,border:"1px solid #e0d9d0",overflow:"hidden"}},
+        [
+          ["Pedidos",todayOrds.length+" pedidos"],
+          ["Ticket médio",todayOrds.length?fmtP(receitaHoje/todayOrds.length):"—"],
+          ["QR Code",todayOrds.filter(function(o){return o.canal==="app";}).length+" pedidos"],
+          ["Profissionais ativos",(function(){var s=new Set(todayOrds.filter(function(o){return o.profissional;}).map(function(o){return o.profissional;}));return s.size+" pessoas";})()]
+        ].map(function(r,i){
+          return h("div",{key:i,style:{display:"flex",justifyContent:"space-between",padding:"9px 12px",borderBottom:i<3?"1px solid #f0ece6":"none"}},
+            h("p",{style:{margin:0,fontSize:12,color:"#666"}},r[0]),
+            h("p",{style:{margin:0,fontSize:12,fontWeight:700,color:R}},r[1])
+          );
+        })
+      )
     )
   );
 }
