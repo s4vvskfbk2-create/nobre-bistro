@@ -13,6 +13,7 @@ referência conceitual e de especificação para um novo módulo/projeto de
 | [`01-cmv-e-ficha-tecnica.md`](./01-cmv-e-ficha-tecnica.md) | CMV Fundamentos (curso) + apresentação "CMV Ferramenta Aplicada" (Érika Guedes) + planilha dos Bastones di Cogumelos | **Conceitual / teórico** (nível prato) |
 | [`02-tecnologias-gerenciais-3-abas.md`](./02-tecnologias-gerenciais-3-abas.md) | Livro "Tecnologias Gerenciais de Restaurantes" (Marcelo Trad Fonseca), compilado em MD + JSON | **Especificação prática (3 abas, fórmulas, benchmarks)** (nível prato) |
 | [`03-prime-cost-cmo-modelo-tra.md`](./03-prime-cost-cmo-modelo-tra.md) | Guia completo do mesmo livro (metodologia TRA): Prime Cost, CMO, custos operacionais, DRE, indicadores | **Gestão financeira do negócio** (nível DRE/empresa) |
+| [`04-benchmark-menucontrol.md`](./04-benchmark-menucontrol.md) | Análise de 19 prints do MenuControl (concorrente): IA do app, modelo de dados, fichas operacional/gerencial, precificação, rótulo nutricional, mercadorias | **Benchmark de produto / UX** (referência de mercado) |
 
 ## Materiais originais recebidos
 1. `Bastones_di_Cogumelos__fatima.xlsx` — ficha técnica preenchida (exemplo).
@@ -21,6 +22,18 @@ referência conceitual e de especificação para um novo módulo/projeto de
 4. `LIVRO_REFERENCIA_CLAUDE_CODE.md` — spec de sistema de 3 abas.
 5. `LIVRO_DADOS_ESTRUTURADOS.json` — mesma spec em dados estruturados.
 6. `LIVRO_COMPLETO_PRIME_COST_E_TUDO.md` — guia completo (Prime Cost, CMO, TRA).
+
+## 🧭 Visão do projeto (definida pelo Breno)
+> "Quero criar um site que me ajude a fazer a mesma coisa **porém melhor**! Sempre
+> **padronizado com a mesma entrega** e **fórmulas funcionando no Excel**,
+> principalmente se eu precisar **baixar as fichas técnicas**."
+
+Requisitos-chave que decorrem disso:
+1. **Web app** (site) inspirado no MenuControl, mas superior (ver nota 04).
+2. **Entrega padronizada:** todas as fichas seguem o mesmo modelo/layout.
+3. **Export Excel com fórmulas vivas:** ao baixar uma ficha, o `.xlsx` deve conter
+   as fórmulas reais (custo unitário, custo total, CMV %, margem, markup, etc.)
+   funcionando — não apenas valores estáticos. (Além de PDF para a cozinha.)
 
 ## 🎯 Escopo do projeto (revelado nos materiais)
 - **Multi-estabelecimento:** o material 03 cita explicitamente **Nobre Bistrô +
