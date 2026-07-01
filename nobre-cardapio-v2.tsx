@@ -75,17 +75,24 @@ function HeroCarousel({destaques}) {
   const touchStart = useRef(null);
 
   useEffect(()=>{
+    if(!destaques.length) return;
+    setIdx(i=>Math.min(i,destaques.length-1));
     timer.current = setInterval(()=>setIdx(i=>(i+1)%destaques.length), 3500);
     return ()=>clearInterval(timer.current);
-  },[]);
+  },[destaques.length]);
 
-  function goTo(i){ clearInterval(timer.current); setIdx(i); timer.current=setInterval(()=>setIdx(x=>(x+1)%destaques.length),3500); }
+  function goTo(i){
+    if(!destaques.length) return;
+    clearInterval(timer.current);
+    setIdx(i);
+    timer.current=setInterval(()=>setIdx(x=>(x+1)%destaques.length),3500);
+  }
 
   function onTouchStart(e){ touchStart.current = e.touches[0].clientX; }
   function onTouchEnd(e){
     if(touchStart.current===null) return;
     const diff = touchStart.current - e.changedTouches[0].clientX;
-    if(Math.abs(diff)>40) goTo(diff>0?(idx+1)%destaques.length:(idx-1+destaques.length)%DESTAQUES.length);
+    if(Math.abs(diff)>40) goTo(diff>0?(idx+1)%destaques.length:(idx-1+destaques.length)%destaques.length);
     touchStart.current=null;
   }
 

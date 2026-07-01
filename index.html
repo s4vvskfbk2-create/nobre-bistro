@@ -30,8 +30,21 @@ var h=React.createElement,us=React.useState,ue=React.useEffect,um=React.useMemo,
 var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
 var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
 var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
-function sbGet(k){return fetch(SBU+"/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}}).then(function(r){return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});}
-function sbSet(k,v){return fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})}).catch(function(){});}
+function sbGet(k){return fetch(SBU+"/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}}).then(function(r){if(!r.ok)throw new Error("Supabase GET "+r.status);return r.json();}).then(function(d){return d&&d.length?d[0].value:null;}).catch(function(){return null;});}
+function sbSet(k,v){return fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})}).then(function(r){if(!r.ok)throw new Error("Supabase SET "+r.status);return true;});}
+function uid(prefix){return (prefix||"")+Date.now()+"-"+Math.random().toString(36).slice(2,8);}
+function readQueue(){try{return JSON.parse(localStorage.getItem("nb_sync_queue")||"[]");}catch(e){return [];} }
+function writeQueue(q){try{localStorage.setItem("nb_sync_queue",JSON.stringify(q));}catch(e){} }
+function queueAction(type,payload){var q=readQueue();q.push({id:uid("q_"),type:type,payload:payload,createdAt:nowStr()});writeQueue(q);return q.length;}
+function appendConfigList(key,item){return sbGet(key).then(function(existing){var novos=(Array.isArray(existing)?existing:[]).concat([item]);return sbSet(key,novos).then(function(){return novos;});});}
+function restPost(path,body,minimal){return fetch(SBU+"/rest/v1/"+path,{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":minimal?"return=minimal":"resolution=merge-duplicates,return=representation"},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error(path+" "+r.status);return minimal?null:r.json();});}
+function isoFromBr(str){try{var p=(str||"").split(" "),d=(p[0]||"").split("/"),hm=(p[1]||"00:00").split(":");if(d.length<3)return new Date().toISOString();return new Date(parseInt(d[2]),parseInt(d[1])-1,parseInt(d[0]),parseInt(hm[0]||0),parseInt(hm[1]||0)).toISOString();}catch(e){return new Date().toISOString();}}
+function syncEvent(type,entity,id,payload){return restPost("system_events",{event_type:type,source:"index.html",entity_type:entity,entity_id:String(id||""),payload:payload||{}},true).catch(function(){});}
+function syncOrderTable(order){var row={legacy_id:String(order.id),order_number:String(order.id),channel:order.canal||"app",table_number:order.mesa||null,customer_name:order.nome||null,professional_name:order.profissional||null,operator_name:"app",status:order.status==="pendente"?"created":order.status,payment_status:"pending",payment_method:order.payment||null,subtotal:Number(order.total||0),total:Number(order.total||0),is_credit:false,metadata:order,created_at:isoFromBr(order.criadoEm)};return restPost("orders?on_conflict=legacy_id",row).then(function(rows){var created=rows&&rows[0]?rows[0]:null;var oid=created&&created.id;var items=(order.items||[]).map(function(i){return{order_id:oid,legacy_product_id:String(i.id||""),name:i.name||"Item",quantity:Number(i.qty||1),unit_price:Number(i.price||0),total_price:Number(i.price||0)*Number(i.qty||1),metadata:i};});var chain=items.length?restPost("order_items",items,true):Promise.resolve();if(order.payment)chain=chain.then(function(){return restPost("payments",{order_id:oid,method:order.payment,status:"pending",amount:Number(order.total||0),raw_payload:{legacy_order_id:order.id,source:"index.html"}},true);});return chain.then(function(){return syncEvent("ORDER_CREATED","order",order.id,{legacy_id:order.id,canal:order.canal,total:order.total});});});}
+function syncCallTable(c){return restPost("table_calls",{table_number:String(c.mesa||""),call_type:c.tipo||"atendimento",status:"open",metadata:c,created_at:isoFromBr(c.hora)},true).then(function(){return syncEvent("TABLE_CALL_CREATED","table_call",c.id,c);});}
+function appendOrder(item){return appendConfigList("nb_bA_orders",item).then(function(r){return syncOrderTable(item).catch(function(e){syncEvent("ORDER_SYNC_FAILED","order",item.id,{error:e.message,order:item});}).then(function(){return r;});});}
+function appendCall(item){return appendConfigList("nb_bA_chamados",item).then(function(r){return syncCallTable(item).catch(function(e){syncEvent("TABLE_CALL_SYNC_FAILED","table_call",item.id,{error:e.message,call:item});}).then(function(){return r;});});}
+function flushQueue(){var q=readQueue();if(!q.length)return Promise.resolve(0);var chain=Promise.resolve();var done=[];q.forEach(function(a){chain=chain.then(function(){if(a.type==="order")return appendOrder(a.payload).then(function(){done.push(a.id);});if(a.type==="call")return appendCall(a.payload).then(function(){done.push(a.id);});});});return chain.then(function(){var rest=readQueue().filter(function(a){return done.indexOf(a.id)<0;});writeQueue(rest);return done.length;});}
 function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
 function nowStr(){var d=new Date();return String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear()+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}
 function getMesaURL(){try{var m=new URLSearchParams(window.location.search).get("mesa");return m&&parseInt(m)>0?String(parseInt(m)):""}catch(e){return "";}}
@@ -140,11 +153,13 @@ var s8=us(false),showCart=s8[0],setShowCart=s8[1];
 var s9=us(""),search=s9[0],setSearch=s9[1];
 var s10=us(getMesaURL()),mesa=s10[0],setMesa=s10[1];
 var s11=us(""),chamadoOk=s11[0],setChamadoOk=s11[1];
+var s12=us(navigator.onLine?"online":"offline"),syncStatus=s12[0],setSyncStatus=s12[1];
+var s13=us(readQueue().length),queueCount=s13[0],setQueueCount=s13[1];
+function marcarSync(status){var q=readQueue().length;setQueueCount(q);setSyncStatus(q>0&&status==="online"?"queued":status);}
 function enviarChamado(tipo){
-  sbGet("nb_bA_chamados").then(function(ex){
-    var novos=(Array.isArray(ex)?ex:[]).concat([{id:Date.now(),mesa:mesa,tipo:tipo,hora:nowStr(),atendido:false}]);
-    sbSet("nb_bA_chamados",novos);
-  });
+  var chamado={id:uid("c_"),mesa:mesa,tipo:tipo,hora:nowStr(),atendido:false};
+  marcarSync("syncing");
+  appendCall(chamado).then(function(){marcarSync("online");}).catch(function(){queueAction("call",chamado);marcarSync("queued");});
   setChamadoOk(tipo);setTimeout(function(){setChamadoOk(false);},3500);
 }
 ue(function(){
@@ -153,8 +168,11 @@ if(res[0]&&res[0].length)setProds(res[0]);
 if(res[1]&&res[1].length)setProfs(res[1]);
 setLoading(false);
 });
-var poll=setInterval(function(){sbGet("nb_bA_products").then(function(p){if(p&&p.length)setProds(p);});},15000);
-return function(){clearInterval(poll);};
+function tentarSync(){marcarSync(navigator.onLine?"syncing":"offline");flushQueue().then(function(){marcarSync(navigator.onLine?"online":"offline");}).catch(function(){marcarSync(navigator.onLine?"queued":"offline");});}
+tentarSync();
+window.addEventListener("online",tentarSync);window.addEventListener("offline",function(){marcarSync("offline");});
+var poll=setInterval(function(){sbGet("nb_bA_products").then(function(p){if(p&&p.length){setProds(p);marcarSync("online");}}).catch(function(){marcarSync("offline");});},15000);
+return function(){clearInterval(poll);window.removeEventListener("online",tentarSync);};
 },[]);
 var cc=cart.reduce(function(s,i){return s+i.qty;},0);
 var ct=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
@@ -166,12 +184,18 @@ return prods.filter(function(p){return p.active&&p.name.toLowerCase().includes(q
 function addCart(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});setSel(null);}
 function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
 function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
-function handleConfirm(order){sbGet("nb_bA_orders").then(function(existing){var novos=(existing||[]).concat([order]);sbSet("nb_bA_orders",novos);});setCart([]);setShowCart(false);}
+function handleConfirm(order){
+  var finalOrder=Object.assign({},order,{id:uid("app_"),syncStatus:"pending"});
+  marcarSync("syncing");
+  appendOrder(finalOrder).then(function(){marcarSync("online");}).catch(function(){queueAction("order",finalOrder);marcarSync("queued");});
+  setCart([]);setShowCart(false);
+}
 function scrollToCat(catId){setCat(catId);var el=document.getElementById("cat-"+catId);if(el){var top=el.getBoundingClientRect().top+window.pageYOffset-110;window.scrollTo({top:top,behavior:"smooth"});}}
 if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
 h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:3,color:R,textTransform:"uppercase"}},"Nobre Bistro"),
 h("div",{style:{width:28,height:28,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}}));
 return h("div",{style:{background:C,maxWidth:480,margin:"0 auto",minHeight:"100vh"}},
+h("div",{style:{position:"sticky",top:0,zIndex:120,background:syncStatus==="online"?"#f0fdf4":syncStatus==="syncing"?"#eff6ff":"#fff7ed",borderBottom:"1px solid "+(syncStatus==="online"?"#bbf7d0":syncStatus==="syncing"?"#bfdbfe":"#fed7aa"),color:syncStatus==="online"?"#166534":syncStatus==="syncing"?"#1d4ed8":"#92400e",fontSize:11,fontWeight:800,textAlign:"center",padding:"6px 10px"}},syncStatus==="online"?"● Sistema conectado ao bistrô":syncStatus==="syncing"?"↻ Sincronizando pedidos e chamados...":"⚠ Modo offline: "+queueCount+" ação(ões) na fila"),
 h("div",{style:{background:"linear-gradient(135deg,#8B1A1A,#7a1515)",padding:"24px 20px 18px",textAlign:"center"}},
 h("div",{style:{fontFamily:"Georgia,serif",fontSize:11,letterSpacing:5,color:"rgba(255,255,255,.75)",textTransform:"uppercase",fontWeight:400}},"Nobre"),
 h("div",{style:{height:1,background:"rgba(255,255,255,.2)",margin:"4px 40px"}}),
