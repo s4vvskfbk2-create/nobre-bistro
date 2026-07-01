@@ -82,8 +82,8 @@ var PROFS_DEFAULT=[
 {id:5,name:"Fernanda",active:true,telefone:"",desconto:20},{id:6,name:"Gabriela",active:true,telefone:"",desconto:20},
 {id:7,name:"Juliana",active:true,telefone:"",desconto:20},{id:8,name:"Larissa",active:true,telefone:"",desconto:20},
 {id:9,name:"Leticia",active:true,telefone:"",desconto:20},{id:10,name:"Mariana",active:true,telefone:"",desconto:20,tipo:"salao"},
-{id:11,name:"Breno",active:true,telefone:"",desconto:0,tipo:"bistro",pin:"1111",papel:"gerente",comissao:0},
-{id:12,name:"Nayra",active:true,telefone:"",desconto:0,tipo:"bistro",pin:"2222",papel:"atendente",comissao:5}
+{id:11,name:"Gerente",active:true,telefone:"",desconto:0,tipo:"bistro",pin:"",papel:"gerente",comissao:0},
+{id:12,name:"Atendente",active:true,telefone:"",desconto:0,tipo:"bistro",pin:"",papel:"atendente",comissao:5}
 ];
 
 function logEvent(tipo,entidade,entidadeId,dados){
@@ -284,15 +284,13 @@ function PedidosTab(props){
     setOrders(n);sbSet("nb_bA_orders",n);
     if(baixar)InventoryService.consumeOrder(alvo);
     OrderService.updateStatus(id,st,{status_anterior:alvo?alvo.status:null,status_novo:st,tempoPreparo:alvo&&alvo.tempoPreparo}, "admin.PedidosTab");
-    var U="https://zxpnguynjrsixsomaieg.supabase.co";
-    var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
-    var H={"Content-Type":"application/json","apikey":K,"Authorization":"Bearer "+K,"Prefer":"return=minimal"};
+    var H={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=minimal"};
     var o=orders.find(function(x){return x.id===id;});
     if(!o)return;
     var evType=st==="aguardando_pagamento"?"PAYMENT_PENDING":st==="concluido"&&o.status==="aguardando_pagamento"?"PAYMENT_RECEIVED":null;
     if(evType){
-      fetch(U+"/rest/v1/system_events",{method:"POST",headers:H,body:JSON.stringify({event_type:evType,source:"admin.PedidosTab",entity_type:"order",entity_id:String(id),payload:{pedido_id:id,cliente:o.nome,total:o.total,status_anterior:o.status,status_novo:st}})}).catch(function(){});
-      fetch(U+"/rest/v1/audit_logs",{method:"POST",headers:H,body:JSON.stringify({action:evType,entity_type:"order",entity_id:String(id),user_role:nivel||"gerente",user_info:"admin",old_value:{status:o.status},new_value:{status:st}})}).catch(function(){});
+      fetch(SBU+"/rest/v1/system_events",{method:"POST",headers:H,body:JSON.stringify({event_type:evType,source:"admin.PedidosTab",entity_type:"order",entity_id:String(id),payload:{pedido_id:id,cliente:o.nome,total:o.total,status_anterior:o.status,status_novo:st}})}).catch(function(){});
+      fetch(SBU+"/rest/v1/audit_logs",{method:"POST",headers:H,body:JSON.stringify({action:evType,entity_type:"order",entity_id:String(id),user_role:nivel||"gerente",user_info:"admin",old_value:{status:o.status},new_value:{status:st}})}).catch(function(){});
     }
   }
   function abrirCancelar(o){setPedidoParaCancelar({id:o.id,numero:o.id,cliente:o.nome,total:o.total,data:o});}
@@ -2144,7 +2142,7 @@ function App(){
   var s10=us("pedidos"),tab=s10[0],setTab=s10[1];
   var s11=us("oper"),grupo=s11[0],setGrupo=s11[1];
   var s12=us(""),operador=s12[0],setOperador=s12[1];
-  var SENHAS_DEFAULT={gerente:"nobre2025",atendente:"balcao",cancelPin:"nobre2025"};
+  var SENHAS_DEFAULT={gerente:"",atendente:"",cancelPin:""};
   var s13=us(SENHAS_DEFAULT),senhas=s13[0],setSenhas=s13[1];
 
   ue(function(){
@@ -2177,8 +2175,8 @@ function App(){
   }
   function fazerLogin(valor){
     var v=(valor||"").trim();
-    if(v===senhas.gerente||v==="nobre2025"){setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");return;}
-    if(v===senhas.atendente){setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");return;}
+    if(v&&v===senhas.gerente){setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");return;}
+    if(v&&v===senhas.atendente){setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");return;}
     var p=profs.filter(function(x){return x.active!==false&&x.pin&&String(x.pin)===v;})[0];
     if(p){var role=p.papel||"atendente";setOperador(p.name);setNivel(role);irPara(role);setPass("");return;}
     setErr(true);setTimeout(function(){setErr(false);},2000);setPass("");
@@ -2555,7 +2553,7 @@ return h("div",{style:{padding:"16px 14px"}},
 );}
 
 function ModalCancelamento({pedido,onConfirm,onClose,senhaCancel}){
-  var SENHA_OK=senhaCancel||"nobre2025";
+  var SENHA_OK=senhaCancel||"";
   const[motivo,setMotivo]=React.useState('');
   const[motivoCustom,setMotivoCustom]=React.useState('');
   const[senhaG,setSenhaG]=React.useState('');
@@ -2563,7 +2561,7 @@ function ModalCancelamento({pedido,onConfirm,onClose,senhaCancel}){
   const[erro,setErro]=React.useState('');
   const motivosPadrao=['Cliente desistiu','Produto indisponivel','Erro no pedido','Pagamento nao confirmado','Solicitacao do cliente','Outro'];
   const motivoFinal=motivo==='Outro'?motivoCustom:motivo;
-  const autorizado=(senhaG===SENHA_OK||senhaG==='nobre2025');
+  const autorizado=(!!SENHA_OK&&senhaG===SENHA_OK);
   async function handleConfirm(){
     if(!motivoFinal.trim()){setErro('Escolha o motivo do cancelamento.');return;}
     if(!autorizado){setErro('Senha do gerente incorreta. Sem ela o pedido NAO pode ser cancelado.');return;}
@@ -2601,9 +2599,7 @@ async function cancelarPedido(pedido,motivo,userRole){
 }
 
 function TabCentroIA(){
-  const U='https://zxpnguynjrsixsomaieg.supabase.co';
-  const K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q';
-  const H={'apikey':K,'Authorization':'Bearer '+K};
+  const H={'apikey':SBK,'Authorization':'Bearer '+SBK};
   const[subTab,setSubTab]=React.useState('eventos');
   const[eventos,setEventos]=React.useState([]);
   const[recomendacoes,setRecomendacoes]=React.useState([]);
@@ -2618,15 +2614,15 @@ function TabCentroIA(){
       setLoading(true);
       try{
         const[evR,recR,agR]=await Promise.all([
-          fetch(U+'/rest/v1/system_events?order=created_at.desc&limit=50',{headers:H}),
-          fetch(U+'/rest/v1/ai_recommendations?order=created_at.desc&limit=20',{headers:H}),
-          fetch(U+'/rest/v1/ai_agents?order=name.asc',{headers:H})
+          fetch(SBU+'/rest/v1/system_events?order=created_at.desc&limit=50',{headers:H}),
+          fetch(SBU+'/rest/v1/ai_recommendations?order=created_at.desc&limit=20',{headers:H}),
+          fetch(SBU+'/rest/v1/ai_agents?order=name.asc',{headers:H})
         ]);
         const[ev,rec,ag]=await Promise.all([evR.json(),recR.json(),agR.json()]);
         setEventos(Array.isArray(ev)?ev:[]);
         setRecomendacoes(Array.isArray(rec)?rec:[]);
         setAgentes(Array.isArray(ag)?ag:[]);
-      }catch(e){console.error(e);}
+      }catch(e){/* load error */}
       setLoading(false);
     }
     load();
@@ -2636,9 +2632,9 @@ function TabCentroIA(){
     try{
       const[ordRes,ficRes,ingRes,evRes]=await Promise.all([
         sbGet('nb_bA_orders'),
-        fetch(U+'/rest/v1/fichas_tecnicas?select=*',{headers:H}).then(function(r){return r.json();}),
-        fetch(U+'/rest/v1/ingredientes?select=*',{headers:H}).then(function(r){return r.json();}),
-        fetch(U+'/rest/v1/system_events?order=created_at.desc&limit=20',{headers:H}).then(function(r){return r.json();})
+        fetch(SBU+'/rest/v1/fichas_tecnicas?select=*',{headers:H}).then(function(r){return r.json();}),
+        fetch(SBU+'/rest/v1/ingredientes?select=*',{headers:H}).then(function(r){return r.json();}),
+        fetch(SBU+'/rest/v1/system_events?order=created_at.desc&limit=20',{headers:H}).then(function(r){return r.json();})
       ]);
       const orders=Array.isArray(ordRes)?ordRes:[];
       const fichas=Array.isArray(ficRes)?ficRes:[];
@@ -2664,7 +2660,7 @@ function TabCentroIA(){
       const top5=Object.entries(prodMap).sort(function(a,b){return b[1].total-a[1].total;}).slice(0,5).map(function(e,i){return (i+1)+'. '+e[0]+': '+e[1].qty+'un R$'+e[1].total.toFixed(0);}).join(' | ');
       const evStr=evs.slice(0,10).map(function(e){return e.event_type+' '+ft(e.created_at);}).join('\n');
       const prompt='Voce e o Sistema Operacional de IA do Nobre Bistro. Integre dados de TODOS os modulos e faca uma analise completa.\n\nDADOS INTEGRADOS DE TODOS OS MODULOS:\n[VENDAS] Pedidos historico: '+done.length+' | Fat 30d: R$'+fat30.toFixed(0)+' | Fat mes: R$'+fatMes.toFixed(0)+' | Ticket: R$'+ticket.toFixed(2)+'\n[CMV] '+(cmvPct!==null?'CMV: '+cmvPct.toFixed(1)+'% (alvo 30%)':'Sem fichas tecnicas')+'\n[ESTOQUE] Criticos: '+(criticos.length?criticos.map(function(i){return i.nome;}).join(', '):'Nenhum')+'\n[FIADO] Em aberto: R$'+fiadoAberto.toFixed(0)+'\n[TOP PRATOS] '+top5+'\n[EVENTOS RECENTES]\n'+evStr+'\n\nRESPONDA AS 4 PERGUNTAS FUNDAMENTAIS:\n## O que aconteceu?\n## Por que aconteceu?\n## O que provavelmente acontecera?\n## O que devemos fazer agora?\n\nSeja o CEO da operacao. Maximo 500 palavras. Numeros reais. Acoes concretas.';
-      const res=await fetch(U+'/functions/v1/consultor-ia',{method:'POST',headers:{'Content-Type':'application/json','apikey':K},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+      const res=await fetch(SBU+'/functions/v1/consultor-ia',{method:'POST',headers:{'Content-Type':'application/json','apikey':SBK},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
       const data=await res.json();
       if(data.error)throw new Error(data.error.message);
       setIaAnalise(data.content&&data.content[0]?data.content[0].text:'');
@@ -2757,9 +2753,7 @@ function TabCentroIA(){
 }
 
 function TabReceitas(){
-  var U="https://zxpnguynjrsixsomaieg.supabase.co";
-  var K="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
-  var H={"apikey":K,"Authorization":"Bearer "+K,"Content-Type":"application/json"};
+  var H={"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json"};
   var h=React.createElement,us=React.useState,ue=React.useEffect;
   var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
   var fmt=function(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});};
@@ -2785,8 +2779,8 @@ function TabReceitas(){
   function carregarDados(){
     setLoading(true);
     Promise.all([
-      fetch(U+"/rest/v1/fichas_tecnicas?order=nome.asc&select=*",{headers:H}).then(function(r){return r.json();}),
-      fetch(U+"/rest/v1/ingredientes?order=nome.asc&ativo=eq.true&select=*",{headers:H}).then(function(r){return r.json();})
+      fetch(SBU+"/rest/v1/fichas_tecnicas?order=nome.asc&select=*",{headers:H}).then(function(r){return r.json();}),
+      fetch(SBU+"/rest/v1/ingredientes?order=nome.asc&ativo=eq.true&select=*",{headers:H}).then(function(r){return r.json();})
     ]).then(function(res){
       setReceitas(Array.isArray(res[0])?res[0]:[]);
       setIngredientes(Array.isArray(res[1])?res[1]:[]);
@@ -2848,7 +2842,7 @@ function TabReceitas(){
   async function editarReceita(rec){
     setEditandoId(rec.id);
     setFormRec({nome:rec.nome,categoria:rec.categoria||"",preco_venda:String(rec.preco_venda||""),rendimento:String(rec.rendimento||1),observacoes:rec.observacoes||""});
-    var r2=await fetch(U+"/rest/v1/ficha_ingredientes?ficha_id=eq."+rec.id+"&select=*",{headers:H});
+    var r2=await fetch(SBU+"/rest/v1/ficha_ingredientes?ficha_id=eq."+rec.id+"&select=*",{headers:H});
     var itens=await r2.json();
     setFormItens(itens.map(function(it){return {id:Date.now()+Math.random(),tipo:it.sub_receita_id?"sub_receita":"ingrediente",ingrediente_id:it.ingrediente_id||"",sub_receita_id:it.sub_receita_id||"",quantidade:String(it.quantidade||""),unidade:it.unidade||""};}) );
     setSel(null);
@@ -2867,10 +2861,10 @@ function TabReceitas(){
     var precoVenda=parseFloat(formRec.preco_venda)||0;
     var cmvPct=precoVenda>0?(custoTotal/precoVenda)*100:0;
     try{
-      var fichaUrl=isEdit?(U+"/rest/v1/fichas_tecnicas?id=eq."+editandoId):(U+"/rest/v1/fichas_tecnicas");
+      var fichaUrl=isEdit?(SBU+"/rest/v1/fichas_tecnicas?id=eq."+editandoId):(SBU+"/rest/v1/fichas_tecnicas");
       var fichaMethod=isEdit?"PATCH":"POST";
       var fichaHeaders=Object.assign({},H,{"Prefer":"return=representation"});
-      if(isEdit){await fetch(U+"/rest/v1/ficha_ingredientes?ficha_id=eq."+editandoId,{method:"DELETE",headers:H});}
+      if(isEdit){await fetch(SBU+"/rest/v1/ficha_ingredientes?ficha_id=eq."+editandoId,{method:"DELETE",headers:H});}
       var rFicha=await fetch(fichaUrl,{
         method:fichaMethod,headers:fichaHeaders,
         body:JSON.stringify({nome:formRec.nome,categoria:formRec.categoria,preco_venda:precoVenda,custo_total:custoTotal,cmv_percentual:cmvPct,rendimento:parseFloat(formRec.rendimento)||1,observacoes:formRec.observacoes,ativo:true})
@@ -2892,7 +2886,7 @@ function TabReceitas(){
           payload.ingrediente_id=parseInt(it.ingrediente_id);
         }
         payload.custo_linha=custoLinha;
-        return fetch(U+"/rest/v1/ficha_ingredientes",{
+        return fetch(SBU+"/rest/v1/ficha_ingredientes",{
           method:"POST",headers:Object.assign({},H,{"Prefer":"return=minimal"}),
           body:JSON.stringify(payload)
         });
@@ -2911,7 +2905,7 @@ function TabReceitas(){
     if(!formIng.custo_unitario||isNaN(parseFloat(formIng.custo_unitario))){setErroIng("Custo obrigatorio.");return;}
     setSalvandoIng(true);setErroIng(null);
     try{
-      await fetch(U+"/rest/v1/ingredientes",{
+      await fetch(SBU+"/rest/v1/ingredientes",{
         method:"POST",headers:Object.assign({},H,{"Prefer":"return=minimal"}),
         body:JSON.stringify({nome:formIng.nome,unidade:formIng.unidade,custo_unitario:parseFloat(formIng.custo_unitario),categoria:formIng.categoria,ativo:true})
       });
@@ -2925,8 +2919,8 @@ function TabReceitas(){
 
   async function excluirReceita(id){
     if(!window.confirm("Excluir esta receita?"))return;
-    await fetch(U+"/rest/v1/ficha_ingredientes?ficha_id=eq."+id,{method:"DELETE",headers:H});
-    await fetch(U+"/rest/v1/fichas_tecnicas?id=eq."+id,{method:"DELETE",headers:H});
+    await fetch(SBU+"/rest/v1/ficha_ingredientes?ficha_id=eq."+id,{method:"DELETE",headers:H});
+    await fetch(SBSBU+"/rest/v1/fichas_tecnicas?id=eq."+id,{method:"DELETE",headers:H});
     carregarDados();setSel(null);
   }
 

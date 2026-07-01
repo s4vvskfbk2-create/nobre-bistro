@@ -8,6 +8,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 
 const R = "#8B1A1A";
 const GOLD = "#C9A84C";
+const WPP_NUMBER = "";
 const CREAM = "#faf8f5";
 const DARK = "#1a1108";
 const BORDER = "#ede9e3";
@@ -258,7 +259,7 @@ function CartDrawer({cart, onClose, profs}) {
   function sendWpp(){
     const lines = cart.items.map(i=>"• "+i.qty+"x "+i.name+(i.obs?" ("+i.obs+")":"")).join("\n");
     const msg = "🌿 *PEDIDO #"+oid.current+" — Nobre Bistrô*\n\n👤 *Cliente:* "+nome+"\n"+(prof?"✂️ *Profissional:* "+prof+"\n":"")+"\n*Itens:*\n"+lines+"\n\n💰 *Total:* "+fmt(cart.total)+"\n💳 *Pagamento:* "+(PAY[payment]||payment);
-    window.open("https://wa.me/5511914195567?text="+encodeURIComponent(msg),"_blank");
+    window.open("https://wa.me/"+WPP_NUMBER+"?text="+encodeURIComponent(msg),"_blank");
     store.set("nb_bA_orders", []);
     onClose();
   }
