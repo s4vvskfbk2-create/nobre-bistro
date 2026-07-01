@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zxpnguynjrsixsomaieg.supabase.co https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://zxpnguynjrsixsomaieg.supabase.co; connect-src 'self' https://zxpnguynjrsixsomaieg.supabase.co;">
 <title>Nobre Bistro Admin</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
@@ -35,6 +36,19 @@ async function sbGet(k){try{var r=await fetch(SBU+"/rest/v1/config?key=eq."+enco
 async function sbSet(k,v){try{await fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})});}catch(e){}}
 async function uploadFoto(file){var fname=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"-");var buf=await file.arrayBuffer();var r=await fetch(SBU+"/storage/v1/object/produtos/"+fname,{method:"POST",headers:{"Authorization":"Bearer "+SBK,"Content-Type":file.type,"x-upsert":"true"},body:buf});if(r.ok)return SBU+"/storage/v1/object/public/produtos/"+fname;return null;}
 function abrirWpp(tel,msg){var t=(tel||"").replace(/\D/g,"");if(t.length>=10)t="55"+t;window.open("https://wa.me/"+t+"?text="+encodeURIComponent(msg),"_blank");}
+
+// ── Brute-force protection ──────────────────────────────────────────────
+var BF_KEY="nb_bA_loginAttempts";
+var BF_MAX=5;
+var BF_LOCK_MS=30*60*1000;
+function bfCheck(){try{var d=JSON.parse(localStorage.getItem(BF_KEY)||"{}");if(d.until&&Date.now()<d.until)return{locked:true,min:Math.ceil((d.until-Date.now())/60000)};return{locked:false,count:d.count||0};}catch(e){return{locked:false,count:0};}}
+function bfFail(){try{var d=JSON.parse(localStorage.getItem(BF_KEY)||"{}");d.count=(d.count||0)+1;if(d.count>=BF_MAX){d.until=Date.now()+BF_LOCK_MS;d.count=0;}localStorage.setItem(BF_KEY,JSON.stringify(d));}catch(e){}}
+function bfOk(){try{localStorage.removeItem(BF_KEY);}catch(e){}}
+
+// ── Server-side auth via Supabase RPC ───────────────────────────────────
+var SBH_AUTH={"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json"};
+async function rpcCheckPassword(role,attempt){try{var r=await fetch(SBU+"/rest/v1/rpc/check_admin_password",{method:"POST",headers:SBH_AUTH,body:JSON.stringify({role_name:role,password_attempt:attempt})});if(!r.ok)return{ok:false};return await r.json();}catch(e){return{ok:false};}}
+async function rpcCheckPin(pin){try{var r=await fetch(SBU+"/rest/v1/rpc/check_staff_pin",{method:"POST",headers:SBH_AUTH,body:JSON.stringify({pin_attempt:pin})});if(!r.ok)return{ok:false};return await r.json();}catch(e){return{ok:false};}}
 function buildFiadoResumo(nome,ordens,descPct){
   var porDia={};
   ordens.forEach(function(o){
@@ -268,7 +282,7 @@ function BalcaoTab(props){
 }
 
 function PedidosTab(props){
-  var orders=props.orders,setOrders=props.setOrders,nivel=props.nivel,senhaCancel=props.senhaCancel;
+  var orders=props.orders,setOrders=props.setOrders,nivel=props.nivel;
   var s1=us("todos"),filtro=s1[0],setFiltro=s1[1];
   var sc=us(null),pedidoParaCancelar=sc[0],setPedidoParaCancelar=sc[1];
   var sch=us([]),chamados=sch[0],setChamados=sch[1];
@@ -347,7 +361,7 @@ function PedidosTab(props){
         o.status!=="cancelado"&&o.status!=="concluido"&&h(Btn,{sm:true,outline:true,color:"#dc2626",onClick:function(){abrirCancelar(o);}},"Cancelar")
       )
     );}),
-    pedidoParaCancelar&&h(ModalCancelamento,{pedido:pedidoParaCancelar,onConfirm:confirmarCancelar,onClose:function(){setPedidoParaCancelar(null);},senhaCancel:senhaCancel})
+    pedidoParaCancelar&&h(ModalCancelamento,{pedido:pedidoParaCancelar,onConfirm:confirmarCancelar,onClose:function(){setPedidoParaCancelar(null);}})
   );
 }
 
@@ -2142,17 +2156,14 @@ function App(){
   var s10=us("pedidos"),tab=s10[0],setTab=s10[1];
   var s11=us("oper"),grupo=s11[0],setGrupo=s11[1];
   var s12=us(""),operador=s12[0],setOperador=s12[1];
-  var SENHAS_DEFAULT={gerente:"",atendente:"",cancelPin:""};
-  var s13=us(SENHAS_DEFAULT),senhas=s13[0],setSenhas=s13[1];
 
   ue(function(){
-    Promise.all([sbGet("nb_bA_products"),sbGet("nb_bA_orders"),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento"),sbGet("nb_bA_senhas")]).then(function(res){
+    Promise.all([sbGet("nb_bA_products"),sbGet("nb_bA_orders"),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
       if(res[0]&&res[0].length){setProds(res[0]);ProductService.syncAll(res[0]);}
       if(res[1])setOrders(res[1]);
       if(res[2]&&res[2].length){setProfs(res[2]);StaffService.syncAll(res[2]);}
       if(res[3])setHorarios(res[3]);
       if(res[4]!==null)setFechamentoManual(!!res[4]);
-      if(res[5])setSenhas(Object.assign({},SENHAS_DEFAULT,res[5]));
       setLoading(false);
     });
     var poll=setInterval(function(){
@@ -2160,6 +2171,16 @@ function App(){
     },10000);
     return function(){clearInterval(poll);};
   },[]);
+
+  ue(function(){
+    if(!nivel)return;
+    window._nbLastAct=Date.now();
+    function ra(){window._nbLastAct=Date.now();}
+    document.addEventListener("click",ra);
+    document.addEventListener("keydown",ra);
+    var timer=setInterval(function(){if(Date.now()-window._nbLastAct>60*60*1000){setNivel(null);setOperador("");}},60000);
+    return function(){clearInterval(timer);document.removeEventListener("click",ra);document.removeEventListener("keydown",ra);};
+  },[nivel]);
 
   var pending=orders.filter(function(o){return o.status==="aguardando_pagamento"||o.status==="pendente";}).length;
   var cooking=orders.filter(function(o){return o.status==="em_curso";}).length;
@@ -2173,13 +2194,19 @@ function App(){
     if(role==="gerente"){setGrupo("oper");setTab("dashboard");}
     else{setGrupo("oper");setTab("balcao");}
   }
-  function fazerLogin(valor){
+  async function fazerLogin(valor){
+    var bf=bfCheck();
+    if(bf.locked){setErr(true);return;}
     var v=(valor||"").trim();
-    if(v&&v===senhas.gerente){setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");return;}
-    if(v&&v===senhas.atendente){setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");return;}
-    var p=profs.filter(function(x){return x.active!==false&&x.pin&&String(x.pin)===v;})[0];
-    if(p){var role=p.papel||"atendente";setOperador(p.name);setNivel(role);irPara(role);setPass("");return;}
-    setErr(true);setTimeout(function(){setErr(false);},2000);setPass("");
+    if(!v){setErr(true);setTimeout(function(){setErr(false);},2000);return;}
+    var res;
+    res=await rpcCheckPassword("gerente",v);
+    if(res.ok){bfOk();setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");return;}
+    res=await rpcCheckPassword("atendente",v);
+    if(res.ok){bfOk();setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");return;}
+    res=await rpcCheckPin(v);
+    if(res.ok){bfOk();var role=res.role||"atendente";setOperador(res.name);setNivel(role);irPara(role);setPass("");return;}
+    bfFail();setErr(true);setTimeout(function(){setErr(false);},3000);setPass("");
   }
 
   if(!nivel)return h("div",{style:{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",padding:22,background:C}},
@@ -2190,16 +2217,23 @@ function App(){
         h("h2",{style:{fontSize:17,fontWeight:900,color:"#1a1a1a"}},"Admin")
       ),
       h("div",{style:{background:"#fff",borderRadius:18,padding:28,border:"1px solid "+B,boxShadow:"0 4px 24px rgba(0,0,0,.08)"}},
-        h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Senha ou PIN"),
-        h("input",{type:"password",value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:function(e){if(e.key==="Enter")fazerLogin(pass);},placeholder:"Digite sua senha ou PIN",inputMode:"text",autoCapitalize:"none",autoFocus:true,style:{width:"100%",border:"1.5px solid "+(err?"#fca5a5":B),borderRadius:9,padding:"12px",fontSize:16,outline:"none",boxSizing:"border-box",letterSpacing:3,textAlign:"center"}}),
-        err&&h("p",{style:{color:"#ef4444",fontSize:11,margin:"4px 0 0",fontWeight:600}},"Senha ou PIN incorreto"),
-        h("button",{onClick:function(){fazerLogin(pass);},style:{width:"100%",marginTop:10,background:R,color:"#fff",border:"none",borderRadius:11,padding:"14px 0",minHeight:48,fontSize:14,fontWeight:800,cursor:"pointer",letterSpacing:"-0.01em"}},"Entrar"),
-        h("div",{style:{marginTop:14,borderTop:"1px solid "+B,paddingTop:12}},
-          h("div",{style:{display:"flex",justifyContent:"center",gap:12,marginBottom:8}},
-            [[R,"Gerente"],["#3b82f6","Atendente"],["#22c55e","Cozinha"]].map(function(arr){return h("div",{key:arr[1],style:{display:"flex",alignItems:"center",gap:5}},h("span",{style:{width:8,height:8,borderRadius:"50%",background:arr[0],flexShrink:0}}),h("span",{style:{fontSize:11,fontWeight:700,color:"#555"}},arr[1]));})
+        (function(){var bf=bfCheck();return[
+          !bf.locked&&h("label",{key:"lbl",style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:4,textTransform:"uppercase"}},"Senha ou PIN"),
+          !bf.locked&&h("input",{key:"inp",type:"password",value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:function(e){if(e.key==="Enter")fazerLogin(pass);},placeholder:"Digite sua senha ou PIN",inputMode:"text",autoCapitalize:"none",autoFocus:true,style:{width:"100%",border:"1.5px solid "+(err?"#fca5a5":B),borderRadius:9,padding:"12px",fontSize:16,outline:"none",boxSizing:"border-box",letterSpacing:3,textAlign:"center"}}),
+          bf.locked&&h("div",{key:"lock",style:{textAlign:"center",padding:"12px 0"}},
+            h("p",{style:{fontSize:22,margin:"0 0 6px"}},"🔒"),
+            h("p",{style:{color:"#ef4444",fontSize:13,fontWeight:700,margin:0}},"Acesso bloqueado"),
+            h("p",{style:{color:"#888",fontSize:11,margin:"4px 0 0"}},"Tente novamente em "+bf.min+" minuto(s)")
           ),
-          h("p",{style:{fontSize:10,color:"#aaa",textAlign:"center",margin:0,lineHeight:1.5}},"Use a senha do seu perfil. Em caso de dúvida, fale com o gerente.")
-        )
+          !bf.locked&&err&&h("p",{key:"err",style:{color:"#ef4444",fontSize:11,margin:"4px 0 0",fontWeight:600}},"Senha ou PIN incorreto"),
+          !bf.locked&&h("button",{key:"btn",onClick:function(){fazerLogin(pass);},style:{width:"100%",marginTop:10,background:R,color:"#fff",border:"none",borderRadius:11,padding:"14px 0",minHeight:48,fontSize:14,fontWeight:800,cursor:"pointer",letterSpacing:"-0.01em"}},"Entrar"),
+          h("div",{key:"hints",style:{marginTop:14,borderTop:"1px solid "+B,paddingTop:12}},
+            h("div",{style:{display:"flex",justifyContent:"center",gap:12,marginBottom:8}},
+              [[R,"Gerente"],["#3b82f6","Atendente"],["#22c55e","Cozinha"]].map(function(arr){return h("div",{key:arr[1],style:{display:"flex",alignItems:"center",gap:5}},h("span",{style:{width:8,height:8,borderRadius:"50%",background:arr[0],flexShrink:0}}),h("span",{style:{fontSize:11,fontWeight:700,color:"#555"}},arr[1]));})
+            ),
+            h("p",{style:{fontSize:10,color:"#aaa",textAlign:"center",margin:0,lineHeight:1.5}},"Use a senha do seu perfil. Em caso de dúvida, fale com o gerente.")
+          )
+        ];})()
       )
     )
   );
@@ -2270,7 +2304,7 @@ function App(){
       tab==="central_ia"&&nivel==="gerente"&&h(TabCentralIA,{orders:orders,prods:prods,profs:profs,onIr:function(g,t){setGrupo(g);setTab(t);}}),
       tab==="tarefas_ia"&&nivel==="gerente"&&h(TabTarefasIA,null),
       tab==="balcao"&&h(BalcaoTab,{prods:prods,profs:profs,orders:orders,setOrders:setOrders,setProds:setProds,operador:operador}),
-      tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders,nivel:nivel,operador:operador,senhaCancel:senhas.cancelPin}),
+      tab==="pedidos"&&h(PedidosTab,{orders:orders,setOrders:setOrders,nivel:nivel,operador:operador}),
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="meu_desempenho"&&h(TabMeuDesempenho,{orders:orders,operador:operador,profs:profs}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
@@ -2292,7 +2326,7 @@ function App(){
       tab==="erp_insumos"&&nivel==="gerente"&&h(TabErpInsumos,null),
       tab==="erp_fornecedores"&&nivel==="gerente"&&h(TabErpFornecedores,null),
       tab==="erp_compras"&&nivel==="gerente"&&h(TabErpCompras,null),
-      tab==="config"&&nivel==="gerente"&&h(TabConfig,{senhas:senhas,setSenhas:setSenhas})
+      tab==="config"&&nivel==="gerente"&&h(TabConfig,null)
     )
   );
 }
@@ -2552,8 +2586,7 @@ return h("div",{style:{padding:"16px 14px"}},
   )
 );}
 
-function ModalCancelamento({pedido,onConfirm,onClose,senhaCancel}){
-  var SENHA_OK=senhaCancel||"";
+function ModalCancelamento({pedido,onConfirm,onClose}){
   const[motivo,setMotivo]=React.useState('');
   const[motivoCustom,setMotivoCustom]=React.useState('');
   const[senhaG,setSenhaG]=React.useState('');
@@ -2561,11 +2594,12 @@ function ModalCancelamento({pedido,onConfirm,onClose,senhaCancel}){
   const[erro,setErro]=React.useState('');
   const motivosPadrao=['Cliente desistiu','Produto indisponivel','Erro no pedido','Pagamento nao confirmado','Solicitacao do cliente','Outro'];
   const motivoFinal=motivo==='Outro'?motivoCustom:motivo;
-  const autorizado=(!!SENHA_OK&&senhaG===SENHA_OK);
   async function handleConfirm(){
     if(!motivoFinal.trim()){setErro('Escolha o motivo do cancelamento.');return;}
-    if(!autorizado){setErro('Senha do gerente incorreta. Sem ela o pedido NAO pode ser cancelado.');return;}
+    if(!senhaG){setErro('Digite a senha do gerente.');return;}
     setLoading(true);setErro('');
+    var res=await rpcCheckPassword("gerente",senhaG);
+    if(!res.ok){var res2=await rpcCheckPassword("cancelPin",senhaG);if(!res2.ok){setErro('Senha incorreta. Cancelamento não autorizado.');setLoading(false);return;}}
     try{await onConfirm(pedido,motivoFinal);onClose();}
     catch(e){setErro('Erro ao cancelar: '+(e.message||'Tente novamente.'));setLoading(false);}
   }
@@ -2583,13 +2617,13 @@ function ModalCancelamento({pedido,onConfirm,onClose,senhaCancel}){
       ),
       React.createElement('div',{style:{marginBottom:'0.75rem'}},
         React.createElement('label',{style:{fontSize:'0.85rem',fontWeight:700,color:'#8B1A1A',display:'block',marginBottom:'0.4rem'}},'🔒 Senha do gerente *'),
-        React.createElement('input',{type:'password',value:senhaG,onChange:function(e){setSenhaG(e.target.value);},placeholder:'Só o gerente cancela',style:{width:'100%',padding:'0.6rem',borderRadius:'6px',border:'2px solid '+(senhaG?(autorizado?'#22c55e':'#fca5a5'):'#d1d5db'),fontSize:'0.95rem',boxSizing:'border-box',letterSpacing:'2px'}}),
+        React.createElement('input',{type:'password',value:senhaG,onChange:function(e){setSenhaG(e.target.value);},placeholder:'Só o gerente cancela',style:{width:'100%',padding:'0.6rem',borderRadius:'6px',border:'2px solid #d1d5db',fontSize:'0.95rem',boxSizing:'border-box',letterSpacing:'2px'}}),
         React.createElement('p',{style:{margin:'0.4rem 0 0',fontSize:'0.72rem',color:'#92400e',background:'#fff7ed',border:'1px solid #fed7aa',borderRadius:'6px',padding:'0.4rem 0.6rem'}},'⚠️ Todo cancelamento fica registrado com data, hora e quem autorizou.')
       ),
       erro&&React.createElement('p',{style:{color:'#dc2626',fontSize:'0.8rem',marginBottom:'0.75rem',fontWeight:600}},erro),
       React.createElement('div',{style:{display:'flex',gap:'0.5rem',justifyContent:'flex-end'}},
         React.createElement('button',{onClick:onClose,disabled:loading,style:{padding:'0.7rem 1.1rem',borderRadius:'8px',border:'1px solid #d1d5db',background:'#f9fafb',cursor:'pointer',fontSize:'0.9rem',fontWeight:600}},'Voltar'),
-        React.createElement('button',{onClick:handleConfirm,disabled:loading||!motivoFinal.trim()||!autorizado,style:{padding:'0.7rem 1.1rem',borderRadius:'8px',border:'none',background:(loading||!motivoFinal.trim()||!autorizado)?'#9ca3af':'#dc2626',color:'#fff',cursor:(loading||!autorizado)?'not-allowed':'pointer',fontSize:'0.9rem',fontWeight:700}},loading?'Cancelando...':'Confirmar Cancelamento')
+        React.createElement('button',{onClick:handleConfirm,disabled:loading||!motivoFinal.trim()||!senhaG,style:{padding:'0.7rem 1.1rem',borderRadius:'8px',border:'none',background:(loading||!motivoFinal.trim()||!senhaG)?'#9ca3af':'#dc2626',color:'#fff',cursor:(loading||!senhaG)?'not-allowed':'pointer',fontSize:'0.9rem',fontWeight:700}},loading?'Verificando...':'Confirmar Cancelamento')
       )
     )
   );
@@ -3653,29 +3687,41 @@ function TabDashboard(props){
   );
 }
 
-function TabConfig(props){
-  var senhas=props.senhas,setSenhas=props.setSenhas;
-  var s1=us(Object.assign({gerente:"",atendente:"",cancelPin:""},senhas)),f=s1[0],setF=s1[1];
-  var s2=us(false),okS=s2[0],setOkS=s2[1];
-  var s3=us(""),metaDia=s3[0],setMetaDia=s3[1];
-  var s4=us(false),okM=s4[0],setOkM=s4[1];
+function TabConfig(){
+  var s1=us({gerente:"",atendente:"",cancelPin:""}),f=s1[0],setF=s1[1];
+  var s2=us(""),senhaAtual=s2[0],setSenhaAtual=s2[1];
+  var s3=us(false),okS=s3[0],setOkS=s3[1];
+  var s4=us(""),erroS=s4[0],setErroS=s4[1];
+  var s5=us(""),metaDia=s5[0],setMetaDia=s5[1];
+  var s6=us(false),okM=s6[0],setOkM=s6[1];
   ue(function(){sbGet("nb_bA_meta").then(function(m){if(m&&m.diaria!=null)setMetaDia(String(m.diaria));});},[]);
   function up(k,v){var o={};o[k]=v;setF(Object.assign({},f,o));}
-  function salvarSenhas(){
-    if(!f.gerente||!f.atendente||!f.cancelPin){window.alert("Preencha todas as senhas.");return;}
-    setSenhas(f);sbSet("nb_bA_senhas",f);setOkS(true);setTimeout(function(){setOkS(false);},2500);
+  async function salvarSenhas(){
+    if(!f.gerente||!f.atendente||!f.cancelPin){setErroS("Preencha todas as novas senhas.");return;}
+    if(!senhaAtual){setErroS("Informe a senha atual do gerente para confirmar.");return;}
+    setErroS("");
+    try{
+      var r=await fetch(SBU+"/rest/v1/rpc/update_admin_password",{method:"POST",headers:SBH_AUTH,body:JSON.stringify({current_gerente_password:senhaAtual,senhas_json:f})});
+      var res=await r.json();
+      if(res.ok){setOkS(true);setSenhaAtual("");setF({gerente:"",atendente:"",cancelPin:""});setTimeout(function(){setOkS(false);},2500);}
+      else if(res.reason==="invalid_current_password"){setErroS("Senha atual incorreta.");}
+      else if(res.reason==="not_configured"){setErroS("Nenhuma senha configurada ainda. Use o painel Supabase para o primeiro acesso.");}
+      else{setErroS("Erro ao salvar. Tente novamente.");}
+    }catch(e){setErroS("Erro de conexão.");}
   }
   function salvarMeta(){sbSet("nb_bA_meta",{diaria:parseFloat(metaDia)||0});setOkM(true);setTimeout(function(){setOkM(false);},2500);}
   return h("div",{style:{padding:"16px 14px"}},
     h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 12px",fontFamily:"Georgia,serif"}},"Ajustes"),
     h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:14,marginBottom:14}},
       h("p",{style:{margin:"0 0 4px",fontWeight:800,fontSize:14}},"🔑 Senhas de acesso"),
-      h("p",{style:{margin:"0 0 12px",fontSize:11,color:"#888"}},"Troque aqui sem mexer no código. Vale na hora pra todos."),
-      h(Inp,{label:"Senha do Gerente",value:f.gerente,onChange:function(v){up("gerente",v);}}),
-      h(Inp,{label:"Senha do Atendente",value:f.atendente,onChange:function(v){up("atendente",v);}}),
-      h(Inp,{label:"Senha para cancelar pedido",value:f.cancelPin,onChange:function(v){up("cancelPin",v);},hint:"Pedida toda vez que alguém cancela uma venda"}),
-      okS&&h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,margin:"0 0 8px"}},"Senhas salvas!"),
-      h(Btn,{full:true,onClick:salvarSenhas},"Salvar senhas")
+      h("p",{style:{margin:"0 0 12px",fontSize:11,color:"#888"}},"Troque aqui as senhas. Confirme a senha atual do gerente para salvar."),
+      h(Inp,{label:"Senha atual do Gerente (confirmação)",value:senhaAtual,onChange:setSenhaAtual,type:"password"}),
+      h(Inp,{label:"Nova Senha do Gerente",value:f.gerente,onChange:function(v){up("gerente",v);},type:"password"}),
+      h(Inp,{label:"Nova Senha do Atendente",value:f.atendente,onChange:function(v){up("atendente",v);},type:"password"}),
+      h(Inp,{label:"Nova Senha para cancelar pedido",value:f.cancelPin,onChange:function(v){up("cancelPin",v);},type:"password",hint:"Pedida toda vez que alguém cancela uma venda"}),
+      erroS&&h("p",{style:{color:"#ef4444",fontSize:12,fontWeight:700,margin:"0 0 8px"}},erroS),
+      okS&&h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,margin:"0 0 8px"}},"Senhas atualizadas com segurança!"),
+      h(Btn,{full:true,onClick:salvarSenhas},"Atualizar senhas")
     ),
     h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:14,marginBottom:14}},
       h("p",{style:{margin:"0 0 4px",fontWeight:800,fontSize:14}},"🎯 Meta de vendas do dia"),
@@ -3683,8 +3729,7 @@ function TabConfig(props){
       h(Inp,{label:"Meta diária (R$)",value:metaDia,onChange:setMetaDia,type:"number",placeholder:"Ex: 800"}),
       okM&&h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,margin:"0 0 8px"}},"Meta salva!"),
       h(Btn,{full:true,onClick:salvarMeta},"Salvar meta")
-    ),
-    h("p",{style:{fontSize:10,color:"#aaa",textAlign:"center",lineHeight:1.5}},"Dica de segurança: a senha mestra de emergência continua válida só pra você não ficar travado. Guarde-a com você.")
+    )
   );
 }
 
