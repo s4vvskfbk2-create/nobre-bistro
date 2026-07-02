@@ -15,6 +15,18 @@ var h=React.createElement,us=React.useState,ue=React.useEffect,um=React.useMemo;
 var R="#8B1A1A",B="#e8e2da",C="#faf8f5",BG="#f2f0ec";var TX="#1a1a1a",TX2="#555",TX3="#999";var SH="0 2px 8px rgba(0,0,0,.08)";
 var SBU="https://zxpnguynjrsixsomaieg.supabase.co";
 var SBK="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+// Token de sessão emitido pelo auth-login após o login; antes dele (ou sem a
+// function publicada) o app opera com a chave anon — compatibilidade total.
+function nbToken(){return window.NB_TOKEN||SBK;}
+async function obterToken(kind,role,valor){
+  try{
+    var r=await fetch(SBU+"/functions/v1/auth-login",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken()},body:JSON.stringify({kind:kind,role:role,value:valor})});
+    if(!r.ok)return null;
+    var d=await r.json();
+    if(d&&d.token){window.NB_TOKEN=d.token;return d.token;}
+  }catch(e){}
+  return null;
+}
 function fmt(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});}
 function nowStr(){
   var d=new Date();
@@ -32,9 +44,9 @@ function todayKey(){
   var yyyy=d.getFullYear();
   return dd+"/"+mm+"/"+yyyy;
 }
-async function sbGet(k){try{var r=await fetch(SBU+"/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}});if(!r.ok)throw new Error("Supabase GET "+r.status);var d=await r.json();return d&&d.length?d[0].value:null;}catch(e){return null;}}
-async function sbSet(k,v){try{await fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})});}catch(e){}}
-async function uploadFoto(file){var fname=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"-");var buf=await file.arrayBuffer();var r=await fetch(SBU+"/storage/v1/object/produtos/"+fname,{method:"POST",headers:{"Authorization":"Bearer "+SBK,"Content-Type":file.type,"x-upsert":"true"},body:buf});if(r.ok)return SBU+"/storage/v1/object/public/produtos/"+fname;return null;}
+async function sbGet(k){try{var r=await fetch(SBU+"/rest/v1/config?key=eq."+encodeURIComponent(k)+"&select=value",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}});if(!r.ok)throw new Error("Supabase GET "+r.status);var d=await r.json();return d&&d.length?d[0].value:null;}catch(e){return null;}}
+async function sbSet(k,v){try{await fetch(SBU+"/rest/v1/config",{method:"POST",headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken(),"Content-Type":"application/json","Prefer":"resolution=merge-duplicates"},body:JSON.stringify({key:k,value:v})});}catch(e){}}
+async function uploadFoto(file){var fname=Date.now()+"-"+file.name.replace(/[^a-zA-Z0-9.]/g,"-");var buf=await file.arrayBuffer();var r=await fetch(SBU+"/storage/v1/object/produtos/"+fname,{method:"POST",headers:{"Authorization":"Bearer "+nbToken(),"Content-Type":file.type,"x-upsert":"true"},body:buf});if(r.ok)return SBU+"/storage/v1/object/public/produtos/"+fname;return null;}
 function abrirWpp(tel,msg){var t=(tel||"").replace(/\D/g,"");if(t.length>=10)t="55"+t;window.open("https://wa.me/"+t+"?text="+encodeURIComponent(msg),"_blank");}
 
 // ── Brute-force protection ──────────────────────────────────────────────
@@ -46,7 +58,7 @@ function bfFail(){try{var d=JSON.parse(localStorage.getItem(BF_KEY)||"{}");d.cou
 function bfOk(){try{localStorage.removeItem(BF_KEY);}catch(e){}}
 
 // ── Server-side auth via Supabase RPC ───────────────────────────────────
-var SBH_AUTH={"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json"};
+var SBH_AUTH={"apikey":SBK,"Authorization":"Bearer "+nbToken(),"Content-Type":"application/json"};
 async function rpcCheckPassword(role,attempt){try{var r=await fetch(SBU+"/rest/v1/rpc/check_admin_password",{method:"POST",headers:SBH_AUTH,body:JSON.stringify({role_name:role,password_attempt:attempt})});if(!r.ok)return{ok:false};return await r.json();}catch(e){return{ok:false};}}
 async function rpcCheckPin(pin){try{var r=await fetch(SBU+"/rest/v1/rpc/check_staff_pin",{method:"POST",headers:SBH_AUTH,body:JSON.stringify({pin_attempt:pin})});if(!r.ok)return{ok:false};return await r.json();}catch(e){return{ok:false};}}
 function buildFiadoResumo(nome,ordens,descPct){
@@ -101,14 +113,14 @@ var PROFS_DEFAULT=[
 ];
 
 function logEvent(tipo,entidade,entidadeId,dados){
-  var H2={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=minimal"};
+  var H2={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken(),"Prefer":"return=minimal"};
   fetch(SBU+"/rest/v1/system_events",{method:"POST",headers:H2,body:JSON.stringify({event_type:tipo,source:"admin",entity_type:entidade,entity_id:String(entidadeId||""),payload:dados||{}})}).catch(function(){});
 }
 var ServiceBus=(function(){
-  var H={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"resolution=merge-duplicates,return=representation"};
-  var HMIN={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"resolution=merge-duplicates,return=minimal"};
-  function post(path,body,minimal){return fetch(SBU+"/rest/v1/"+path,{method:"POST",headers:minimal?HMIN:H,body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error(path+" "+r.status);return minimal?null:r.json();});}
-  function patch(path,body){return fetch(SBU+"/rest/v1/"+path,{method:"PATCH",headers:HMIN,body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error(path+" "+r.status);return true;});}
+  function H(){return {"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken(),"Prefer":"resolution=merge-duplicates,return=representation"};}
+  function HMIN(){return {"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken(),"Prefer":"resolution=merge-duplicates,return=minimal"};}
+  function post(path,body,minimal){return fetch(SBU+"/rest/v1/"+path,{method:"POST",headers:minimal?HMIN():H(),body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error(path+" "+r.status);return minimal?null:r.json();});}
+  function patch(path,body){return fetch(SBU+"/rest/v1/"+path,{method:"PATCH",headers:HMIN(),body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error(path+" "+r.status);return true;});}
   function event(type,source,entityType,entityId,payload){return post("system_events",{event_type:type,source:source||"service",entity_type:entityType||"",entity_id:String(entityId||""),payload:payload||{}},true).catch(function(){});}
   function safeNum(v){return Number(v||0)||0;}
   function isoFromBr(str){try{var p=(str||"").split(" ");var d=(p[0]||"").split("/");var hm=(p[1]||"00:00").split(":");if(d.length<3)return new Date().toISOString();return new Date(parseInt(d[2]),parseInt(d[1])-1,parseInt(d[0]),parseInt(hm[0]||0),parseInt(hm[1]||0)).toISOString();}catch(e){return new Date().toISOString();}}
@@ -149,10 +161,10 @@ var OrderService={create:function(order,source){return ServiceBus.createOrder(or
 // ── Leitura primária das tabelas normalizadas (config JSON vira fallback) ──
 // metadata guarda o objeto legado completo; cada pedido é uma linha própria,
 // eliminando a sobrescrita entre operadores simultâneos do array em config.
-var SBH_READ={"apikey":SBK,"Authorization":"Bearer "+SBK};
+function SBH_READ(){return {"apikey":SBK,"Authorization":"Bearer "+nbToken()};}
 async function loadOrdersFromDB(){
   try{
-    var r=await fetch(SBU+"/rest/v1/orders?select=metadata&order=created_at.desc&limit=2000",{headers:SBH_READ});
+    var r=await fetch(SBU+"/rest/v1/orders?select=metadata&order=created_at.desc&limit=2000",{headers:SBH_READ()});
     if(!r.ok)return null;
     var rows=await r.json();
     if(!Array.isArray(rows))return null;
@@ -161,7 +173,7 @@ async function loadOrdersFromDB(){
 }
 async function loadChamadosFromDB(){
   try{
-    var r=await fetch(SBU+"/rest/v1/table_calls?select=metadata,status&order=created_at.desc&limit=300",{headers:SBH_READ});
+    var r=await fetch(SBU+"/rest/v1/table_calls?select=metadata,status&order=created_at.desc&limit=300",{headers:SBH_READ()});
     if(!r.ok)return null;
     var rows=await r.json();
     if(!Array.isArray(rows))return null;
@@ -251,6 +263,7 @@ function BalcaoTab(props){
         var desc=profObj?(profObj.desconto||0):0;
         var todosOrdens=fiadosAnt.concat([order]);
         var msgFiado=buildFiadoResumo(profSel,todosOrdens,desc);
+        fetch(SBU+"/functions/v1/fiado-notify",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken()},body:JSON.stringify({action:"novo_fiado",profissional:profSel,telefone:profObj?(profObj.telefone||""):"",itens:order.items,total:order.total,desconto:desc,totalAcumulado:totalAcum,pedidoId:order.id})}).catch(function(){});
         if(profObj&&profObj.telefone){
           setTimeout(function(){abrirWpp(profObj.telefone,msgFiado);},800);
         }
@@ -343,7 +356,7 @@ function PedidosTab(props){
     if(baixar)InventoryService.consumeOrder(alvo);
     OrderService.syncFull(n.find(function(o){return o.id===id;}));
     OrderService.updateStatus(id,st,{status_anterior:alvo?alvo.status:null,status_novo:st,tempoPreparo:alvo&&alvo.tempoPreparo}, "admin.PedidosTab");
-    var H={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=minimal"};
+    var H={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken(),"Prefer":"return=minimal"};
     var o=orders.find(function(x){return x.id===id;});
     if(!o)return;
     var evType=st==="aguardando_pagamento"?"PAYMENT_PENDING":st==="concluido"&&o.status==="aguardando_pagamento"?"PAYMENT_RECEIVED":null;
@@ -1633,11 +1646,11 @@ function TabClientes(props){
 }
 
 /* ERP API helper */
-var SBH_ERP={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=representation"};
-async function erpGet(path){var r=await fetch(SBU+"/rest/v1/"+path,{headers:SBH_ERP});if(!r.ok)return[];return r.json();}
-async function erpPost(path,body){var r=await fetch(SBU+"/rest/v1/"+path,{method:"POST",headers:SBH_ERP,body:JSON.stringify(body)});if(!r.ok)throw new Error(await r.text());return r.json();}
-async function erpPatch(path,body){var r=await fetch(SBU+"/rest/v1/"+path,{method:"PATCH",headers:SBH_ERP,body:JSON.stringify(body)});if(!r.ok)throw new Error(await r.text());return r.json();}
-async function erpDel(path){await fetch(SBU+"/rest/v1/"+path,{method:"DELETE",headers:Object.assign({},SBH_ERP,{Prefer:""})});}
+function SBH_ERP(){return {"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken(),"Prefer":"return=representation"};}
+async function erpGet(path){var r=await fetch(SBU+"/rest/v1/"+path,{headers:SBH_ERP()});if(!r.ok)return[];return r.json();}
+async function erpPost(path,body){var r=await fetch(SBU+"/rest/v1/"+path,{method:"POST",headers:SBH_ERP(),body:JSON.stringify(body)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function erpPatch(path,body){var r=await fetch(SBU+"/rest/v1/"+path,{method:"PATCH",headers:SBH_ERP(),body:JSON.stringify(body)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function erpDel(path){await fetch(SBU+"/rest/v1/"+path,{method:"DELETE",headers:Object.assign({},SBH_ERP(),{Prefer:""})});}
 
 /* ── Estoque unificado: baixa de insumos pela ficha técnica ── */
 async function acumulaFicha(fichaId,batches,consumo,depth){
@@ -1668,7 +1681,7 @@ async function baixarInsumosPedido(order){
     for(var j=0;j<ings.length;j++){var ing=ings[j];var novo=(parseFloat(ing.estoque_atual)||0)-(consumo[ing.id]||0);
       await erpPatch("ingredientes?id=eq."+ing.id,{estoque_atual:novo});
     }
-    fetch(SBU+"/rest/v1/system_events",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=minimal"},body:JSON.stringify({event_type:"STOCK_CONSUMED",source:"admin.baixarInsumos",entity_type:"order",entity_id:String(order.id),payload:{pedido_id:order.id,consumo:consumo}})}).catch(function(){});
+    fetch(SBU+"/rest/v1/system_events",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken(),"Prefer":"return=minimal"},body:JSON.stringify({event_type:"STOCK_CONSUMED",source:"admin.baixarInsumos",entity_type:"order",entity_id:String(order.id),payload:{pedido_id:order.id,consumo:consumo}})}).catch(function(){});
   }catch(e){}
 }
 
@@ -2228,7 +2241,7 @@ function App(){
     function ra(){window._nbLastAct=Date.now();}
     document.addEventListener("click",ra);
     document.addEventListener("keydown",ra);
-    var timer=setInterval(function(){if(Date.now()-window._nbLastAct>60*60*1000){setNivel(null);setOperador("");}},60000);
+    var timer=setInterval(function(){if(Date.now()-window._nbLastAct>60*60*1000){window.NB_TOKEN=null;setNivel(null);setOperador("");}},60000);
     return function(){clearInterval(timer);document.removeEventListener("click",ra);document.removeEventListener("keydown",ra);};
   },[nivel]);
 
@@ -2244,6 +2257,10 @@ function App(){
     if(role==="gerente"){setGrupo("oper");setTab("dashboard");}
     else{setGrupo("oper");setTab("balcao");}
   }
+  async function posLogin(kind,role,v){
+    await obterToken(kind,role,v);
+    loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});
+  }
   async function fazerLogin(valor){
     var bf=bfCheck();
     if(bf.locked){setErr(true);return;}
@@ -2251,11 +2268,11 @@ function App(){
     if(!v){setErr(true);setTimeout(function(){setErr(false);},2000);return;}
     var res;
     res=await rpcCheckPassword("gerente",v);
-    if(res.ok){bfOk();setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");return;}
+    if(res.ok){bfOk();setOperador("Gerente");setNivel("gerente");irPara("gerente");setPass("");posLogin("password","gerente",v);return;}
     res=await rpcCheckPassword("atendente",v);
-    if(res.ok){bfOk();setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");return;}
+    if(res.ok){bfOk();setOperador("Atendente");setNivel("atendente");irPara("atendente");setPass("");posLogin("password","atendente",v);return;}
     res=await rpcCheckPin(v);
-    if(res.ok){bfOk();var role=res.role||"atendente";setOperador(res.name);setNivel(role);irPara(role);setPass("");return;}
+    if(res.ok){bfOk();var role=res.role||"atendente";setOperador(res.name);setNivel(role);irPara(role);setPass("");posLogin("pin",role,v);return;}
     bfFail();setErr(true);setTimeout(function(){setErr(false);},3000);setPass("");
   }
 
@@ -2326,7 +2343,7 @@ function App(){
       ),
       h("div",{style:{display:"flex",alignItems:"center",gap:7}},
         h("span",{style:{background:"rgba(255,255,255,.15)",color:"rgba(255,255,255,.85)",fontSize:9,fontWeight:700,padding:"2px 7px",borderRadius:16,textTransform:"uppercase"}},nivel),
-        h("button",{onClick:function(){setNivel(null);setOperador("");},style:{background:"rgba(255,255,255,.22)",border:"1px solid rgba(255,255,255,.3)",color:"#fff",fontSize:11,fontWeight:700,padding:"6px 12px",borderRadius:20,cursor:"pointer",letterSpacing:"0.01em"}},"Sair")
+        h("button",{onClick:function(){window.NB_TOKEN=null;setNivel(null);setOperador("");},style:{background:"rgba(255,255,255,.22)",border:"1px solid rgba(255,255,255,.3)",color:"#fff",fontSize:11,fontWeight:700,padding:"6px 12px",borderRadius:20,cursor:"pointer",letterSpacing:"0.01em"}},"Sair")
       )
     ),
     h("div",{style:{display:"flex",overflowX:"auto",gap:6,background:"#fff",padding:"8px 10px",borderBottom:"1px solid #f0ece6"}},
@@ -2538,9 +2555,9 @@ var sfi=us([]),fichas=sfi[0],setFichas=sfi[1];
 var sin=us([]),ingredientes=sin[0],setIngredientes=sin[1];
 var sdp=us([]),despesas=sdp[0],setDespesas=sdp[1];
 ue(function(){
-  fetch(SBU+"/rest/v1/fichas_tecnicas?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+  fetch(SBU+"/rest/v1/fichas_tecnicas?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}})
     .then(function(r){return r.json();}).then(function(d){setFichas(Array.isArray(d)?d:[]);}).catch(function(){});
-  fetch(SBU+"/rest/v1/ingredientes?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+  fetch(SBU+"/rest/v1/ingredientes?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}})
     .then(function(r){return r.json();}).then(function(d){setIngredientes(Array.isArray(d)?d:[]);}).catch(function(){});
   sbGet("nb_bA_despesas").then(function(d){if(d)setDespesas(d);});
 },[]);
@@ -2683,7 +2700,7 @@ async function cancelarPedido(pedido,motivo,userRole){
 }
 
 function TabCentroIA(){
-  const H={'apikey':SBK,'Authorization':'Bearer '+SBK};
+  const H={'apikey':SBK,'Authorization':'Bearer '+nbToken()};
   const[subTab,setSubTab]=React.useState('eventos');
   const[eventos,setEventos]=React.useState([]);
   const[recomendacoes,setRecomendacoes]=React.useState([]);
@@ -2837,7 +2854,7 @@ function TabCentroIA(){
 }
 
 function TabReceitas(){
-  var H={"apikey":SBK,"Authorization":"Bearer "+SBK,"Content-Type":"application/json"};
+  var H={"apikey":SBK,"Authorization":"Bearer "+nbToken(),"Content-Type":"application/json"};
   var h=React.createElement,us=React.useState,ue=React.useEffect;
   var R="#8B1A1A",B="#ede9e3",C="#faf8f5";
   var fmt=function(v){return "R$ "+Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2});};
@@ -3198,7 +3215,7 @@ function TabEngCardapio(props){
   var sl=us(true),loading=sl[0],setLoading=sl[1];
   var sv=us("quadrante"),view=sv[0],setView=sv[1];
   ue(function(){
-    fetch(SBU+"/rest/v1/fichas_tecnicas?order=nome.asc&select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+    fetch(SBU+"/rest/v1/fichas_tecnicas?order=nome.asc&select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}})
       .then(function(r){return r.json();})
       .then(function(d){setFichas(Array.isArray(d)?d:[]);setLoading(false);})
       .catch(function(){setLoading(false);});
@@ -3335,9 +3352,9 @@ function TabProprietario(props){
   var sig=us(false),iaGerando=sig[0],setIaGerando=sig[1];
   var sie=us(null),iaErro=sie[0],setIaErro=sie[1];
   ue(function(){
-    fetch(SBU+"/rest/v1/ingredientes?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+    fetch(SBU+"/rest/v1/ingredientes?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}})
       .then(function(r){return r.json();}).then(function(d){setIngredientes(Array.isArray(d)?d:[]);}).catch(function(){});
-    fetch(SBU+"/rest/v1/fichas_tecnicas?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+SBK}})
+    fetch(SBU+"/rest/v1/fichas_tecnicas?select=*",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}})
       .then(function(r){return r.json();}).then(function(d){setFichas(Array.isArray(d)?d:[]);}).catch(function(){});
     sbGet("nb_bA_despesas").then(function(d){if(d)setDespesas(d);});
   },[]);
