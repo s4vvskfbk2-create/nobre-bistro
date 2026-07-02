@@ -3,10 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zxpnguynjrsixsomaieg.supabase.co https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://zxpnguynjrsixsomaieg.supabase.co; connect-src 'self' https://zxpnguynjrsixsomaieg.supabase.co;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zxpnguynjrsixsomaieg.supabase.co https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://zxpnguynjrsixsomaieg.supabase.co; connect-src 'self' https://zxpnguynjrsixsomaieg.supabase.co wss://zxpnguynjrsixsomaieg.supabase.co;">
 <title>Nobre Bistro Admin</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f4f6f9;font-family:"Inter",system-ui,-apple-system,sans-serif;width:100%;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}input,select,button,textarea{font-family:inherit}::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#d1c9be;border-radius:4px}@keyframes spin{to{transform:rotate(360deg)}}@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}.nb-card{animation:fadeIn .18s ease}.nb-skeleton{animation:pulse 1.4s ease infinite;background:linear-gradient(90deg,#ede9e3 25%,#f5f2ee 50%,#ede9e3 75%);background-size:200% 100%;border-radius:8px}</style>
 </head>
 <body><div id="root"></div>
@@ -23,7 +24,7 @@ async function obterToken(kind,role,valor){
     var r=await fetch(SBU+"/functions/v1/auth-login",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+nbToken()},body:JSON.stringify({kind:kind,role:role,value:valor})});
     if(!r.ok)return null;
     var d=await r.json();
-    if(d&&d.token){window.NB_TOKEN=d.token;return d.token;}
+    if(d&&d.token){window.NB_TOKEN=d.token;try{NBRealtime.setAuth(d.token);}catch(e){}return d.token;}
   }catch(e){}
   return null;
 }
@@ -196,6 +197,35 @@ async function loadChamadosPrimary(){
   var cfg=await sbGet("nb_bA_chamados");
   return Array.isArray(cfg)?cfg:(db||[]);
 }
+
+// ── Realtime: pedidos e chamados chegam na hora, sem esperar o polling ──
+// O polling continua como rede de segurança: roda no ritmo normal quando o
+// realtime está fora (CDN bloqueado, publication não aplicada) e desacelera
+// para 1x/min quando o canal está vivo.
+var NBRealtime=(function(){
+  var client=null,channel=null,subs=[],live=false;
+  function ensure(){
+    if(client)return client;
+    if(!window.supabase||!window.supabase.createClient)return null;
+    try{client=window.supabase.createClient(SBU,SBK,{auth:{persistSession:false,autoRefreshToken:false}});}catch(e){return null;}
+    return client;
+  }
+  function start(){
+    var c=ensure();
+    if(!c||channel)return;
+    try{
+      channel=c.channel("nb-live")
+        .on("postgres_changes",{event:"*",schema:"public",table:"orders"},function(){emit("orders");})
+        .on("postgres_changes",{event:"*",schema:"public",table:"table_calls"},function(){emit("chamados");})
+        .subscribe(function(status){live=(status==="SUBSCRIBED");});
+    }catch(e){channel=null;live=false;}
+  }
+  function setAuth(token){var c=ensure();if(c&&token){try{c.realtime.setAuth(token);}catch(e){}}}
+  function emit(kind){subs.forEach(function(s){if(s.kind===kind){try{s.fn();}catch(e){}}});}
+  function on(kind,fn){var s={kind:kind,fn:fn};subs.push(s);start();return function(){subs=subs.filter(function(x){return x!==s;});};}
+  function isLive(){return live;}
+  return {on:on,setAuth:setAuth,isLive:isLive};
+})();
 var PaymentService={
   record:function(order,orderUuid,source){
     if(!orderUuid||!order.payment)return Promise.resolve();
@@ -343,7 +373,7 @@ function PedidosTab(props){
   var s1=us("todos"),filtro=s1[0],setFiltro=s1[1];
   var sc=us(null),pedidoParaCancelar=sc[0],setPedidoParaCancelar=sc[1];
   var sch=us([]),chamados=sch[0],setChamados=sch[1];
-  ue(function(){function lc(){loadChamadosPrimary().then(function(d){if(Array.isArray(d))setChamados(d);});}lc();var i=setInterval(lc,8000);return function(){clearInterval(i);};},[]);
+  ue(function(){function lc(){loadChamadosPrimary().then(function(d){if(Array.isArray(d))setChamados(d);});}lc();var t=0;var i=setInterval(function(){t++;if(NBRealtime.isLive()&&t%8!==0)return;lc();},8000);var off=NBRealtime.on("chamados",lc);return function(){clearInterval(i);off&&off();};},[]);
   function atender(id){var alvo=chamados.find(function(c){return c.id===id;});var n=chamados.map(function(c){return c.id===id?Object.assign({},c,{atendido:true}):c;});setChamados(n);sbSet("nb_bA_chamados",n);if(alvo)TableCallService.attend(alvo);}
   var chamadosAbertos=chamados.filter(function(c){return !c.atendido;});
   var STATUS={todos:"Todos",aguardando_pagamento:"Aguard.Pgto",em_curso:"Em curso",concluido:"Concluido",cancelado:"Cancelado"};
@@ -447,7 +477,8 @@ function CozinhaTab(props){
   var concluidos=orders.filter(function(o){return o.status==="concluido"&&isHoje(o.criadoEm);}).slice().reverse().slice(0,20);
 
   ue(function(){
-    var i=setInterval(function(){loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},10000);
+    var t=0;
+    var i=setInterval(function(){t++;if(NBRealtime.isLive()&&t%6!==0)return;loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},10000);
     return function(){clearInterval(i);};
   },[]);
 
@@ -615,7 +646,9 @@ function CaixaTab(props){
   var s2=us("caixa"),aba=s2[0],setAba=s2[1];
 
   ue(function(){
+    var t=0;
     var i=setInterval(function(){
+      t++;if(NBRealtime.isLive()&&t%6!==0)return;
       loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});
     },10000);
     return function(){clearInterval(i);};
@@ -1006,7 +1039,7 @@ function HorariosTab(props){
 
 function HistoricoTab(props){
   var orders=props.orders,profs=props.profs,setOrders=props.setOrders;
-  ue(function(){var i=setInterval(function(){loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
+  ue(function(){var t=0;var i=setInterval(function(){t++;if(NBRealtime.isLive()&&t%6!==0)return;loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
   var s1=us("clientes"),tipo=s1[0],setTipo=s1[1];
   var s2=us(null),selNome=s2[0],setSelNome=s2[1];
   var s3=us("hoje"),modoPeriodo=s3[0],setModoPeriodo=s3[1];
@@ -2229,10 +2262,18 @@ function App(){
       if(res[4]!==null)setFechamentoManual(!!res[4]);
       setLoading(false);
     });
+    var tick=0;
     var poll=setInterval(function(){
+      tick++;
+      if(NBRealtime.isLive()&&tick%6!==0)return; // canal vivo: poll vira safety net de 1x/min
       loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});
     },10000);
-    return function(){clearInterval(poll);};
+    var rtT=null;
+    var rtOff=NBRealtime.on("orders",function(){
+      clearTimeout(rtT);
+      rtT=setTimeout(function(){loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},400);
+    });
+    return function(){clearInterval(poll);clearTimeout(rtT);rtOff&&rtOff();};
   },[]);
 
   ue(function(){
@@ -3689,7 +3730,9 @@ function TabDashboard(props){
     sbGet("nb_bA_despesas").then(function(d){if(d)setDespesas(d);});
     sbGet("nb_bA_meta").then(function(m){if(m&&m.diaria!=null)setMetaDia(m.diaria);});
     function lc(){loadChamadosPrimary().then(function(d){if(Array.isArray(d))setChamados(d);});}
-    lc();var i=setInterval(lc,8000);return function(){clearInterval(i);};
+    lc();var t=0;var i=setInterval(function(){t++;if(NBRealtime.isLive()&&t%8!==0)return;lc();},8000);
+    var off=NBRealtime.on("chamados",lc);
+    return function(){clearInterval(i);off&&off();};
   },[]);
   var chamadosAbertos=chamados.filter(function(c){return !c.atendido;});
   var now=new Date();

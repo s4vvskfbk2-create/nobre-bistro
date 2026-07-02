@@ -34,6 +34,7 @@ Execute na ordem, se ainda não executou:
 1. `20260630000000_core_management_schema.sql`
 2. `20260701000000_security_hardening.sql` (login server-side com bcrypt)
 3. `20260702000000_fiado_automation.sql` (notifications + quinzena automática + agendamento)
+4. `20260703000000_realtime.sql` (pedidos e chamados em tempo real no painel)
 
 ## Etapa 2 — Publicar as Edge Functions
 
