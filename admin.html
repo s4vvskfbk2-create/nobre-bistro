@@ -127,7 +127,12 @@ var ServiceBus=(function(){
     }).catch(function(e){event("ORDER_SYNC_FAILED",source||"OrderService","order",order.id,{error:e.message,order:order});});
   }
   function updateOrderStatus(legacyId,status,payload,source){
-    return patch("orders?legacy_id=eq."+encodeURIComponent(String(legacyId)),{status:normalizeStatus(status),metadata:Object.assign({},payload||{},{status_app:status})}).then(function(){return event("ORDER_STATUS_CHANGED",source||"OrderService","order",legacyId,{status:status,payload:payload||{}});}).catch(function(e){event("ORDER_STATUS_SYNC_FAILED",source||"OrderService","order",legacyId,{status:status,error:e.message});});
+    return patch("orders?legacy_id=eq."+encodeURIComponent(String(legacyId)),{status:normalizeStatus(status)}).then(function(){return event("ORDER_STATUS_CHANGED",source||"OrderService","order",legacyId,{status:status,payload:payload||{}});}).catch(function(e){event("ORDER_STATUS_SYNC_FAILED",source||"OrderService","order",legacyId,{status:status,error:e.message});});
+  }
+  function upsertOrderRow(order){
+    if(!order||order.id==null)return Promise.resolve();
+    var row={legacy_id:String(order.id),order_number:String(order.id),channel:order.canal||"balcao",table_number:order.mesa||null,customer_name:order.nome||null,professional_name:order.profissional||order.profFiado||null,operator_name:order.operador||null,status:normalizeStatus(order.status),payment_status:paymentStatus(order),payment_method:order.payment||null,total:safeNum(order.total),subtotal:safeNum(order.total),is_credit:!!order.fiado,credit_holder:order.profFiado||null,metadata:order,created_at:isoFromBr(order.criadoEm)};
+    return post("orders?on_conflict=legacy_id",row,true).catch(function(e){event("ORDER_SYNC_FAILED","OrderService.syncFull","order",order.id,{error:e.message});});
   }
   function cancelOrder(pedido,motivo,userRole){
     var data=Object.assign({},pedido.data||pedido,{status:"cancelado",motivo_cancelamento:motivo,cancelado_por:userRole||"gerente",cancelado_em:new Date().toISOString()});
@@ -136,10 +141,49 @@ var ServiceBus=(function(){
       return event("ORDER_CANCELLED","OrderService.cancel","order",pedido.id,{pedido_numero:pedido.numero||pedido.id,cliente:pedido.cliente||pedido.nome,total:pedido.total,motivo:motivo,cancelado_por:userRole||"gerente"});
     });
   }
-  return {post:post,patch:patch,event:event,createOrder:createOrder,updateOrderStatus:updateOrderStatus,cancelOrder:cancelOrder,isoFromBr:isoFromBr,safeNum:safeNum};
+  return {post:post,patch:patch,event:event,createOrder:createOrder,updateOrderStatus:updateOrderStatus,cancelOrder:cancelOrder,upsertOrderRow:upsertOrderRow,isoFromBr:isoFromBr,safeNum:safeNum};
 })();
 var EventService={record:function(type,entity,id,payload,source){return ServiceBus.event(type,source||"EventService",entity,id,payload);}};
-var OrderService={create:function(order,source){return ServiceBus.createOrder(order,source||"OrderService");},updateStatus:function(id,status,payload,source){return ServiceBus.updateOrderStatus(id,status,payload,source||"OrderService");},cancel:function(pedido,motivo,userRole){return ServiceBus.cancelOrder(pedido,motivo,userRole);}};
+var OrderService={create:function(order,source){return ServiceBus.createOrder(order,source||"OrderService");},updateStatus:function(id,status,payload,source){return ServiceBus.updateOrderStatus(id,status,payload,source||"OrderService");},cancel:function(pedido,motivo,userRole){return ServiceBus.cancelOrder(pedido,motivo,userRole);},syncFull:function(order){return ServiceBus.upsertOrderRow(order);},syncManyFull:function(list){return Promise.all((list||[]).map(function(o){return ServiceBus.upsertOrderRow(o);}));}};
+
+// ── Leitura primária das tabelas normalizadas (config JSON vira fallback) ──
+// metadata guarda o objeto legado completo; cada pedido é uma linha própria,
+// eliminando a sobrescrita entre operadores simultâneos do array em config.
+var SBH_READ={"apikey":SBK,"Authorization":"Bearer "+SBK};
+async function loadOrdersFromDB(){
+  try{
+    var r=await fetch(SBU+"/rest/v1/orders?select=metadata&order=created_at.desc&limit=2000",{headers:SBH_READ});
+    if(!r.ok)return null;
+    var rows=await r.json();
+    if(!Array.isArray(rows))return null;
+    return rows.map(function(x){return x.metadata;}).filter(function(o){return o&&o.id!=null;}).reverse();
+  }catch(e){return null;}
+}
+async function loadChamadosFromDB(){
+  try{
+    var r=await fetch(SBU+"/rest/v1/table_calls?select=metadata,status&order=created_at.desc&limit=300",{headers:SBH_READ});
+    if(!r.ok)return null;
+    var rows=await r.json();
+    if(!Array.isArray(rows))return null;
+    return rows.map(function(x){var c=x.metadata||{};if(x.status==="attended"&&!c.atendido)c=Object.assign({},c,{atendido:true});return c;}).filter(function(c){return c&&c.id!=null;}).reverse();
+  }catch(e){return null;}
+}
+async function loadOrdersPrimary(){
+  var db=await loadOrdersFromDB();
+  if(db&&db.length)return db;
+  var cfg=await sbGet("nb_bA_orders");
+  if(Array.isArray(cfg)&&cfg.length){
+    if(db&&!db.length)OrderService.syncManyFull(cfg); // migração única: sobe o legado
+    return cfg;
+  }
+  return db||cfg||[];
+}
+async function loadChamadosPrimary(){
+  var db=await loadChamadosFromDB();
+  if(db&&db.length)return db;
+  var cfg=await sbGet("nb_bA_chamados");
+  return Array.isArray(cfg)?cfg:(db||[]);
+}
 var PaymentService={
   record:function(order,orderUuid,source){
     if(!orderUuid||!order.payment)return Promise.resolve();
@@ -191,7 +235,7 @@ function BalcaoTab(props){
   function addItem(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});}
   function remItem(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
   function confirmar(){
-    var oid=2000+Math.floor(Math.random()*9000);
+    var oid;do{oid=2000+Math.floor(Math.random()*9000);}while((props.orders||[]).some(function(o){return String(o.id)===String(oid);}));
     var isAutoVenda=profSel&&profSel===operador;
     var isEmpFiado=fiado&&!!profSel;
     var semComissao=isAutoVenda||isEmpFiado;
@@ -286,7 +330,7 @@ function PedidosTab(props){
   var s1=us("todos"),filtro=s1[0],setFiltro=s1[1];
   var sc=us(null),pedidoParaCancelar=sc[0],setPedidoParaCancelar=sc[1];
   var sch=us([]),chamados=sch[0],setChamados=sch[1];
-  ue(function(){function lc(){sbGet("nb_bA_chamados").then(function(d){if(Array.isArray(d))setChamados(d);});}lc();var i=setInterval(lc,8000);return function(){clearInterval(i);};},[]);
+  ue(function(){function lc(){loadChamadosPrimary().then(function(d){if(Array.isArray(d))setChamados(d);});}lc();var i=setInterval(lc,8000);return function(){clearInterval(i);};},[]);
   function atender(id){var alvo=chamados.find(function(c){return c.id===id;});var n=chamados.map(function(c){return c.id===id?Object.assign({},c,{atendido:true}):c;});setChamados(n);sbSet("nb_bA_chamados",n);if(alvo)TableCallService.attend(alvo);}
   var chamadosAbertos=chamados.filter(function(c){return !c.atendido;});
   var STATUS={todos:"Todos",aguardando_pagamento:"Aguard.Pgto",em_curso:"Em curso",concluido:"Concluido",cancelado:"Cancelado"};
@@ -297,6 +341,7 @@ function PedidosTab(props){
     var n=orders.map(function(o){return o.id===id?Object.assign({},o,{status:st},baixar?{insumosBaixados:true}:{}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);
     if(baixar)InventoryService.consumeOrder(alvo);
+    OrderService.syncFull(n.find(function(o){return o.id===id;}));
     OrderService.updateStatus(id,st,{status_anterior:alvo?alvo.status:null,status_novo:st,tempoPreparo:alvo&&alvo.tempoPreparo}, "admin.PedidosTab");
     var H={"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK,"Prefer":"return=minimal"};
     var o=orders.find(function(x){return x.id===id;});
@@ -312,6 +357,7 @@ function PedidosTab(props){
     await OrderService.cancel(pedido,motivo,nivel||"gerente");
     var n=orders.map(function(o){return o.id===pedido.id?Object.assign({},o,{status:"cancelado",motivo_cancelamento:motivo}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);
+    OrderService.syncFull(n.find(function(o){return o.id===pedido.id;}));
     setPedidoParaCancelar(null);
   }
   var lista=orders.slice().reverse().filter(function(o){return filtro==="todos"||o.status===filtro;});
@@ -388,7 +434,7 @@ function CozinhaTab(props){
   var concluidos=orders.filter(function(o){return o.status==="concluido"&&isHoje(o.criadoEm);}).slice().reverse().slice(0,20);
 
   ue(function(){
-    var i=setInterval(function(){sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});},10000);
+    var i=setInterval(function(){loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},10000);
     return function(){clearInterval(i);};
   },[]);
 
@@ -414,6 +460,7 @@ function CozinhaTab(props){
     });
     setOrders(n);sbSet("nb_bA_orders",n);
     if(baixar)InventoryService.consumeOrder(alvo);
+    OrderService.syncFull(n.find(function(o){return o.id===id;}));
     OrderService.updateStatus(id,"concluido",{concluidoEm:agora,tempoPreparo:(n.find(function(o){return o.id===id;})||{}).tempoPreparo},"admin.CozinhaTab");
   }
 
@@ -556,12 +603,12 @@ function CaixaTab(props){
 
   ue(function(){
     var i=setInterval(function(){
-      sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});
+      loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});
     },10000);
     return function(){clearInterval(i);};
   },[]);
 
-  function refresh(){setRefreshing(true);sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);setRefreshing(false);});}
+  function refresh(){setRefreshing(true);loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);setRefreshing(false);});}
 
   var hoje=orders.filter(function(o){return isHoje(o.criadoEm);});
   var pagos=hoje.filter(function(o){return o.status==="concluido"&&!o.fiado;});
@@ -652,6 +699,7 @@ function FiadoTab(props){
     var agora=nowStr();
     var n=orders.map(function(o){return (o.fiado&&o.profFiado===nome&&!o.fiadoPago&&o.status!=="cancelado")?Object.assign({},o,{cobrancaFiadoEm:agora}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);
+    OrderService.syncManyFull(n.filter(function(o){return o.fiado&&o.profFiado===nome&&!o.fiadoPago&&o.status!=="cancelado";}));
     var total=porProf[nome]?porProf[nome].total:0;
     CreditService.reminder(nome,total);
   }
@@ -659,6 +707,7 @@ function FiadoTab(props){
     if(!window.confirm("Marcar fiado de "+nome+" como acertado/pago ao Nobre Bistro?"))return;
     var n=orders.map(function(o){return (o.fiado&&o.profFiado===nome&&!o.fiadoPago)?Object.assign({},o,{fiadoPago:true,pagoEm:nowStr()}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);
+    OrderService.syncManyFull(n.filter(function(o){return o.fiado&&o.profFiado===nome&&o.fiadoPago;}));
     var total=porProf[nome]?porProf[nome].total:0;
     CreditService.settle(nome,total);
   }
@@ -751,6 +800,7 @@ function QuinzenaTab(props){
     var ids=metricas.reduce(function(s,p){return s.concat(p.fiadosQ.map(function(o){return o.id;}));},[] );
     var n=orders.map(function(o){return ids.indexOf(o.id)>=0?Object.assign({},o,{fiadoPago:true,pagoEm:nowStr()}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);setFechouHoje(true);
+    OrderService.syncManyFull(n.filter(function(o){return ids.indexOf(o.id)>=0;}));
     metricas.forEach(function(p,i){if(p.telefone)setTimeout(function(){enviarWPP(p);},i*1800);});
     var totalQz=metricas.reduce(function(s,p){return s+p.liquido;},0);
     metricas.forEach(function(p){CreditService.settle(p.name,p.liquido);});
@@ -943,7 +993,7 @@ function HorariosTab(props){
 
 function HistoricoTab(props){
   var orders=props.orders,profs=props.profs,setOrders=props.setOrders;
-  ue(function(){var i=setInterval(function(){sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
+  ue(function(){var i=setInterval(function(){loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});},10000);return function(){clearInterval(i);};},[]);
   var s1=us("clientes"),tipo=s1[0],setTipo=s1[1];
   var s2=us(null),selNome=s2[0],setSelNome=s2[1];
   var s3=us("hoje"),modoPeriodo=s3[0],setModoPeriodo=s3[1];
@@ -2158,7 +2208,7 @@ function App(){
   var s12=us(""),operador=s12[0],setOperador=s12[1];
 
   ue(function(){
-    Promise.all([sbGet("nb_bA_products"),sbGet("nb_bA_orders"),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
+    Promise.all([sbGet("nb_bA_products"),loadOrdersPrimary(),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
       if(res[0]&&res[0].length){setProds(res[0]);ProductService.syncAll(res[0]);}
       if(res[1])setOrders(res[1]);
       if(res[2]&&res[2].length){setProfs(res[2]);StaffService.syncAll(res[2]);}
@@ -2167,7 +2217,7 @@ function App(){
       setLoading(false);
     });
     var poll=setInterval(function(){
-      sbGet("nb_bA_orders").then(function(o){if(o)setOrders(o);});
+      loadOrdersPrimary().then(function(o){if(o&&o.length)setOrders(o);});
     },10000);
     return function(){clearInterval(poll);};
   },[]);
@@ -2665,7 +2715,7 @@ function TabCentroIA(){
     setIaGerando(true);setIaAnalise(null);setIaErro(null);
     try{
       const[ordRes,ficRes,ingRes,evRes]=await Promise.all([
-        sbGet('nb_bA_orders'),
+        loadOrdersPrimary(),
         fetch(SBU+'/rest/v1/fichas_tecnicas?select=*',{headers:H}).then(function(r){return r.json();}),
         fetch(SBU+'/rest/v1/ingredientes?select=*',{headers:H}).then(function(r){return r.json();}),
         fetch(SBU+'/rest/v1/system_events?order=created_at.desc&limit=20',{headers:H}).then(function(r){return r.json();})
@@ -3621,7 +3671,7 @@ function TabDashboard(props){
   ue(function(){
     sbGet("nb_bA_despesas").then(function(d){if(d)setDespesas(d);});
     sbGet("nb_bA_meta").then(function(m){if(m&&m.diaria!=null)setMetaDia(m.diaria);});
-    function lc(){sbGet("nb_bA_chamados").then(function(d){if(Array.isArray(d))setChamados(d);});}
+    function lc(){loadChamadosPrimary().then(function(d){if(Array.isArray(d))setChamados(d);});}
     lc();var i=setInterval(lc,8000);return function(){clearInterval(i);};
   },[]);
   var chamadosAbertos=chamados.filter(function(c){return !c.atendido;});
