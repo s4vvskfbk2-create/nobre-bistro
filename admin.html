@@ -272,7 +272,12 @@ function BalcaoTab(props){
   var s5=us(null),done=s5[0],setDone=s5[1];
   var s6=us(""),busca=s6[0],setBusca=s6[1];
   var s7=us("prato"),cat=s7[0],setCat=s7[1];
-  var total=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
+  var s8=us("pct"),descTipo=s8[0],setDescTipo=s8[1];
+  var s9=us(""),descNum=s9[0],setDescNum=s9[1];
+  var subtotal=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
+  var descRaw=parseFloat(String(descNum).replace(",","."))||0;
+  var desconto=descRaw>0?Math.min(subtotal,descTipo==="pct"?subtotal*Math.min(descRaw,100)/100:descRaw):0;
+  var total=Math.max(0,subtotal-desconto);
   var prodsFilt=um(function(){var ap=prods.filter(function(p){return p.active;});if(!busca)return ap.filter(function(p){return p.cat===cat;});var q=busca.toLowerCase();return ap.filter(function(p){return p.name.toLowerCase().includes(q);});},[prods,busca,cat]);
   function addItem(p){setCart(function(prev){var ex=prev.find(function(i){return i.id===p.id;});if(ex)return prev.map(function(i){return i.id===p.id?Object.assign({},i,{qty:i.qty+1}):i;});return prev.concat([Object.assign({},p,{qty:1})]);});}
   function remItem(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
@@ -281,7 +286,8 @@ function BalcaoTab(props){
     var isAutoVenda=profSel&&profSel===operador;
     var isEmpFiado=fiado&&!!profSel;
     var semComissao=isAutoVenda||isEmpFiado;
-    var order={id:oid,nome:profSel||"Balcao",profissional:profSel,operador:operador||"",payment:fiado?"fiado":pay,fiado:fiado,profFiado:fiado?profSel:"",semComissao:semComissao,items:cart.map(function(i){return{id:i.id,name:i.name,price:i.price,qty:i.qty};}),total:total,status:"em_curso",criadoEm:nowStr(),canal:"balcao"};
+    var order={id:oid,nome:profSel||"Balcao",profissional:profSel,operador:operador||"",payment:fiado?"fiado":pay,fiado:fiado,profFiado:fiado?profSel:"",semComissao:semComissao,items:cart.map(function(i){return{id:i.id,name:i.name,price:i.price,qty:i.qty};}),subtotal:subtotal,descontoValor:desconto>0?desconto:0,descontoTipo:desconto>0?(descTipo==="pct"?descRaw+"%":"R$"):"",total:total,status:"em_curso",criadoEm:nowStr(),canal:"balcao"};
+    if(desconto>0)logEvent("DISCOUNT_APPLIED","order",oid,{operador:operador||"",subtotal:subtotal,desconto:desconto,tipo:descTipo==="pct"?descRaw+"%":"valor",total_final:total});
     setOrders(function(prev){
       var novos=prev.concat([order]);
       sbSet("nb_bA_orders",novos);
@@ -301,7 +307,7 @@ function BalcaoTab(props){
       return novos;
     });
     setProds(function(prev){var n=prev.map(function(p){var it=cart.find(function(i){return i.id===p.id;});if(!it)return p;var ns=Math.max(0,(p.stock||0)-it.qty);if(ns<=2&&ns<(p.stock||0))InventoryService.alertLow(p,ns,p.stock||0);return Object.assign({},p,{stock:ns});});sbSet("nb_bA_products",n);return n;});
-    setDone(order);setCart([]);setProfSel("");setFiado(false);setPay("pix");
+    setDone(order);setCart([]);setProfSel("");setFiado(false);setPay("pix");setDescNum("");
   }
   if(done)return h("div",{style:{padding:16,textAlign:"center"}},
     h("div",{style:{width:50,height:50,borderRadius:"50%",background:"#f0fdf4",border:"2px solid #22c55e",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 12px"}},
@@ -346,9 +352,19 @@ function BalcaoTab(props){
           h("button",{onClick:function(){remItem(item.id);},style:{background:"#fee2e2",border:"none",borderRadius:5,width:20,height:20,cursor:"pointer",fontSize:13,color:"#b91c1c",display:"flex",alignItems:"center",justifyContent:"center"}},"-")
         )
       );}),
-      h("div",{style:{borderTop:"1.5px solid "+B,paddingTop:7,marginTop:4,display:"flex",justifyContent:"space-between"}},
-        h("span",{style:{fontWeight:800}},"Total"),
-        h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif",fontSize:15}},fmt(total))
+      h("div",{style:{borderTop:"1.5px solid "+B,paddingTop:7,marginTop:4}},
+        desconto>0&&h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
+          h("span",{style:{fontSize:12,color:"#888"}},"Subtotal"),
+          h("span",{style:{fontSize:12,color:"#888"}},fmt(subtotal))
+        ),
+        desconto>0&&h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:3}},
+          h("span",{style:{fontSize:12,color:"#16a34a",fontWeight:700}},"Desconto"+(descTipo==="pct"?" ("+descRaw+"%)":"")),
+          h("span",{style:{fontSize:12,color:"#16a34a",fontWeight:700}},"− "+fmt(desconto))
+        ),
+        h("div",{style:{display:"flex",justifyContent:"space-between"}},
+          h("span",{style:{fontWeight:800}},"Total"),
+          h("span",{style:{fontWeight:900,color:R,fontFamily:"Georgia,serif",fontSize:15}},fmt(total))
+        )
       )
     ),
     cart.length>0&&h("div",null,
@@ -356,6 +372,17 @@ function BalcaoTab(props){
         h("p",{style:{fontSize:11,fontWeight:900,color:"#555",textTransform:"uppercase",marginBottom:6}},"Cliente / profissional (opcional)"),
         h("div",{style:{display:"flex",flexWrap:"wrap",gap:4}},
           profs.filter(function(p){return p.active;}).map(function(p){return h("button",{key:p.id,onClick:function(){setProfSel(profSel===p.name?"":p.name);},style:{padding:"4px 9px",borderRadius:16,border:"1.5px solid "+(profSel===p.name?R:B),background:profSel===p.name?"#fff5f5":"#fff",color:profSel===p.name?R:"#666",fontSize:11,fontWeight:700,cursor:"pointer"}},p.name);}))
+      ),
+      h("div",{style:{background:"#f0fdf4",border:"1.5px solid #bbf7d0",borderRadius:12,padding:"9px 11px",marginBottom:8}},
+        h("p",{style:{fontSize:11,fontWeight:900,color:"#166534",textTransform:"uppercase",margin:"0 0 6px"}},"🏷️ Desconto (opcional)"),
+        h("div",{style:{display:"flex",gap:5,alignItems:"center"}},
+          h("div",{style:{display:"flex",borderRadius:9,overflow:"hidden",border:"1.5px solid #bbf7d0",flexShrink:0}},
+            [["pct","%"],["val","R$"]].map(function(t){var a=descTipo===t[0];return h("button",{key:t[0],onClick:function(){setDescTipo(t[0]);},style:{padding:"7px 12px",border:"none",background:a?"#16a34a":"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:800,cursor:"pointer"}},t[1]);})
+          ),
+          h("input",{value:descNum,onChange:function(e){setDescNum(e.target.value.replace(/[^0-9.,]/g,""));},placeholder:descTipo==="pct"?"Ex: 10":"Ex: 5,00",inputMode:"decimal",style:{flex:1,border:"1.5px solid #bbf7d0",borderRadius:9,padding:"7px 10px",fontSize:13,outline:"none",minWidth:0}}),
+          descNum&&h("button",{onClick:function(){setDescNum("");},style:{background:"none",border:"none",color:"#888",fontSize:16,cursor:"pointer",padding:"0 4px"}},"×")
+        ),
+        desconto>0&&h("p",{style:{margin:"5px 0 0",fontSize:10,color:"#166534"}},"Desconto de "+fmt(desconto)+" registrado no nome de "+(operador||"quem está no caixa")+".")
       ),
       h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:5,marginBottom:8}},
         [["pix","PIX"],["cartao_credito","Credito"],["cartao_debito","Debito"],["dinheiro","Dinheiro"]].map(function(arr){return h("button",{key:arr[0],onClick:function(){setPay(arr[0]);setFiado(false);},style:{padding:"9px 0",borderRadius:20,border:"1.5px solid "+(pay===arr[0]&&!fiado?R:B),background:pay===arr[0]&&!fiado?"#fff5f5":"#fff",color:pay===arr[0]&&!fiado?R:"#666",fontSize:11,fontWeight:700,cursor:"pointer"}},arr[1]);})),
@@ -2239,6 +2266,58 @@ function TabSegundoCerebro(props){
   );
 }
 
+// ── Hubs consolidados: mesmas funções, uma página só ──────────────────────
+// Dinheiro: Caixa do dia + Relatórios + Despesas viram seções de uma página,
+// com os números do dia destacados no topo (fim da informação repetida).
+function TabCaixaHub(props){
+  var s=us("hoje"),sec=s[0],setSec=s[1];
+  var sd=us([]),despesas=sd[0],setDespesas=sd[1];
+  ue(function(){sbGet("nb_bA_despesas").then(function(d){if(Array.isArray(d))setDespesas(d);});},[sec]);
+  var hojeOrds=props.orders.filter(function(o){return isHoje(o.criadoEm);});
+  var recebido=hojeOrds.filter(function(o){return o.status==="concluido"&&!o.fiado;}).reduce(function(s2,o){return s2+Number(o.total||0);},0);
+  var fiadoH=hojeOrds.filter(function(o){return o.fiado&&o.status!=="cancelado";}).reduce(function(s2,o){return s2+Number(o.total||0);},0);
+  var hojeStr=todayKey();
+  var despH=despesas.filter(function(d){return d.data===hojeStr;}).reduce(function(s2,d){return s2+Number(d.valor||0);},0);
+  var liquido=recebido-despH;
+  var SECS=[["hoje","💵 Caixa do dia"],["relatorios","📊 Relatórios"],["despesas","🧾 Despesas"]];
+  return h("div",null,
+    h("div",{style:{padding:"14px 14px 0"}},
+      h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 10px",fontFamily:"Georgia,serif"}},"Dinheiro"),
+      h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:7,marginBottom:10}},
+        [["Recebido hoje",fmt(recebido),"#16a34a"],["Fiado hoje",fmt(fiadoH),"#b45309"],["Despesas hoje",fmt(despH),"#dc2626"],["Líquido do dia",fmt(liquido),liquido>=0?R:"#dc2626"]].map(function(k){
+          return h("div",{key:k[0],style:{background:"#fff",borderRadius:12,border:"1px solid "+B,padding:"9px 11px"}},
+            h("p",{style:{margin:0,fontSize:9,fontWeight:700,color:"#999",textTransform:"uppercase"}},k[0]),
+            h("p",{style:{margin:"2px 0 0",fontWeight:900,fontSize:16,fontFamily:"Georgia,serif",color:k[2]}},k[1])
+          );})
+      ),
+      h("div",{style:{display:"flex",gap:5,marginBottom:4,overflowX:"auto"}},
+        SECS.map(function(sx){var a=sec===sx[0];return h("button",{key:sx[0],onClick:function(){setSec(sx[0]);},style:{flexShrink:0,padding:"8px 14px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},sx[1]);})
+      )
+    ),
+    sec==="hoje"&&h(CaixaTab,{orders:props.orders,setOrders:props.setOrders}),
+    sec==="relatorios"&&h(TabFinanceiro,{orders:props.orders,prods:props.prods}),
+    sec==="despesas"&&h(TabDespesas,null)
+  );
+}
+// IA: as 5 telas de IA viram seções de um único centro de comando.
+function TabIAHub(props){
+  var s=us("central"),sec=s[0],setSec=s[1];
+  var SECS=[["central","🧠 Central CEO"],["cerebro","🧬 2º Cérebro"],["tarefas","📌 Tarefas"],["centro","🤖 Agentes & Eventos"],["consultor","💬 Consultor"]];
+  return h("div",null,
+    h("div",{style:{padding:"14px 14px 0"}},
+      h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 10px",fontFamily:"Georgia,serif"}},"Inteligência Artificial"),
+      h("div",{style:{display:"flex",gap:5,marginBottom:4,overflowX:"auto"}},
+        SECS.map(function(sx){var a=sec===sx[0];return h("button",{key:sx[0],onClick:function(){setSec(sx[0]);},style:{flexShrink:0,padding:"8px 13px",borderRadius:20,border:"1.5px solid "+(a?R:B),background:a?R:"#fff",color:a?"#fff":"#666",fontSize:12,fontWeight:a?800:600,cursor:"pointer",whiteSpace:"nowrap"}},sx[1]);})
+      )
+    ),
+    sec==="central"&&h(TabCentralIA,{orders:props.orders,prods:props.prods,profs:props.profs,onIr:props.onIr}),
+    sec==="cerebro"&&h(TabSegundoCerebro,{orders:props.orders,prods:props.prods,profs:props.profs,onIr:props.onIr}),
+    sec==="tarefas"&&h(TabTarefasIA,null),
+    sec==="centro"&&React.createElement(TabCentroIA,null),
+    sec==="consultor"&&h(TabConsultor,{orders:props.orders})
+  );
+}
+
 function App(){
   var s1=us(null),nivel=s1[0],setNivel=s1[1];
   var s2=us(""),pass=s2[0],setPass=s2[1];
@@ -2349,6 +2428,7 @@ function App(){
   var TAB_META={
     dashboard:{l:"Resumo",i:"🏠"},
     balcao:{l:"Balcão",i:"🛎️"},pedidos:{l:"Pedidos",i:"📋"},cozinha:{l:"Cozinha",i:"👨‍🍳"},meu_desempenho:{l:"Minhas Vendas",i:"📈"},
+    caixa_hub:{l:"Caixa & Relatórios",i:"💰"},ia_hub:{l:"Central IA",i:"🧠"},
     caixa:{l:"Caixa do dia",i:"💵"},financeiro:{l:"Relatórios",i:"📊"},fechamento:{l:"Fechar caixa",i:"🔐"},despesas:{l:"Despesas",i:"🧾"},consultor:{l:"Consultor IA",i:"🤖"},
     segundo_cerebro:{l:"2º Cérebro",i:"🧬"},central_ia:{l:"Central CEO",i:"🧠"},tarefas_ia:{l:"Tarefas IA",i:"📌"},
     fiado:{l:"Em aberto",i:"📒"},quinzena:{l:"Fechar quinzena",i:"🗓️"},historico:{l:"Histórico",i:"🕘"},
@@ -2360,13 +2440,13 @@ function App(){
   };
   var BADGE={pedidos:pending,cozinha:cooking};
   var ALL_GROUPS=[
-    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","proprietario","balcao","pedidos","cozinha","meu_desempenho"]},
-    {id:"caixa",l:"Dinheiro",i:"💰",tabs:["caixa","financeiro","fechamento","despesas"]},
+    {id:"oper",l:"Operação",i:"🍽️",tabs:["dashboard","proprietario","balcao","pedidos","cozinha","fechamento","meu_desempenho"]},
+    {id:"caixa",l:"Dinheiro",i:"💰",tabs:["caixa_hub"]},
     {id:"fiado",l:"Fiado",i:"📒",tabs:["fiado","quinzena","historico"]},
     {id:"cardapio",l:"Cardápio",i:"📖",tabs:["cardapio","receitas","eng_cardapio","erp_cardapio","erp_insumos","erp_fornecedores","erp_compras"]},
-    {id:"clientes",l:"Clientes",i:"⭐",tabs:["clientes","centroIA"]},
+    {id:"clientes",l:"Clientes",i:"⭐",tabs:["clientes"]},
     {id:"equipe",l:"Equipe",i:"👥",tabs:["equipe","comissoes","horarios","config"]},
-    {id:"ia",l:"IA",i:"🧠",tabs:["segundo_cerebro","central_ia","tarefas_ia","consultor"]}
+    {id:"ia",l:"IA",i:"🧠",tabs:["ia_hub"]}
   ];
   var allowedTabs=nivel==="gerente"?null:["balcao","pedidos","cozinha","meu_desempenho"];
   var groups=ALL_GROUPS.map(function(g){
@@ -2416,6 +2496,8 @@ function App(){
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="meu_desempenho"&&h(TabMeuDesempenho,{orders:orders,operador:operador,profs:profs}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
+      tab==="caixa_hub"&&(nivel==="gerente"?h(TabCaixaHub,{orders:orders,setOrders:setOrders,prods:prods}):null),
+      tab==="ia_hub"&&(nivel==="gerente"?h(TabIAHub,{orders:orders,prods:prods,profs:profs,onIr:function(g,t){setGrupo(g);setTab(t);}}):null),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
       tab==="fechamento"&&(nivel==="gerente"?h(TabFechamento,{orders:orders,operador:operador}):null),
       tab==="centroIA"&&(nivel==="gerente")&&React.createElement(TabCentroIA,null),
