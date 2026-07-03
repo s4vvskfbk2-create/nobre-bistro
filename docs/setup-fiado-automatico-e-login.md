@@ -35,13 +35,31 @@ Execute na ordem, se ainda não executou:
 2. `20260701000000_security_hardening.sql` (login server-side com bcrypt)
 3. `20260702000000_fiado_automation.sql` (notifications + quinzena automática + agendamento)
 4. `20260703000000_realtime.sql` (pedidos e chamados em tempo real no painel)
+5. `20260704000000_ai_agents_scheduler.sql` (ativa os 6 agentes de IA + execução horária)
 
 ## Etapa 2 — Publicar as Edge Functions
 
 ```bash
 supabase functions deploy fiado-notify
 supabase functions deploy auth-login
+supabase functions deploy agente-executor
 ```
+
+### Os 6 agentes de IA (agente-executor)
+
+| Agente | Quando roda | O que vigia |
+|---|---|---|
+| Operação | a cada hora | pedidos há 45+ min na cozinha, chamados de mesa sem atendimento, cancelamentos |
+| Vendas | diário 08h | queda de faturamento vs. média, produto destaque, análise estratégica com IA* |
+| Fiado | diário 10h | profissionais acima do limite, fiado antigo sem acerto |
+| Estoque/CMV | diário 22h | insumos no estoque mínimo (gera lista de compras), receitas com CMV > 40% |
+| Financeiro | diário 23h | fiado comprometendo o caixa do dia, pedidos concluídos sem pagamento |
+| Clientes | semanal | clientes recorrentes sumidos há 30+ dias (campanha de retorno) |
+
+As recomendações e tarefas aparecem automaticamente na aba **Centro IA**, onde
+também há o botão **"Rodar todos os agentes agora"** para testar sem esperar o
+horário. \*A análise com IA exige o secret `ANTHROPIC_API_KEY` (o mesmo do
+Consultor IA) — sem ele, os agentes rodam só com as regras (sem custo).
 
 ## Etapa 3 — Secrets (Dashboard → Edge Functions → Secrets)
 

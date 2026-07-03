@@ -2750,25 +2750,32 @@ function TabCentroIA(){
   const[iaAnalise,setIaAnalise]=React.useState(null);
   const[iaGerando,setIaGerando]=React.useState(false);
   const[iaErro,setIaErro]=React.useState(null);
+  const[agRodando,setAgRodando]=React.useState(false);
   const EICONS={ORDER_CANCELLED:'❌',ORDER_CREATED:'🆕',PAYMENT_PENDING:'⏳',PAYMENT_RECEIVED:'✅',LOW_STOCK:'⚠️',DEFAULT:'📌'};
-  React.useEffect(function(){
-    async function load(){
-      setLoading(true);
-      try{
-        const[evR,recR,agR]=await Promise.all([
-          fetch(SBU+'/rest/v1/system_events?order=created_at.desc&limit=50',{headers:H}),
-          fetch(SBU+'/rest/v1/ai_recommendations?order=created_at.desc&limit=20',{headers:H}),
-          fetch(SBU+'/rest/v1/ai_agents?order=name.asc',{headers:H})
-        ]);
-        const[ev,rec,ag]=await Promise.all([evR.json(),recR.json(),agR.json()]);
-        setEventos(Array.isArray(ev)?ev:[]);
-        setRecomendacoes(Array.isArray(rec)?rec:[]);
-        setAgentes(Array.isArray(ag)?ag:[]);
-      }catch(e){/* load error */}
-      setLoading(false);
-    }
-    load();
-  },[subTab]);
+  async function load(){
+    setLoading(true);
+    try{
+      const[evR,recR,agR]=await Promise.all([
+        fetch(SBU+'/rest/v1/system_events?order=created_at.desc&limit=50',{headers:H}),
+        fetch(SBU+'/rest/v1/ai_recommendations?order=created_at.desc&limit=20',{headers:H}),
+        fetch(SBU+'/rest/v1/ai_agents?order=name.asc',{headers:H})
+      ]);
+      const[ev,rec,ag]=await Promise.all([evR.json(),recR.json(),agR.json()]);
+      setEventos(Array.isArray(ev)?ev:[]);
+      setRecomendacoes(Array.isArray(rec)?rec:[]);
+      setAgentes(Array.isArray(ag)?ag:[]);
+    }catch(e){/* load error */}
+    setLoading(false);
+  }
+  React.useEffect(function(){load();},[subTab]);
+  async function rodarAgentes(){
+    setAgRodando(true);
+    try{
+      await fetch(SBU+'/functions/v1/agente-executor',{method:'POST',headers:{'Content-Type':'application/json','apikey':SBK,'Authorization':'Bearer '+nbToken()},body:JSON.stringify({action:'tick',force:true})});
+      await load();
+    }catch(e){/* função ainda não publicada */}
+    setAgRodando(false);
+  }
   async function analisarCompleto(){
     setIaGerando(true);setIaAnalise(null);setIaErro(null);
     try{
@@ -2855,12 +2862,16 @@ function TabCentroIA(){
           );})
     ),
     !loading&&subTab==='agentes'&&React.createElement('div',null,
-      React.createElement('div',{style:{background:'#fef3c7',border:'1px solid #fcd34d',borderRadius:'8px',padding:'0.75rem 1rem',marginBottom:'1rem',fontSize:'0.85rem',color:'#92400e'}},'Agentes em modo INATIVO. Estrutura pronta para ativacao futura.'),
+      agentes.some(function(a){return a.status==='active';})
+        ?React.createElement('div',{style:{background:'#d1fae5',border:'1px solid #6ee7b7',borderRadius:'8px',padding:'0.75rem 1rem',marginBottom:'0.75rem',fontSize:'0.85rem',color:'#065f46'}},'✅ Agentes ativos: rodam sozinhos na cadência de cada um e geram recomendações e tarefas automaticamente.')
+        :React.createElement('div',{style:{background:'#fef3c7',border:'1px solid #fcd34d',borderRadius:'8px',padding:'0.75rem 1rem',marginBottom:'0.75rem',fontSize:'0.85rem',color:'#92400e'}},'Agentes inativos. Aplique a migration 20260704000000_ai_agents_scheduler.sql e publique a function agente-executor para ativar.'),
+      React.createElement('button',{onClick:rodarAgentes,disabled:agRodando,style:{width:'100%',background:agRodando?'#9ca3af':'#1e3a5f',color:'#fff',border:'none',borderRadius:'10px',padding:'12px',fontSize:'0.85rem',fontWeight:800,cursor:agRodando?'default':'pointer',marginBottom:'1rem'}},agRodando?'Executando agentes...':'▶ Rodar todos os agentes agora'),
       React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'1rem'}},
         agentes.map(function(ag){return React.createElement('div',{key:ag.id,style:{background:'#fff',border:'1px solid #e5e7eb',borderRadius:'10px',padding:'1rem',textAlign:'center'}},
           React.createElement('div',{style:{fontWeight:700,fontSize:'0.85rem',color:'#1f2937',marginBottom:'0.25rem'}},ag.name.replace('-agent','').replace(/^\w/,function(c){return c.toUpperCase();})),
           React.createElement('div',{style:{fontSize:'0.75rem',color:'#6b7280',marginBottom:'0.5rem'}},ag.description),
-          React.createElement('span',{style:{fontSize:'0.7rem',fontWeight:700,padding:'2px 8px',borderRadius:'999px',background:ag.status==='active'?'#d1fae5':'#f3f4f6',color:ag.status==='active'?'#065f46':'#6b7280'}},ag.status==='active'?'ATIVO':'INATIVO')
+          React.createElement('span',{style:{fontSize:'0.7rem',fontWeight:700,padding:'2px 8px',borderRadius:'999px',background:ag.status==='active'?'#d1fae5':'#f3f4f6',color:ag.status==='active'?'#065f46':'#6b7280'}},ag.status==='active'?'ATIVO':'INATIVO'),
+          ag.last_run_at&&React.createElement('div',{style:{fontSize:'0.65rem',color:'#9ca3af',marginTop:'0.4rem'}},'Última execução: '+new Date(ag.last_run_at).toLocaleString('pt-BR'))
         );})
       )
     ),
