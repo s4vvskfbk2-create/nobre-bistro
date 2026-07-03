@@ -36,6 +36,7 @@ Execute na ordem, se ainda não executou:
 3. `20260702000000_fiado_automation.sql` (notifications + quinzena automática + agendamento)
 4. `20260703000000_realtime.sql` (pedidos e chamados em tempo real no painel)
 5. `20260704000000_ai_agents_scheduler.sql` (ativa os 6 agentes de IA + execução horária)
+6. `20260705000000_estoque_avancado_e_resumo.sql` (perdas/validade/inventário + resumo diário do dono)
 
 ## Etapa 2 — Publicar as Edge Functions
 
@@ -43,7 +44,36 @@ Execute na ordem, se ainda não executou:
 supabase functions deploy fiado-notify
 supabase functions deploy auth-login
 supabase functions deploy agente-executor
+supabase functions deploy pix-gateway --no-verify-jwt   # --no-verify-jwt é necessário para o webhook do Mercado Pago
 ```
+
+### Resumo diário + alertas críticos no WhatsApp do dono
+
+1. No painel: **Equipe → Senhas e metas → WhatsApp do proprietário** — salve seu celular.
+2. Todo dia às 22h30 (Brasília) chega o resumo: vendas, pedidos, ticket, fiado, perdas, cancelamentos e prato mais vendido.
+3. Alertas críticos dos agentes (pedido travado 45+ min, insumo em falta/vencendo, fiado estourado) chegam na hora, assim que o agente roda.
+4. Teste sem esperar: `select public.enviar_resumo_diario();` no SQL Editor.
+
+### PIX automático (Mercado Pago)
+
+1. Crie a conta em mercadopago.com.br e pegue o **Access Token de produção**
+   (Suas integrações → Credenciais).
+2. Secret `MP_ACCESS_TOKEN` no Supabase (Edge Functions → Secrets).
+3. No painel do Mercado Pago, configure o webhook (evento *Pagamentos*) para:
+   `https://zxpnguynjrsixsomaieg.supabase.co/functions/v1/pix-gateway?source=mp`
+4. Pronto: o cardápio passa a gerar **QR PIX dinâmico com confirmação automática** —
+   quando o cliente paga, o pedido é marcado como pago e vai para a cozinha sozinho.
+   Sem o token configurado, o cardápio continua com a chave estática (fallback automático).
+
+### Perdas, validade e inventário (aba ERP → Insumos)
+
+- **Perda**: botão "Perda" em cada insumo — quantidade + motivo; baixa o estoque,
+  calcula o custo da perda e registra em `stock_movements` + auditoria.
+- **Validade**: campo no cadastro; badge vermelho/laranja quando vencido ou
+  vencendo em 3 dias, e o agente de estoque cria tarefa automaticamente.
+- **Inventário**: botão "📋 Inventário" — conte as prateleiras, digite o valor real
+  de cada item e aplique; as diferenças são ajustadas e auditadas.
+- As perdas do dia entram no resumo diário do proprietário.
 
 ### Os 6 agentes de IA (agente-executor)
 

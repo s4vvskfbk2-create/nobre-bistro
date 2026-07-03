@@ -62,12 +62,26 @@ var s1=us("cart"),step=s1[0],setStep=s1[1];
 var s2=us(""),nome=s2[0],setNome=s2[1];
 var s3=us(""),prof=s3[0],setProf=s3[1];
 var s4=us("pix"),pay=s4[0],setPay=s4[1];
+var s5=us(null),pix=s5[0],setPix=s5[1];
+var s6=us(null),pixOid=s6[0],setPixOid=s6[1];
 var total=cart.reduce(function(s,i){return s+i.price*i.qty;},0);
 var steps=["cart","dados","pagamento","confirmar"];
 var si=steps.indexOf(step);
+// PIX dinâmico via gateway: gera cobrança com QR/copia-e-cola e confirmação
+// automática. Se a função não estiver publicada/configurada, cai no fallback
+// da chave estática sem qualquer mudança para o cliente.
+ue(function(){
+if(step!=="confirmar"||pay!=="pix"||pix)return;
+var oid=uid("app_");
+setPixOid(oid);setPix({status:"loading"});
+fetch(SBU+"/functions/v1/pix-gateway",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK,"Authorization":"Bearer "+SBK},body:JSON.stringify({action:"criar",pedidoId:oid,total:total,cliente:nome||"Cliente"})})
+.then(function(r){return r.json();})
+.then(function(d){if(d&&d.ok&&d.copiaECola)setPix({status:"ok",copiaECola:d.copiaECola,qrBase64:d.qrBase64||""});else setPix({status:"fallback"});})
+.catch(function(){setPix({status:"fallback"});});
+},[step,pay]);
 function confirmar(){
-var oid=1000+Math.floor(Math.random()*9000);
-var order={id:oid,nome:nome||"Cliente",profissional:prof,payment:pay,items:cart.map(function(i){return{id:i.id,name:i.name,price:i.price,qty:i.qty};}),total:total,status:"aguardando_pagamento",criadoEm:nowStr(),canal:"app",mesa:mesa};
+var oid=pixOid||(1000+Math.floor(Math.random()*9000));
+var order={id:oid,nome:nome||"Cliente",profissional:prof,payment:pay,items:cart.map(function(i){return{id:i.id,name:i.name,price:i.price,qty:i.qty};}),total:total,status:"aguardando_pagamento",criadoEm:nowStr(),canal:"app",mesa:mesa,pixAutomatico:!!(pix&&pix.status==="ok")};
 onConfirm(order);setStep("enviado");
 }
 if(step==="enviado")return h("div",{onClick:onClose,style:{position:"fixed",inset:0,zIndex:300,background:"rgba(0,0,0,.5)",display:"flex",alignItems:"flex-end",justifyContent:"center"}},
@@ -112,7 +126,15 @@ h("div",{style:{width:20,height:20,borderRadius:"50%",border:"2px solid "+(a?R:B
 }),
 h("div",{style:{background:C,borderRadius:12,padding:"12px 14px",marginTop:8}},h("div",{style:{display:"flex",justifyContent:"space-between"}},h("span",{style:{fontSize:13,color:"#888"}},"Total"),h("span",{style:{fontWeight:900,fontSize:18,color:R,fontFamily:"Georgia,serif"}},fmt(total))))),
 step==="confirmar"&&h("div",null,
-pay==="pix"&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
+pay==="pix"&&pix&&pix.status==="ok"&&h("div",{style:{background:"#f0fdf4",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bbf7d0"}},
+h("p",{style:{margin:"0 0 8px",fontWeight:800,fontSize:12,color:"#166534"}},"⚡ PIX com confirmação automática"),
+pix.qrBase64&&h("img",{src:"data:image/png;base64,"+pix.qrBase64,style:{width:160,height:160,borderRadius:10,marginBottom:8}}),
+h("p",{style:{margin:"0 0 8px",fontSize:10,color:"#166534",wordBreak:"break-all",fontFamily:"monospace",maxHeight:44,overflow:"hidden"}},pix.copiaECola),
+h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText(pix.copiaECola);},style:{background:"#16a34a",color:"#fff",border:"none",borderRadius:8,padding:"8px 18px",fontSize:12,fontWeight:700,cursor:"pointer"}},"Copiar código PIX"),
+h("p",{style:{margin:"8px 0 0",fontSize:10,color:"#166534"}},"Assim que pagar, a cozinha é avisada automaticamente.")),
+pay==="pix"&&pix&&pix.status==="loading"&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"18px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
+h("p",{style:{margin:0,fontSize:12,fontWeight:700,color:"#1d4ed8"}},"Gerando PIX...")),
+pay==="pix"&&(!pix||pix.status==="fallback")&&h("div",{style:{background:"#eff6ff",borderRadius:12,padding:"14px",marginBottom:14,textAlign:"center",border:"1px solid #bfdbfe"}},
 h("p",{style:{margin:"0 0 4px",fontWeight:700,fontSize:12,color:"#1d4ed8"}},"Chave PIX"),
 h("p",{style:{margin:"0 0 10px",fontWeight:900,fontSize:15,color:"#1d4ed8",fontFamily:"monospace"}},"nobre@bistro.com.br"),
 h("button",{onClick:function(){navigator.clipboard&&navigator.clipboard.writeText("nobre@bistro.com.br");},style:{background:"#1d4ed8",color:"#fff",border:"none",borderRadius:8,padding:"7px 16px",fontSize:12,fontWeight:700,cursor:"pointer"}},"Copiar chave")),
@@ -189,7 +211,8 @@ function addCart(p){setCart(function(prev){var ex=prev.find(function(i){return i
 function decCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id&&i.qty>1?Object.assign({},i,{qty:i.qty-1}):i;}).filter(function(i){return i.qty>0;});});}
 function incCart(id){setCart(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{qty:i.qty+1}):i;});});}
 function handleConfirm(order){
-  var finalOrder=Object.assign({},order,{id:uid("app_"),syncStatus:"pending"});
+  var keepId=order.id&&String(order.id).indexOf("app_")===0; // id pré-gerado pelo PIX dinâmico (webhook casa por legacy_id)
+  var finalOrder=Object.assign({},order,{id:keepId?order.id:uid("app_"),syncStatus:"pending"});
   marcarSync("syncing");
   appendOrder(finalOrder).then(function(){marcarSync("online");}).catch(function(){queueAction("order",finalOrder);marcarSync("queued");});
   setCart([]);setShowCart(false);

@@ -1817,27 +1817,81 @@ function TabErpCardapio(){
   );
 }
 
-/* ERP: Insumos */
-function TabErpInsumos(){
+/* ERP: Insumos — com perdas, validade e inventário */
+function TabErpInsumos(props){
   var sd=us([]),data=sd[0],setData=sd[1];
   var sl=us(true),loading=sl[0],setLoading=sl[1];
   var sm=us(false),modal=sm[0],setModal=sm[1];
-  var sf=us({nome:"",unidade:"un",custo_unitario:"",estoque_atual:"0",estoque_minimo:"0"}),form=sf[0],setForm=sf[1];
+  var sf=us({nome:"",unidade:"un",custo_unitario:"",estoque_atual:"0",estoque_minimo:"0",validade:""}),form=sf[0],setForm=sf[1];
   var sa=us(null),alerta=sa[0],setAlerta=sa[1];
+  var sp=us(null),perdaDe=sp[0],setPerdaDe=sp[1];
+  var spf=us({qtd:"",motivo:"vencido"}),perdaF=spf[0],setPerdaF=spf[1];
+  var si=us(false),invMode=si[0],setInvMode=si[1];
+  var sic=us({}),contagem=sic[0],setContagem=sic[1];
   var B2="#e8e2da";
+  var operador=props&&props.operador||"gerente";
   function toast(msg,ok){setAlerta({msg:msg,ok:ok!==false});setTimeout(function(){setAlerta(null);},3500);}
   function load(){setLoading(true);erpGet("ingredientes?order=nome").then(function(r){setData(r||[]);setLoading(false);}).catch(function(){setLoading(false);});}
   ue(function(){load();},[]);
-  function salvar(){var body={nome:form.nome,unidade:form.unidade||"un",custo_unitario:parseFloat(form.custo_unitario)||0,estoque_atual:parseFloat(form.estoque_atual)||0,estoque_minimo:parseFloat(form.estoque_minimo)||0};if(!body.nome){toast("Nome obrigatorio",false);return;}erpPost("ingredientes",body).then(function(){setModal(false);setForm({nome:"",unidade:"un",custo_unitario:"",estoque_atual:"0",estoque_minimo:"0"});toast("Salvo!");load();}).catch(function(e){toast(e.message,false);});}
+  function salvar(){var body={nome:form.nome,unidade:form.unidade||"un",custo_unitario:parseFloat(form.custo_unitario)||0,estoque_atual:parseFloat(form.estoque_atual)||0,estoque_minimo:parseFloat(form.estoque_minimo)||0};if(form.validade)body.validade=form.validade;if(!body.nome){toast("Nome obrigatorio",false);return;}erpPost("ingredientes",body).then(function(){setModal(false);setForm({nome:"",unidade:"un",custo_unitario:"",estoque_atual:"0",estoque_minimo:"0",validade:""});toast("Salvo!");load();}).catch(function(e){toast(e.message,false);});}
   function excluir(id){if(!confirm("Remover?"))return;erpDel("ingredientes?id=eq."+id).then(function(){toast("Removido");load();});}
+  function registrarMov(ing,tipo,qtd,motivo,novoEstoque){
+    var custo=(parseFloat(ing.custo_unitario)||0)*Math.abs(qtd);
+    erpPost("stock_movements",{ingrediente_id:ing.id,ingrediente_nome:ing.nome,tipo:tipo,quantidade:qtd,unidade:ing.unidade,motivo:motivo||"",custo_estimado:custo,operador:operador}).catch(function(){});
+    return erpPatch("ingredientes?id=eq."+ing.id,{estoque_atual:novoEstoque});
+  }
+  function confirmarPerda(){
+    var q=parseFloat(String(perdaF.qtd).replace(",","."))||0;
+    if(q<=0){toast("Informe a quantidade",false);return;}
+    var novo=Math.max(0,(parseFloat(perdaDe.estoque_atual)||0)-q);
+    registrarMov(perdaDe,"perda",q,perdaF.motivo,novo).then(function(){
+      logEvent("STOCK_LOSS","ingrediente",perdaDe.id,{nome:perdaDe.nome,quantidade:q,motivo:perdaF.motivo,custo:(parseFloat(perdaDe.custo_unitario)||0)*q,operador:operador});
+      toast("Perda registrada: "+q+" "+perdaDe.unidade+" de "+perdaDe.nome);
+      setPerdaDe(null);setPerdaF({qtd:"",motivo:"vencido"});load();
+    }).catch(function(e){toast(e.message,false);});
+  }
+  function aplicarInventario(){
+    var ajustes=data.filter(function(i){var c=contagem[i.id];return c!==undefined&&c!==""&&parseFloat(String(c).replace(",","."))!==(parseFloat(i.estoque_atual)||0);});
+    if(!ajustes.length){toast("Nenhuma diferença para ajustar",false);return;}
+    if(!confirm("Aplicar "+ajustes.length+" ajuste(s) de inventário? O estoque do sistema será corrigido para o valor contado."))return;
+    Promise.all(ajustes.map(function(i){
+      var contado=parseFloat(String(contagem[i.id]).replace(",","."))||0;
+      var dif=contado-(parseFloat(i.estoque_atual)||0);
+      return registrarMov(i,"ajuste_inventario",dif,"Inventário físico: sistema "+Number(i.estoque_atual||0).toFixed(2)+" → contado "+contado,contado);
+    })).then(function(){
+      logEvent("INVENTORY_ADJUSTED","estoque","inventario",{itens:ajustes.length,operador:operador});
+      toast("Inventário aplicado: "+ajustes.length+" item(ns) ajustado(s)");
+      setInvMode(false);setContagem({});load();
+    }).catch(function(e){toast(e.message,false);});
+  }
+  function validadeInfo(i){
+    if(!i.validade)return null;
+    var d=new Date(i.validade+"T12:00:00");
+    var dias=Math.floor((d-new Date())/86400000);
+    if(dias<0)return{txt:"VENCIDO",bg:"#fee2e2",tx:"#b91c1c"};
+    if(dias<=3)return{txt:"vence em "+dias+"d",bg:"#fff7ed",tx:"#b45309"};
+    return null;
+  }
   var baixos=data.filter(function(i){return (i.estoque_atual||0)<=(i.estoque_minimo||0)&&(i.estoque_minimo||0)>0;});
+  var vencendo=data.filter(function(i){return validadeInfo(i);});
   return h("div",{style:{padding:"16px 14px"}},
     alerta&&h("div",{style:{background:alerta.ok?"#f0fdf4":"#fee2e2",border:"1px solid "+(alerta.ok?"#86efac":"#fca5a5"),borderRadius:10,padding:"9px 13px",marginBottom:10,fontSize:12,fontWeight:600,color:alerta.ok?"#15803d":"#b91c1c"}},alerta.msg),
     h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
       h("h2",{style:{fontWeight:900,fontSize:17,fontFamily:"Georgia,serif"}},"Insumos"),
-      h("button",{onClick:function(){setModal(true);},style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Novo")
+      h("div",{style:{display:"flex",gap:6}},
+        h("button",{onClick:function(){setInvMode(!invMode);setContagem({});},style:{background:invMode?"#1e3a5f":"#fff",color:invMode?"#fff":"#1e3a5f",border:"1.5px solid #1e3a5f",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},invMode?"Sair do inventário":"📋 Inventário"),
+        h("button",{onClick:function(){setModal(true);},style:{background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"6px 12px",fontSize:11,fontWeight:800,cursor:"pointer"}},"+ Novo")
+      )
     ),
-    baixos.length>0&&h("div",{style:{background:"#fff7ed",border:"1px solid #fed7aa",borderRadius:10,padding:"10px 13px",marginBottom:10}},
+    invMode&&h("div",{style:{background:"#eff6ff",border:"1.5px solid #bfdbfe",borderRadius:10,padding:"10px 13px",marginBottom:10}},
+      h("p",{style:{margin:"0 0 4px",fontSize:12,fontWeight:800,color:"#1e40af"}},"📋 Modo inventário físico"),
+      h("p",{style:{margin:0,fontSize:11,color:"#1e40af"}},"Conte cada insumo na prateleira e digite o valor real. A diferença é ajustada e registrada na trilha de auditoria.")
+    ),
+    vencendo.length>0&&!invMode&&h("div",{style:{background:"#fee2e2",border:"1px solid #fca5a5",borderRadius:10,padding:"10px 13px",marginBottom:10}},
+      h("p",{style:{margin:0,fontSize:12,fontWeight:700,color:"#b91c1c"}},"⏰ "+vencendo.length+" insumo(s) vencido(s) ou vencendo"),
+      vencendo.map(function(i){var v=validadeInfo(i);return h("p",{key:i.id,style:{margin:"3px 0 0",fontSize:11,color:"#7f1d1d"}},i.nome+": "+v.txt+" ("+i.validade+")");})
+    ),
+    baixos.length>0&&!invMode&&h("div",{style:{background:"#fff7ed",border:"1px solid #fed7aa",borderRadius:10,padding:"10px 13px",marginBottom:10}},
       h("p",{style:{margin:0,fontSize:12,fontWeight:700,color:"#92400e"}},baixos.length+" abaixo do minimo"),
       baixos.map(function(i){return h("p",{key:i.id,style:{margin:"3px 0 0",fontSize:11,color:"#78350f"}},i.nome+": "+Number(i.estoque_atual||0).toFixed(2)+" "+i.unidade);})
     ),
@@ -1845,14 +1899,45 @@ function TabErpInsumos(){
     !loading&&data.length===0&&h("p",{style:{textAlign:"center",color:"#ccc",padding:"30px 0"}},"Nenhum insumo cadastrado."),
     !loading&&data.map(function(i){
       var baixo=(i.estoque_atual||0)<=(i.estoque_minimo||0)&&(i.estoque_minimo||0)>0;
-      return h("div",{key:i.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+(baixo?"#fed7aa":B2),padding:"10px 13px",marginBottom:7,display:"flex",justifyContent:"space-between",alignItems:"center"}},
-        h("div",null,
-          h("p",{style:{margin:0,fontWeight:700,fontSize:13}},i.nome),
-          h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},"Custo: "+fmt(i.custo_unitario||0)+"/"+i.unidade+" · Estoque: ",h("span",{style:{fontWeight:700,color:baixo?"#ea580c":"#15803d"}},Number(i.estoque_atual||0).toFixed(2)+" "+i.unidade))
-        ),
-        h("button",{onClick:function(){excluir(i.id);},style:{background:"#fee2e2",border:"1px solid #fecaca",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b91c1c"}},"Del")
+      var vInfo=validadeInfo(i);
+      var contado=contagem[i.id];
+      var dif=contado!==undefined&&contado!==""?(parseFloat(String(contado).replace(",","."))||0)-(parseFloat(i.estoque_atual)||0):null;
+      return h("div",{key:i.id,style:{background:"#fff",borderRadius:12,border:"1px solid "+(baixo?"#fed7aa":B2),padding:"10px 13px",marginBottom:7}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"}},
+          h("div",{style:{flex:1,minWidth:0}},
+            h("div",{style:{display:"flex",alignItems:"center",gap:6}},
+              h("p",{style:{margin:0,fontWeight:700,fontSize:13}},i.nome),
+              vInfo&&h("span",{style:{background:vInfo.bg,color:vInfo.tx,fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:10,flexShrink:0}},vInfo.txt)
+            ),
+            h("p",{style:{margin:"2px 0 0",fontSize:11,color:"#888"}},"Custo: "+fmt(i.custo_unitario||0)+"/"+i.unidade+" · Estoque: ",h("span",{style:{fontWeight:700,color:baixo?"#ea580c":"#15803d"}},Number(i.estoque_atual||0).toFixed(2)+" "+i.unidade))
+          ),
+          !invMode&&h("div",{style:{display:"flex",gap:5,flexShrink:0}},
+            h("button",{onClick:function(){setPerdaDe(i);setPerdaF({qtd:"",motivo:"vencido"});},style:{background:"#fff7ed",border:"1px solid #fed7aa",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b45309"}},"Perda"),
+            h("button",{onClick:function(){excluir(i.id);},style:{background:"#fee2e2",border:"1px solid #fecaca",borderRadius:7,padding:"4px 8px",fontSize:10,fontWeight:700,cursor:"pointer",color:"#b91c1c"}},"Del")
+          ),
+          invMode&&h("div",{style:{display:"flex",alignItems:"center",gap:6,flexShrink:0}},
+            h("input",{value:contado===undefined?"":contado,onChange:function(e){var o={};o[i.id]=e.target.value.replace(/[^0-9.,]/g,"");setContagem(Object.assign({},contagem,o));},placeholder:"Contado",inputMode:"decimal",style:{width:76,border:"1.5px solid #bfdbfe",borderRadius:8,padding:"6px 8px",fontSize:12,outline:"none",textAlign:"center"}}),
+            dif!==null&&dif!==0&&h("span",{style:{fontSize:10,fontWeight:800,color:dif<0?"#b91c1c":"#15803d",minWidth:40}},(dif>0?"+":"")+dif.toFixed(2))
+          )
+        )
       );
     }),
+    invMode&&!loading&&data.length>0&&h("button",{onClick:aplicarInventario,style:{width:"100%",background:"#1e3a5f",color:"#fff",border:"none",borderRadius:11,padding:"13px 0",fontSize:13,fontWeight:800,cursor:"pointer",marginTop:6}},"✓ Aplicar ajustes do inventário"),
+    perdaDe&&h("div",{onClick:function(){setPerdaDe(null);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
+      h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:380,padding:"16px"}},
+        h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:4}},h("span",{style:{fontWeight:800,fontSize:15}},"Registrar perda"),h("button",{onClick:function(){setPerdaDe(null);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
+        h("p",{style:{margin:"0 0 12px",fontSize:12,color:"#888"}},perdaDe.nome+" — estoque atual: "+Number(perdaDe.estoque_atual||0).toFixed(2)+" "+perdaDe.unidade),
+        h("input",{value:perdaF.qtd,onChange:function(e){setPerdaF(Object.assign({},perdaF,{qtd:e.target.value.replace(/[^0-9.,]/g,"")}));},placeholder:"Quantidade perdida ("+perdaDe.unidade+")",inputMode:"decimal",style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,boxSizing:"border-box"}}),
+        h("select",{value:perdaF.motivo,onChange:function(e){setPerdaF(Object.assign({},perdaF,{motivo:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",marginBottom:8,background:"#fff"}},
+          [["vencido","Vencido"],["estragado","Estragado / mal armazenado"],["quebra","Quebra / acidente"],["erro_producao","Erro de produção"],["outro","Outro"]].map(function(m){return h("option",{key:m[0],value:m[0]},m[1]);})
+        ),
+        parseFloat(String(perdaF.qtd).replace(",","."))>0&&h("p",{style:{margin:"0 0 10px",fontSize:11,fontWeight:700,color:"#b45309"}},"Custo estimado da perda: "+fmt((parseFloat(perdaDe.custo_unitario)||0)*(parseFloat(String(perdaF.qtd).replace(",","."))||0))),
+        h("div",{style:{display:"flex",gap:8}},
+          h("button",{onClick:confirmarPerda,style:{flex:1,background:"#b45309",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Registrar perda"),
+          h("button",{onClick:function(){setPerdaDe(null);},style:{flex:1,background:"#fff",color:"#666",border:"1.5px solid "+B2,borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:700,cursor:"pointer"}},"Cancelar")
+        )
+      )
+    ),
     modal&&h("div",{onClick:function(){setModal(false);},style:{position:"fixed",inset:0,zIndex:200,background:"rgba(0,0,0,.45)",display:"flex",alignItems:"center",justifyContent:"center",padding:12}},
       h("div",{onClick:function(e){e.stopPropagation();},style:{background:"#fff",borderRadius:14,width:"100%",maxWidth:380,padding:"16px"}},
         h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:12}},h("span",{style:{fontWeight:800,fontSize:15}},"Novo Insumo"),h("button",{onClick:function(){setModal(false);},style:{background:"none",border:"none",fontSize:20,cursor:"pointer"}},"x")),
@@ -1861,9 +1946,13 @@ function TabErpInsumos(){
           h("select",{value:form.unidade,onChange:function(e){setForm(Object.assign({},form,{unidade:e.target.value}));},style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",background:"#fff"}},["un","kg","g","L","ml"].map(function(u){return h("option",{key:u,value:u},u);})),
           h("input",{type:"number",value:form.custo_unitario,onChange:function(e){setForm(Object.assign({},form,{custo_unitario:e.target.value}));},placeholder:"Custo R$",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
         ),
-        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}},
+        h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}},
           h("input",{type:"number",value:form.estoque_atual,onChange:function(e){setForm(Object.assign({},form,{estoque_atual:e.target.value}));},placeholder:"Estoque atual",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}}),
           h("input",{type:"number",value:form.estoque_minimo,onChange:function(e){setForm(Object.assign({},form,{estoque_minimo:e.target.value}));},placeholder:"Estoque minimo",style:{border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
+        ),
+        h("div",{style:{marginBottom:12}},
+          h("label",{style:{fontSize:10,fontWeight:700,color:"#888",display:"block",marginBottom:3,textTransform:"uppercase"}},"Validade (opcional)"),
+          h("input",{type:"date",value:form.validade,onChange:function(e){setForm(Object.assign({},form,{validade:e.target.value}));},style:{width:"100%",border:"1.5px solid "+B2,borderRadius:9,padding:"9px 11px",fontSize:13,outline:"none",boxSizing:"border-box"}})
         ),
         h("div",{style:{display:"flex",gap:8}},
           h("button",{onClick:salvar,style:{flex:1,background:"#8B1A1A",color:"#fff",border:"none",borderRadius:9,padding:"10px 0",fontSize:13,fontWeight:800,cursor:"pointer"}},"Salvar"),
@@ -2513,7 +2602,7 @@ function App(){
       tab==="eng_cardapio"&&nivel==="gerente"&&h(TabEngCardapio,{orders:orders,prods:prods}),
       tab==="proprietario"&&nivel==="gerente"&&h(TabProprietario,{orders:orders,prods:prods,profs:profs}),
       tab==="erp_cardapio"&&nivel==="gerente"&&h(TabErpCardapio,null),
-      tab==="erp_insumos"&&nivel==="gerente"&&h(TabErpInsumos,null),
+      tab==="erp_insumos"&&nivel==="gerente"&&h(TabErpInsumos,{operador:operador}),
       tab==="erp_fornecedores"&&nivel==="gerente"&&h(TabErpFornecedores,null),
       tab==="erp_compras"&&nivel==="gerente"&&h(TabErpCompras,null),
       tab==="config"&&nivel==="gerente"&&h(TabConfig,null)
@@ -3897,7 +3986,13 @@ function TabConfig(){
   var s4=us(""),erroS=s4[0],setErroS=s4[1];
   var s5=us(""),metaDia=s5[0],setMetaDia=s5[1];
   var s6=us(false),okM=s6[0],setOkM=s6[1];
-  ue(function(){sbGet("nb_bA_meta").then(function(m){if(m&&m.diaria!=null)setMetaDia(String(m.diaria));});},[]);
+  var s7=us(""),telDono=s7[0],setTelDono=s7[1];
+  var s8=us(false),okD=s8[0],setOkD=s8[1];
+  ue(function(){
+    sbGet("nb_bA_meta").then(function(m){if(m&&m.diaria!=null)setMetaDia(String(m.diaria));});
+    sbGet("nb_bA_dono").then(function(d){if(d&&d.telefone)setTelDono(d.telefone);});
+  },[]);
+  function salvarDono(){sbSet("nb_bA_dono",{telefone:telDono.replace(/\D/g,"")});setOkD(true);setTimeout(function(){setOkD(false);},2500);}
   function up(k,v){var o={};o[k]=v;setF(Object.assign({},f,o));}
   async function salvarSenhas(){
     if(!f.gerente||!f.atendente||!f.cancelPin){setErroS("Preencha todas as novas senhas.");return;}
@@ -3932,6 +4027,13 @@ function TabConfig(){
       h(Inp,{label:"Meta diária (R$)",value:metaDia,onChange:setMetaDia,type:"number",placeholder:"Ex: 800"}),
       okM&&h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,margin:"0 0 8px"}},"Meta salva!"),
       h(Btn,{full:true,onClick:salvarMeta},"Salvar meta")
+    ),
+    h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:14,marginBottom:14}},
+      h("p",{style:{margin:"0 0 4px",fontWeight:800,fontSize:14}},"📱 WhatsApp do proprietário"),
+      h("p",{style:{margin:"0 0 12px",fontSize:11,color:"#888"}},"Recebe o resumo do dia às 22h30 e os alertas críticos dos agentes de IA (pedido travado, estoque em falta, fiado estourado)."),
+      h(Inp,{label:"Celular com DDD",value:telDono,onChange:setTelDono,placeholder:"Ex: 11 91234-5678",hint:"Requer o WhatsApp configurado (WHATSAPP_TOKEN) — veja docs/setup"}),
+      okD&&h("p",{style:{color:"#16a34a",fontSize:12,fontWeight:700,margin:"0 0 8px"}},"Número salvo!"),
+      h(Btn,{full:true,onClick:salvarDono},"Salvar WhatsApp")
     )
   );
 }

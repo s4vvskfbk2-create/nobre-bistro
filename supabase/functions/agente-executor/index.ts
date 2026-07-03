@@ -88,20 +88,22 @@ type Task = { area: string; priority: string; title: string; action: string; imp
 type Ctx = Awaited<ReturnType<typeof gatherContext>>;
 
 async function gatherContext() {
-  const [ordersRows, ingredientes, fichas, calls, profsCfg, recentRecs, openTasks] = await Promise.all([
+  const [ordersRows, ingredientes, fichas, calls, profsCfg, recentRecs, openTasks, donoCfg] = await Promise.all([
     dbGet("orders?select=metadata,status,payment_status,created_at&order=created_at.desc&limit=800"),
-    dbGet("ingredientes?select=nome,estoque_atual,estoque_minimo,ativo,unidade&ativo=eq.true"),
+    dbGet("ingredientes?select=nome,estoque_atual,estoque_minimo,ativo,unidade,validade&ativo=eq.true"),
     dbGet("fichas_tecnicas?select=nome,cmv_percentual,preco_venda,ativo"),
     dbGet("table_calls?select=metadata,status,created_at&status=eq.open&limit=100"),
     dbGet("config?key=eq.nb_bA_profs&select=value"),
     dbGet(`ai_recommendations?select=title&created_at=gte.${new Date(Date.now() - 36 * 3600e3).toISOString()}`),
     dbGet("ai_tasks?select=title&status=in.(open,aberta,doing,em_andamento)&limit=200"),
+    dbGet("config?key=eq.nb_bA_dono&select=value"),
   ]);
   const orders = ordersRows.map((r: any) => r.metadata).filter((o: any) => o && o.id != null);
   const profs = (profsCfg[0]?.value && Array.isArray(profsCfg[0].value)) ? profsCfg[0].value : [];
   const recTitles = new Set(recentRecs.map((r: any) => r.title));
   const taskTitles = new Set(openTasks.map((t: any) => t.title));
-  return { orders, ingredientes, fichas, calls, profs, recTitles, taskTitles };
+  const donoTelefone = String(donoCfg[0]?.value?.telefone || "");
+  return { orders, ingredientes, fichas, calls, profs, recTitles, taskTitles, donoTelefone };
 }
 
 // ── agentes ──────────────────────────────────────────────────────────────
@@ -161,6 +163,23 @@ function agenteEstoque(ctx: Ctx): { recs: Rec[]; tasks: Task[] } {
       title: `Repor ${criticos.length} insumo(s) crítico(s)`,
       action: `Comprar/repor: ${lista}`,
       impact: "Evita ruptura de pratos do cardápio",
+    });
+  }
+  const vencendo = ctx.ingredientes.filter((i: any) => {
+    if (!i.validade) return false;
+    const dias = (new Date(i.validade + "T12:00:00").getTime() - Date.now()) / 86400e3;
+    return dias <= 3;
+  });
+  if (vencendo.length) {
+    const lista = vencendo.slice(0, 10).map((i: any) => {
+      const dias = Math.floor((new Date(i.validade + "T12:00:00").getTime() - Date.now()) / 86400e3);
+      return `${i.nome} (${dias < 0 ? "VENCIDO" : "vence em " + dias + "d"})`;
+    }).join(", ");
+    tasks.push({
+      area: "estoque", priority: "alta",
+      title: `${vencendo.length} insumo(s) vencido(s) ou vencendo em 3 dias`,
+      action: `Verificar e usar primeiro (ou registrar perda): ${lista}.`,
+      impact: "Evita perda de insumo e uso de produto vencido",
     });
   }
   const cmvAlto = ctx.fichas.filter((f: any) => f.ativo !== false && Number(f.cmv_percentual || 0) > 40);
@@ -354,6 +373,7 @@ async function tick(force: boolean): Promise<Record<string, unknown>> {
 
   const ctx = await gatherContext();
   const ran: Array<Record<string, unknown>> = [];
+  const alertasCriticos: Task[] = [];
 
   for (const a of due) {
     const fn = AGENTES[a.name];
@@ -373,6 +393,7 @@ async function tick(force: boolean): Promise<Record<string, unknown>> {
     for (const t of tasks) {
       await dbPost("ai_tasks", { source: a.name, ...t, status: "open", payload: { agent: a.name } });
       ctx.taskTitles.add(t.title);
+      if (t.priority === "critica" || t.priority === "alta") alertasCriticos.push(t);
     }
     await dbPost("system_events", {
       event_type: "AGENT_RUN", source: a.name, entity_type: "ai_agent", entity_id: a.name,
@@ -385,6 +406,25 @@ async function tick(force: boolean): Promise<Record<string, unknown>> {
     });
     ran.push({ agent: a.name, recs: recs.length, tasks: tasks.length });
   }
+
+  // Alertas críticos direto no WhatsApp do proprietário (config nb_bA_dono)
+  if (alertasCriticos.length && ctx.donoTelefone) {
+    const msg = `🚨 *Nobre Bistro — Alerta dos agentes de IA*\n\n` +
+      alertasCriticos.slice(0, 5).map((t) => `• *${t.title}*\n  ${t.action}`).join("\n\n") +
+      `\n\nDetalhes na aba Central IA do painel.`;
+    await dbPost("notifications", {
+      kind: "alerta_critico", recipient_name: "Proprietário", phone: ctx.donoTelefone,
+      message: msg, status: "pending", payload: { alertas: alertasCriticos.length },
+    });
+    // dispara o envio imediato via fiado-notify (dispatcher compartilhado)
+    const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    await fetch(`${SB_URL}/functions/v1/fiado-notify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": anon, "Authorization": `Bearer ${anon}` },
+      body: JSON.stringify({ action: "dispatch" }),
+    }).catch(() => {});
+  }
+
   return { ok: true, ran };
 }
 
