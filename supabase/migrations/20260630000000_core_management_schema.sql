@@ -28,10 +28,16 @@ create table if not exists public.customers (
 
 create table if not exists public.staff (
   id uuid primary key default gen_random_uuid(),
-  name text not null,
+  name text not null unique,
   role text not null default 'atendente',
   phone text,
   pin_hash text,
+  staff_type text not null default 'salao',
+  appears_on_menu boolean not null default true,
+  can_use_credit boolean not null default true,
+  participates_in_ranking boolean not null default true,
+  credit_limit numeric(12,2) not null default 200,
+  payment_cycle text not null default 'quinzena',
   commission_rate numeric(6,2) not null default 0,
   credit_discount_rate numeric(6,2) not null default 0,
   daily_goal numeric(12,2) not null default 0,
@@ -214,6 +220,31 @@ create table if not exists public.ai_recommendations (
   constraint ai_recommendations_status_check check (status in ('new','accepted','dismissed','done','nova','aceita','ignorada','concluida'))
 );
 
+create table if not exists public.ai_agents (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  description text,
+  area text not null,
+  cadence text not null default 'manual',
+  status text not null default 'inactive',
+  last_run_at timestamptz,
+  next_run_at timestamptz,
+  config jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint ai_agents_status_check check (status in ('active','inactive','paused','error'))
+);
+
+insert into public.ai_agents (name, description, area, cadence, status, config)
+values
+  ('vendas-agent','Analisa faturamento, ticket médio, produto foco e ranking de indicações.','vendas','diario','inactive','{}'::jsonb),
+  ('estoque-cmv-agent','Monitora estoque, ficha técnica, CMV, rupturas e compras sugeridas.','estoque_cmv','fim_do_dia','inactive','{}'::jsonb),
+  ('fiado-agent','Controla fiado de profissionais do salão, limites, cobranças e quinzena.','fiado','diario_quinzena','inactive','{}'::jsonb),
+  ('clientes-agent','Identifica clientes sumidas, recorrentes, aniversariantes e campanhas.','clientes','semanal','inactive','{}'::jsonb),
+  ('operacao-agent','Acompanha pedidos atrasados, cozinha, chamados de mesa e cancelamentos.','operacao','tempo_real','inactive','{}'::jsonb),
+  ('financeiro-agent','Analisa caixa, formas de pagamento, despesas, divergências e lucro estimado.','financeiro','fechamento','inactive','{}'::jsonb)
+on conflict (name) do nothing;
+
 create table if not exists public.system_events (
   id uuid primary key default gen_random_uuid(),
   event_type text not null,
@@ -279,7 +310,7 @@ do $$
 declare
   t text;
 begin
-  foreach t in array array['customers','staff','products','orders','payments','table_calls','cash_sessions','credit_entries','ai_tasks','ai_recommendations']
+  foreach t in array array['customers','staff','products','orders','payments','table_calls','cash_sessions','credit_entries','ai_tasks','ai_recommendations','ai_agents']
   loop
     execute format('drop trigger if exists set_%I_updated_at on public.%I', t, t);
     execute format('create trigger set_%I_updated_at before update on public.%I for each row execute function public.set_updated_at()', t, t);
@@ -293,7 +324,7 @@ do $$
 declare
   t text;
 begin
-  foreach t in array array['customers','staff','products','orders','order_items','payments','table_calls','cash_sessions','cash_movements','credit_entries','ai_tasks','ai_recommendations','system_events','audit_logs']
+  foreach t in array array['customers','staff','products','orders','order_items','payments','table_calls','cash_sessions','cash_movements','credit_entries','ai_tasks','ai_recommendations','ai_agents','system_events','audit_logs']
   loop
     execute format('alter table public.%I enable row level security', t);
     execute format('drop policy if exists "temporary_anon_all_%I" on public.%I', t, t);

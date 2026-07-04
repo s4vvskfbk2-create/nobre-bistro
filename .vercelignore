@@ -1,0 +1,7 @@
+# Só o site vai para produção — código de referência e backend ficam fora
+nobre-admin.tsx
+nobre-cardapio-v2.tsx
+docs/
+supabase/
+README.md
+.claude/

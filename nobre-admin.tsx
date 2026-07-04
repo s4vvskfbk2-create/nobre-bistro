@@ -10,6 +10,8 @@ var todayKey=function(){return new Date().toLocaleDateString("pt-BR");};
 
 var _SB_URL="https://zxpnguynjrsixsomaieg.supabase.co";
 var _SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+var WPP_NUMBER="";
+var SENHAS={gerente:"",atendente:"",cozinha:""};
 
 async function sbFetch(method,path,body){
   var res=await fetch(_SB_URL+"/rest/v1/"+path,{
@@ -82,7 +84,7 @@ function gerarMsgQuinzena(prof,orders,desconto){
 function abrirWpp(telefone,msg){
   var tel=(telefone||"").replace(/\D/g,"");
   if(tel.length>=10)tel="55"+tel;
-  window.open("https://wa.me/"+(tel||"5511914195567")+"?text="+encodeURIComponent(msg),"_blank");
+  window.open("https://wa.me/"+(tel||WPP_NUMBER)+"?text="+encodeURIComponent(msg),"_blank");
 }
 
 function Btn(props){
@@ -656,7 +658,7 @@ function HorariosTab(props){
     <div style={{background:"#fff",borderRadius:13,border:"1px solid "+BORDER,padding:13}}>
       <p style={{fontWeight:700,fontSize:13,margin:"0 0 10px"}}>Links do restaurante</p>
       <div style={{display:"flex",gap:8}}>
-        <a href="https://wa.me/5511914195567" target="_blank" rel="noreferrer" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",background:"#25D366",color:"#fff",padding:"10px 0",borderRadius:10,fontSize:12,fontWeight:700,textDecoration:"none"}}>WhatsApp</a>
+        <a href={"https://wa.me/"+WPP_NUMBER} target="_blank" rel="noreferrer" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",background:"#25D366",color:"#fff",padding:"10px 0",borderRadius:10,fontSize:12,fontWeight:700,textDecoration:"none"}}>WhatsApp</a>
         <a href="https://instagram.com/nobrebistro" target="_blank" rel="noreferrer" style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",background:"#e1306c",color:"#fff",padding:"10px 0",borderRadius:10,fontSize:12,fontWeight:700,textDecoration:"none"}}>Instagram</a>
       </div>
     </div>
@@ -721,9 +723,9 @@ function Login(props){
   var _p=useState(""),pass=_p[0],setPass=_p[1];
   var _e=useState(false),err=_e[0],setErr=_e[1];
   function go(){
-    if(pass==="nobre2025"){props.onLogin("gerente");}
-    else if(pass==="balcao"){props.onLogin("atendente");}
-    else if(pass==="cozinha"){props.onLogin("cozinha");}
+    if(pass&&SENHAS.gerente&&pass===SENHAS.gerente){props.onLogin("gerente");}
+    else if(pass&&SENHAS.atendente&&pass===SENHAS.atendente){props.onLogin("atendente");}
+    else if(pass&&SENHAS.cozinha&&pass===SENHAS.cozinha){props.onLogin("cozinha");}
     else{setErr(true);setTimeout(function(){setErr(false);},2000);}
     setPass("");
   }
@@ -746,11 +748,10 @@ function Login(props){
       </div>
       <div style={{marginTop:16,background:"#fff",borderRadius:12,padding:"12px 14px",border:"1px solid "+BORDER}}>
         <p style={{margin:"0 0 7px",fontSize:10,fontWeight:700,color:"#aaa",textTransform:"uppercase",letterSpacing:.5}}>Niveis</p>
-        {[[R,"Gerente","nobre2025"],["#3b82f6","Atendente","balcao"],["#22c55e","Cozinha","cozinha"]].map(function(arr){
+        {[[R,"Gerente"],["#3b82f6","Atendente"],["#22c55e","Cozinha"]].map(function(arr){
           return <div key={arr[1]} style={{display:"flex",alignItems:"center",gap:7,marginBottom:5}}>
             <span style={{width:7,height:7,borderRadius:"50%",background:arr[0],flexShrink:0}}/>
             <span style={{fontSize:12,fontWeight:700,color:"#1a1a1a"}}>{arr[1]}</span>
-            <span style={{fontSize:11,color:"#aaa"}}>-- senha: {arr[2]}</span>
           </div>;
         })}
       </div>
