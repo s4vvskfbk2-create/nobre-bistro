@@ -65,6 +65,16 @@ supabase functions deploy pix-gateway --no-verify-jwt   # --no-verify-jwt é nec
    quando o cliente paga, o pedido é marcado como pago e vai para a cozinha sozinho.
    Sem o token configurado, o cardápio continua com a chave estática (fallback automático).
 
+### 📸 Nota fiscal por foto (aba ERP → Insumos)
+
+1. Requer o secret `ANTHROPIC_API_KEY` (o mesmo dos agentes de IA).
+2. Botão **"📸 Nota fiscal"** → tire a foto da nota/cupom → a IA extrai itens,
+   quantidades e preços e já casa com os insumos cadastrados.
+3. Confira a tela de revisão (pode ajustar qtd/preço, escolher em qual insumo
+   somar ou criar um novo) → **Confirmar entrada**.
+4. O sistema dá entrada no estoque, atualiza o custo unitário (o CMV das
+   receitas acompanha) e registra tudo em `stock_movements` + auditoria.
+
 ### Perdas, validade e inventário (aba ERP → Insumos)
 
 - **Perda**: botão "Perda" em cada insumo — quantidade + motivo; baixa o estoque,
