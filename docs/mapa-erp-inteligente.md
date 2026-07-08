@@ -49,7 +49,7 @@ aprovar cria tarefa (ai_tasks) e registra RECOMMENDATION_APPROVED em auditoria;
 status: new → accepted/dismissed/done. A IA nunca altera dados críticos sozinha.
 
 ## Próximas fases (ordem sugerida)
-1. **Fase A (sem IA):** lista de compras sugerida (consumo médio via stock_movements) · contas a pagar/receber · previsão simples por dia da semana · simulação de preço na eng. de cardápio
+1. **Fase A (sem IA): ✅ CONCLUÍDA** — lista de compras sugerida (consumo médio 30d × 7 dias de cobertura + mínimo, com envio por WhatsApp, em Compras) · contas a pagar/receber (hub Dinheiro → 📆 Contas, com vencidas/vence em Xd e totais 30d) · previsão de vendas por dia da semana (média das últimas 4 semanas, no DRE) · simulação de preço na ficha técnica (novo CMV%, margem/un e ganho por 100 vendas)
 2. **Fase B (sem IA):** produção/pré-preparo · escala da equipe · giro de estoque no dashboard
 3. **Fase C (IA controlada):** marketing (campanhas para inativos usando o agente clientes) · Q&A da base de conhecimento · reputação
 4. **Fase D (futuro):** eventos · manutenção · segurança alimentar · voz · visão computacional
