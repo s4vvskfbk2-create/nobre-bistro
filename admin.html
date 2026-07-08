@@ -2455,6 +2455,79 @@ function TabSegundoCerebro(props){
   );
 }
 
+// ── DRE automática (100% determinística — fórmulas, sem IA) ───────────────
+// Receita (mês) − CMV estimado (fichas técnicas) − Comissões − Despesas
+// = Lucro operacional. Ponto de equilíbrio e venda mínima derivados.
+function TabDRE(props){
+  var orders=props.orders||[],profs=props.profs||[];
+  var sd=us([]),despesas=sd[0],setDespesas=sd[1];
+  var sf=us([]),fichas=sf[0],setFichas=sf[1];
+  ue(function(){
+    sbGet("nb_bA_despesas").then(function(d){if(Array.isArray(d))setDespesas(d);});
+    fetch(SBU+"/rest/v1/fichas_tecnicas?select=nome,custo_total,preco_venda",{headers:{"apikey":SBK,"Authorization":"Bearer "+nbToken()}}).then(function(r){return r.json();}).then(function(d){if(Array.isArray(d))setFichas(d);}).catch(function(){});
+  },[]);
+  var now=new Date();
+  var mesPrefix="/"+String(now.getMonth()+1).padStart(2,"0")+"/"+now.getFullYear();
+  function doMes(str){return String(str||"").split(" ")[0].endsWith(mesPrefix);}
+  var vendidos=orders.filter(function(o){return o.status==="concluido"&&doMes(o.criadoEm);});
+  var receita=vendidos.reduce(function(s,o){return s+Number(o.total||0);},0);
+  var fichaMap={};fichas.forEach(function(f){fichaMap[(f.nome||"").toLowerCase().trim()]=f;});
+  var cmv=0,receitaComFicha=0;
+  vendidos.forEach(function(o){(o.items||[]).forEach(function(i){
+    var f=fichaMap[(i.name||"").toLowerCase().trim()];
+    if(f&&f.custo_total){cmv+=Number(i.qty||1)*Number(f.custo_total||0);receitaComFicha+=Number(i.qty||1)*Number(i.price||0);}
+  });});
+  var cmvPct=receitaComFicha>0?cmv/receitaComFicha*100:0;
+  var cmvEstimado=receita*(cmvPct/100); // extrapola o % dos itens com ficha para a receita total
+  var comissoes=vendidos.reduce(function(s,o){
+    if(!o.profissional||o.semComissao)return s;
+    var p=profs.find(function(x){return x.name===o.profissional;});
+    return s+Number(o.total||0)*(p?Number(p.comissao||0):0)/100;
+  },0);
+  var despMes=despesas.filter(function(d){return String(d.data||"").endsWith(mesPrefix);}).reduce(function(s,d){return s+Number(d.valor||0);},0);
+  var margemContrib=receita>0?(receita-cmvEstimado-comissoes)/receita:0;
+  var lucro=receita-cmvEstimado-comissoes-despMes;
+  var margemLiq=receita>0?lucro/receita*100:0;
+  var pontoEq=margemContrib>0?despMes/margemContrib:0;
+  var diasNoMes=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  var vendaMinDia=pontoEq/diasNoMes;
+  var diaAtual=now.getDate();
+  var ritmoNecessario=receita<pontoEq&&diaAtual<diasNoMes?(pontoEq-receita)/(diasNoMes-diaAtual):0;
+  function linha(label,valor,cor,bold,pct){
+    return h("div",{style:{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f0ece6"}},
+      h("span",{style:{fontSize:12,fontWeight:bold?900:600,color:bold?"#1a1a1a":"#555"}},label),
+      h("span",{style:{textAlign:"right"}},
+        h("span",{style:{fontSize:13,fontWeight:bold?900:700,color:cor,fontFamily:"Georgia,serif"}},valor),
+        pct!=null&&h("span",{style:{fontSize:10,color:"#999",marginLeft:6}},pct)
+      )
+    );
+  }
+  return h("div",{style:{padding:"16px 14px"}},
+    h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 2px",fontFamily:"Georgia,serif"}},"DRE do mês"),
+    h("p",{style:{fontSize:11,color:"#888",margin:"0 0 12px"}},"Demonstração de resultado calculada em tempo real — fórmulas auditáveis, sem IA."),
+    h("div",{style:{background:"#fff",borderRadius:14,border:"1px solid "+B,boxShadow:"0 1px 4px rgba(0,0,0,.06)",padding:"6px 14px",marginBottom:12}},
+      linha("Receita bruta (vendas concluídas)",fmt(receita),"#16a34a",true,null),
+      linha("(−) CMV estimado",fmt(-cmvEstimado),"#dc2626",false,cmvPct>0?cmvPct.toFixed(1)+"%":"sem fichas"),
+      linha("(−) Comissões",fmt(-comissoes),"#dc2626",false,null),
+      linha("(=) Margem de contribuição",fmt(receita-cmvEstimado-comissoes),"#1a1a1a",false,(margemContrib*100).toFixed(1)+"%"),
+      linha("(−) Despesas do mês",fmt(-despMes),"#dc2626",false,null),
+      linha("(=) LUCRO OPERACIONAL",fmt(lucro),lucro>=0?"#16a34a":"#dc2626",true,margemLiq.toFixed(1)+"%")
+    ),
+    h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}},
+      [["⚖️ Ponto de equilíbrio",pontoEq>0?fmt(pontoEq):"—","vendas no mês para pagar as contas"],
+       ["📅 Venda mínima/dia",vendaMinDia>0?fmt(vendaMinDia):"—","média necessária no mês"],
+       ["📈 Já vendido",fmt(receita),receita>=pontoEq&&pontoEq>0?"acima do equilíbrio ✅":pontoEq>0?((receita/pontoEq*100).toFixed(0)+"% do equilíbrio"):"—"],
+       ["🎯 Ritmo p/ equilibrar",ritmoNecessario>0?fmt(ritmoNecessario)+"/dia":"—",ritmoNecessario>0?"nos "+(diasNoMes-diaAtual)+" dias restantes":"meta alcançada ou mês encerrando"]
+      ].map(function(k){return h("div",{key:k[0],style:{background:"#fff",borderRadius:12,border:"1px solid "+B,padding:"10px 12px"}},
+        h("p",{style:{margin:0,fontSize:10,fontWeight:800,color:"#555"}},k[0]),
+        h("p",{style:{margin:"3px 0 1px",fontWeight:900,fontSize:15,fontFamily:"Georgia,serif",color:R}},k[1]),
+        h("p",{style:{margin:0,fontSize:9,color:"#999"}},k[2])
+      );})
+    ),
+    h("p",{style:{fontSize:10,color:"#aaa",lineHeight:1.5}},"O CMV usa as fichas técnicas: quanto mais pratos com ficha cadastrada, mais preciso. O % dos itens com ficha ("+(cmvPct>0?cmvPct.toFixed(1)+"%":"—")+") é extrapolado para a receita total. Despesas vêm da aba Despesas.")
+  );
+}
+
 // ── Hubs consolidados: mesmas funções, uma página só ──────────────────────
 // Dinheiro: Caixa do dia + Relatórios + Despesas viram seções de uma página,
 // com os números do dia destacados no topo (fim da informação repetida).
@@ -2468,7 +2541,7 @@ function TabCaixaHub(props){
   var hojeStr=todayKey();
   var despH=despesas.filter(function(d){return d.data===hojeStr;}).reduce(function(s2,d){return s2+Number(d.valor||0);},0);
   var liquido=recebido-despH;
-  var SECS=[["hoje","💵 Caixa do dia"],["relatorios","📊 Relatórios"],["despesas","🧾 Despesas"]];
+  var SECS=[["hoje","💵 Caixa do dia"],["dre","📑 DRE"],["relatorios","📊 Relatórios"],["despesas","🧾 Despesas"]];
   return h("div",null,
     h("div",{style:{padding:"14px 14px 0"}},
       h("h2",{style:{fontWeight:900,fontSize:17,margin:"0 0 10px",fontFamily:"Georgia,serif"}},"Dinheiro"),
@@ -2484,6 +2557,7 @@ function TabCaixaHub(props){
       )
     ),
     sec==="hoje"&&h(CaixaTab,{orders:props.orders,setOrders:props.setOrders}),
+    sec==="dre"&&h(TabDRE,{orders:props.orders,profs:props.profs}),
     sec==="relatorios"&&h(TabFinanceiro,{orders:props.orders,prods:props.prods}),
     sec==="despesas"&&h(TabDespesas,null)
   );
@@ -2685,7 +2759,7 @@ function App(){
       tab==="cozinha"&&h(CozinhaTab,{orders:orders,setOrders:setOrders}),
       tab==="meu_desempenho"&&h(TabMeuDesempenho,{orders:orders,operador:operador,profs:profs}),
       tab==="cardapio"&&(nivel==="gerente"?h(CardapioTab,{prods:prods,setProds:setProds}):h("p",{style:{textAlign:"center",padding:40,color:"#ccc"}},"Acesso restrito")),
-      tab==="caixa_hub"&&(nivel==="gerente"?h(TabCaixaHub,{orders:orders,setOrders:setOrders,prods:prods}):null),
+      tab==="caixa_hub"&&(nivel==="gerente"?h(TabCaixaHub,{orders:orders,setOrders:setOrders,prods:prods,profs:profs}):null),
       tab==="ia_hub"&&(nivel==="gerente"?h(TabIAHub,{orders:orders,prods:prods,profs:profs,onIr:function(g,t){setGrupo(g);setTab(t);}}):null),
       tab==="caixa"&&(nivel==="gerente"?h(CaixaTab,{orders:orders,setOrders:setOrders}):null),
       tab==="fechamento"&&(nivel==="gerente"?h(TabFechamento,{orders:orders,operador:operador}):null),
@@ -3124,12 +3198,35 @@ function TabCentroIA(){
             React.createElement('p',{style:{margin:0}},'Nenhuma recomendacao gerada ainda.'),
             React.createElement('p',{style:{margin:'0.25rem 0 0',fontSize:'0.8rem'}},'As recomendacoes aparecerao quando os agentes de IA forem ativados.')
           )
-        :recomendacoes.map(function(rec){return React.createElement('div',{key:rec.id,style:{background:'#fff',border:'1px solid #e5e7eb',borderRadius:'8px',padding:'1rem',marginBottom:'0.5rem'}},
-            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'0.25rem'}},
-              React.createElement('span',{style:{fontWeight:700,fontSize:'0.9rem',color:'#1f2937'}},rec.title),
-              React.createElement('span',{style:{fontSize:'0.75rem',fontWeight:700,color:pc(rec.priority)}},rec.priority)
+        :recomendacoes.map(function(rec){
+            var st=rec.status||'new';
+            var stCor=st==='accepted'?{bg:'#d1fae5',tx:'#065f46',l:'APROVADA'}:st==='dismissed'?{bg:'#f3f4f6',tx:'#6b7280',l:'IGNORADA'}:st==='done'?{bg:'#dbeafe',tx:'#1d4ed8',l:'CONCLUÍDA'}:null;
+            function decidir(novoStatus){
+              fetch(SBU+'/rest/v1/ai_recommendations?id=eq.'+rec.id,{method:'PATCH',headers:{'Content-Type':'application/json','apikey':SBK,'Authorization':'Bearer '+nbToken(),'Prefer':'return=minimal'},body:JSON.stringify({status:novoStatus})})
+                .then(function(){
+                  if(novoStatus==='accepted'){
+                    AIService.saveTask({source:'aprovacao',area:rec.area||'Gestão',priority:rec.priority||'media',title:rec.title,action:rec.suggested_action||rec.reasoning||'',impact:rec.estimated_impact||''});
+                    logEvent('RECOMMENDATION_APPROVED','ai_recommendation',rec.id,{title:rec.title});
+                  }else{
+                    logEvent('RECOMMENDATION_DISMISSED','ai_recommendation',rec.id,{title:rec.title});
+                  }
+                  load();
+                }).catch(function(){});
+            }
+            return React.createElement('div',{key:rec.id,style:{background:'#fff',border:'1px solid #e5e7eb',borderRadius:'8px',padding:'1rem',marginBottom:'0.5rem',opacity:st==='dismissed'?.55:1}},
+            React.createElement('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'0.25rem',gap:6}},
+              React.createElement('span',{style:{fontWeight:700,fontSize:'0.9rem',color:'#1f2937',flex:1}},rec.title),
+              stCor?React.createElement('span',{style:{fontSize:'0.65rem',fontWeight:800,color:stCor.tx,background:stCor.bg,padding:'2px 8px',borderRadius:'10px',flexShrink:0,alignSelf:'flex-start'}},stCor.l)
+                   :React.createElement('span',{style:{fontSize:'0.75rem',fontWeight:700,color:pc(rec.priority),flexShrink:0}},rec.priority)
             ),
-            rec.description&&React.createElement('p',{style:{margin:'0.25rem 0',fontSize:'0.8rem',color:'#6b7280'}},rec.description)
+            rec.reasoning&&React.createElement('p',{style:{margin:'0.25rem 0',fontSize:'0.8rem',color:'#6b7280'}},rec.reasoning),
+            rec.suggested_action&&React.createElement('p',{style:{margin:'0.25rem 0',fontSize:'0.8rem',color:'#374151'}},'👉 '+rec.suggested_action),
+            rec.estimated_impact&&React.createElement('p',{style:{margin:'0.25rem 0',fontSize:'0.75rem',fontWeight:700,color:'#b45309'}},'💰 '+rec.estimated_impact),
+            rec.description&&React.createElement('p',{style:{margin:'0.25rem 0',fontSize:'0.8rem',color:'#6b7280'}},rec.description),
+            (st==='new'||st==='nova')&&React.createElement('div',{style:{display:'flex',gap:6,marginTop:'0.6rem'}},
+              React.createElement('button',{onClick:function(){decidir('accepted');},style:{flex:1,background:'#16a34a',color:'#fff',border:'none',borderRadius:'8px',padding:'8px 0',fontSize:'0.78rem',fontWeight:800,cursor:'pointer'}},'✓ Aprovar (vira tarefa)'),
+              React.createElement('button',{onClick:function(){decidir('dismissed');},style:{flex:1,background:'#fff',color:'#6b7280',border:'1px solid #d1d5db',borderRadius:'8px',padding:'8px 0',fontSize:'0.78rem',fontWeight:700,cursor:'pointer'}},'Ignorar')
+            )
           );})
     ),
     !loading&&subTab==='agentes'&&React.createElement('div',null,

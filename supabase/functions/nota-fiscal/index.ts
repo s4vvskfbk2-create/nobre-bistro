@@ -134,6 +134,7 @@ async function aplicar(body: Record<string, unknown>): Promise<Response> {
 
   let atualizados = 0, criados = 0, falhas = 0;
   let totalCompra = 0;
+  const itensCompra: Array<Record<string, unknown>> = [];
 
   for (const it of itens) {
     const qtd = Number(it.quantidade || 0);
@@ -171,6 +172,21 @@ async function aplicar(body: Record<string, unknown>): Promise<Response> {
       custo_estimado: qtd * preco, operador,
       metadata: { fornecedor, preco_unitario: preco, origem: "nota-fiscal" },
     });
+    itensCompra.push({ ingrediente_id: ingId, descricao: ingNome, quantidade: qtd, unidade, valor_unitario: preco, valor_total: qtd * preco });
+  }
+
+  // Registro da compra (rastreabilidade por fornecedor + histórico de preços)
+  if (itensCompra.length) {
+    const compra = await dbPost("compras", {
+      numero_nf: String(body.numero_nf || ""), fornecedor, data_compra: new Date().toISOString().slice(0, 10),
+      total_nf: totalCompra, status: "recebida",
+      nf_interpretada: { itens: itensCompra, operador, origem: "nota-fiscal" },
+      observacoes: "Lançada por foto da nota (IA) e confirmada por " + operador,
+    }, "return=representation");
+    const compraId = compra && compra[0] ? compra[0].id : null;
+    if (compraId) {
+      await dbPost("compra_itens", itensCompra.map((ic) => ({ ...ic, compra_id: compraId })));
+    }
   }
 
   await dbPost("system_events", {
