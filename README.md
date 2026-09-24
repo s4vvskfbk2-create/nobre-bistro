@@ -1,8 +1,35 @@
-# Nobre Bistrô — Sistema de Gestão com IA
+# Nobre Café — Sistema de Gestão com IA
 
-Sistema web para cardápio, pedidos, operação de balcão/cozinha, fiado de profissionais do salão, caixa, ERP de insumos/fichas técnicas e gestão com apoio de IA.
+Sistema web completo para gestão de cafeteria/bistrô com cardápio, pedidos, operação de balcão/cozinha, fiado de funcionários, caixa, ERP de insumos e gestão com apoio de IA.
 
-O projeto está em fase de evolução de um MVP baseado em arquivos HTML estáticos e chaves JSON no Supabase para uma arquitetura mais empresarial, com escrita em tabelas normalizadas e serviços de domínio no front-end.
+**Status**: ✅ Conectado ao banco de dados - Pronto para testes e deploy
+
+O projeto está em arquitetura HTML+React18 (CDN) com Supabase como backend. Frontend carrega dados em tempo real do banco, com fallback para defaults locais para garantir disponibilidade.
+
+## Status Atual (Setembro 2026)
+
+### ✅ Concluído
+- Banco de dados Supabase estruturado com 11 migrações SQL
+- Frontend conectado ao banco de dados (carregamento de produtos e equipe)
+- 37 produtos de Nobre Café cadastrados com preços em BRL
+- 21 funcionários cadastrados (19 equipe salão + gerente + atendente)
+- Sistema de autenticação com PIN e senhas
+- Fiado com controle de quinzena
+- RLS (Row Level Security) ativado
+- Edge Functions para autenticação e notificações
+
+### 📋 Próximos Passos
+1. Testar os 5 fluxos críticos (ver `TESTING.md`)
+2. Deploy em Vercel (ver `DEPLOYMENT.md`)
+3. Ativar integração WhatsApp
+4. Configurar agentes de IA recorrentes
+
+### 📚 Documentação
+- **`TESTING.md`** — Guia completo de testes com 5 fluxos críticos
+- **`DEPLOYMENT.md`** — Instruções passo-a-passo para deploy
+- **`.env.example`** — Exemplo de variáveis de ambiente
+
+---
 
 ## Visão geral
 
@@ -101,16 +128,30 @@ A IA do projeto está dividida em camadas:
 
 ## Como rodar localmente
 
-Como o projeto é majoritariamente estático, você pode servir a pasta com Python:
-
+### Opção 1: Server Python (simples)
 ```bash
-python3 -m http.server 4173
+python3 -m http.server 8000
 ```
 
 Depois abra:
+- Cardápio público: `http://127.0.0.1:8000/index.html`
+- Admin: `http://127.0.0.1:8000/admin.html`
 
-- Cardápio público: `http://127.0.0.1:4173/index.html`
-- Admin: `http://127.0.0.1:4173/admin.html`
+**Nota**: Precisa de Supabase configurado para carregar dados do banco. Caso contrário, usa defaults.
+
+### Opção 2: Vercel CLI (recomendado para testes)
+```bash
+npm i -g vercel
+vercel dev
+```
+
+Abra em `http://localhost:3000/admin.html`
+
+### Opção 3: Vercel Preview
+```bash
+git push origin claude/github-connection-setup-aaoj9k
+# Criar PR no GitHub → Vercel cria preview automaticamente
+```
 
 ## Validações rápidas
 
@@ -138,31 +179,60 @@ curl -I http://127.0.0.1:4173/index.html
 
 ## Configuração Supabase
 
-As URLs e chaves públicas do Supabase ainda estão diretamente nos arquivos HTML. Isso facilita o MVP, mas para produção recomenda-se:
+### Atual (MVP)
+✅ Chaves públicas (Anon Key) estão em `admin.html` — OK para MVP
+✅ RLS está ativado em todas as tabelas
+✅ 11 migrações aplicadas ao banco
+✅ Produtos e equipe carregam do banco com fallback para defaults
+✅ Autenticação via PIN com hash server-side
 
-- Separar ambiente de produção/homologação.
-- Migrar credenciais para variáveis/configuração segura.
-- Aplicar a migration SQL no Supabase.
-- Validar tabelas normalizadas contra os dados legados em `config`.
-- Trocar RLS temporário por políticas reais por papel.
+### Para Produção
+- Mover Anon Key para variáveis de ambiente (`.env.example` já criado)
+- Validar RLS por papel está correto
+- Ativar backups automáticos no Supabase
+- Configurar monitoramento e alertas
+- Testar failover e recuperação de dados
+
+Ver `DEPLOYMENT.md` para instruções completas.
 
 ## Estado atual da migração
 
-O sistema está em modo **write-through**:
+✅ **Leitura**: Produtos e equipe carregam do banco normalizadas
+✅ **Escrita**: Serviços fazem write-through (config + tabelas normalizadas)
+✅ **Histórico**: Pedidos e vendas salvos em `orders`, `order_items`, `payments`
+✅ **Auditoria**: `system_events` e `audit_logs` rastreiam tudo
 
-1. Continua salvando em chaves legadas do `config` para não interromper a operação.
-2. Também tenta gravar em tabelas normalizadas.
-3. Eventos e auditoria alimentam a IA e a rastreabilidade.
-4. A próxima fase é comparar dados entre legado e tabelas, corrigir diferenças e então migrar leitura/escrita principal para as tabelas reais.
+**Próxima fase**:
+1. Testar os 5 fluxos críticos com dados do banco
+2. Validar consistência entre config legado e tabelas
+3. Migrar escrita principal para tabelas (remover fallback config)
+4. Ativar agentes de IA para análises automáticas
 
 ## Próximos passos recomendados
 
-1. Aplicar a migration no Supabase.
-2. Validar gravações em `orders`, `order_items`, `payments`, `credit_entries`, `table_calls`, `cash_sessions`, `cash_movements`, `ai_tasks` e `ai_recommendations`.
-3. Migrar leituras principais do admin/cardápio para tabelas normalizadas.
-4. Criar autenticação real e RLS por perfil.
-5. Ativar agentes de IA recorrentes.
-6. Implantar PWA, backup, monitoramento e domínio de produção.
+### Imediato (próximas 1-2 semanas)
+1. ✅ Conectar frontend ao banco (DONE)
+2. **Em progresso**: Testar os 5 fluxos críticos (`TESTING.md`)
+3. **Próximo**: Deploy em Vercel (`DEPLOYMENT.md`)
+4. Validar funcionamento em produção
+
+### Curto prazo (mês 1)
+1. Ativar integração WhatsApp para notificações
+2. Ativar agentes de IA recorrentes (vendas, estoque, fiado, etc)
+3. Criar dashboard de KPIs
+4. Implementar PWA (modo offline aprimorado)
+
+### Médio prazo (mês 2-3)
+1. Ativar backup automático e DR
+2. Monitoramento com Sentry/Datadog
+3. Criar relatórios detalhados
+4. Integração com sistema de pagamento (Mercado Pago, etc)
+
+### Longo prazo
+1. App nativa iOS/Android
+2. Integração com ERP/contabilidade
+3. IA generativa para análise de dados
+4. Multi-loja suporte
 
 ## Observações de negócio
 
