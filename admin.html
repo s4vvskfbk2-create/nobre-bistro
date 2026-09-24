@@ -204,6 +204,24 @@ var OrderService={create:function(order,source){return ServiceBus.createOrder(or
 // metadata guarda o objeto legado completo; cada pedido é uma linha própria,
 // eliminando a sobrescrita entre operadores simultâneos do array em config.
 function SBH_READ(){return {"apikey":SBK,"Authorization":"Bearer "+nbToken()};}
+async function loadProdsFromDB(){
+  try{
+    var r=await fetch(SBU+"/rest/v1/products?select=*&active=eq.true&order=name",{headers:SBH_READ()});
+    if(!r.ok)return null;
+    var rows=await r.json();
+    if(!Array.isArray(rows))return null;
+    return rows.map(function(x){return{id:x.id,cat:x.category,name:x.name,price:parseFloat(x.price)||0,custo:x.cost?parseFloat(x.cost):null,tag:x.tag,img:x.image_url,stock:parseFloat(x.stock_qty)||0,active:!!x.active,desc:x.description};});
+  }catch(e){return null;}
+}
+async function loadProfsFromDB(){
+  try{
+    var r=await fetch(SBU+"/rest/v1/staff?select=*&active=eq.true&order=name",{headers:SBH_READ()});
+    if(!r.ok)return null;
+    var rows=await r.json();
+    if(!Array.isArray(rows))return null;
+    return rows.map(function(x){return{id:x.id,name:x.name,active:!!x.active,telefone:x.phone||"",desconto:parseFloat(x.credit_discount_rate)||0,tipo:x.staff_type,papel:x.role,comissao:parseFloat(x.commission_rate)||0};});
+  }catch(e){return null;}
+}
 async function loadOrdersFromDB(){
   try{
     var r=await fetch(SBU+"/rest/v1/orders?select=metadata&order=created_at.desc&limit=2000",{headers:SBH_READ()});
@@ -221,6 +239,20 @@ async function loadChamadosFromDB(){
     if(!Array.isArray(rows))return null;
     return rows.map(function(x){var c=x.metadata||{};if(x.status==="attended"&&!c.atendido)c=Object.assign({},c,{atendido:true});return c;}).filter(function(c){return c&&c.id!=null;}).reverse();
   }catch(e){return null;}
+}
+async function loadProdsPrimary(){
+  var db=await loadProdsFromDB();
+  if(db&&db.length)return db;
+  var cfg=await sbGet("nb_bA_products");
+  if(Array.isArray(cfg)&&cfg.length)return cfg;
+  return db||cfg||PRODS_DEFAULT;
+}
+async function loadProfsPrimary(){
+  var db=await loadProfsFromDB();
+  if(db&&db.length)return db;
+  var cfg=await sbGet("nb_bA_profs");
+  if(Array.isArray(cfg)&&cfg.length)return cfg;
+  return db||cfg||PROFS_DEFAULT;
 }
 async function loadOrdersPrimary(){
   var db=await loadOrdersFromDB();
@@ -2784,7 +2816,7 @@ function App(){
   var s12=us(""),operador=s12[0],setOperador=s12[1];
 
   ue(function(){
-    Promise.all([sbGet("nb_bA_products"),loadOrdersPrimary(),sbGet("nb_bA_profs"),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
+    Promise.all([loadProdsPrimary(),loadOrdersPrimary(),loadProfsPrimary(),sbGet("nb_bA_horarios"),sbGet("nb_bA_fechamento")]).then(function(res){
       if(res[0]&&res[0].length){setProds(res[0]);ProductService.syncAll(res[0]);}
       if(res[1])setOrders(res[1]);
       if(res[2]&&res[2].length){setProfs(res[2]);StaffService.syncAll(res[2]);}
