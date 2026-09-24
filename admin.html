@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://zxpnguynjrsixsomaieg.supabase.co https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https://zxpnguynjrsixsomaieg.supabase.co; connect-src 'self' https://zxpnguynjrsixsomaieg.supabase.co wss://zxpnguynjrsixsomaieg.supabase.co;">
-<title>Nobre Bistro Admin</title>
+<title>Nobre Café Gestão</title>
 <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
@@ -73,7 +73,7 @@ function buildFiadoResumo(nome,ordens,descPct){
   var total=ordens.reduce(function(s,o){return s+Number(o.total||0);},0);
   var descValor=total*(descPct/100);
   var totalPagar=total-descValor;
-  var msg="Oi "+nome.split(" ")[0]+"! Seu fiado no Nobre Bistro para acertar na quinzena:\n";
+  var msg="Oi "+nome.split(" ")[0]+"! Seu fiado no Nobre Café para acertar na quinzena:\n";
   Object.keys(porDia).sort().forEach(function(dia){
     var d=porDia[dia];
     msg+="\n📅 "+dia+"\n";
@@ -83,67 +83,75 @@ function buildFiadoResumo(nome,ordens,descPct){
     if(d.ordens.length>1||Object.keys(porDia).length>1)msg+="  Subtotal do dia: "+fmt(d.sub)+"\n";
   });
   msg+="\n💳 Total acumulado: "+fmt(total);
-  if(descPct>0){msg+="\n✂️ Desconto "+descPct+"%: -"+fmt(descValor)+"\n📌 Total a pagar ao Nobre Bistro: "+fmt(totalPagar);}else{msg+="\n📌 Total a pagar ao Nobre Bistro: "+fmt(totalPagar);}
-  msg+="\n\nPode acertar comigo quando receber. Obrigado!\nNobre Bistro";
+  if(descPct>0){msg+="\n✂️ Desconto "+descPct+"%: -"+fmt(descValor)+"\n📌 Total a pagar ao Nobre Café: "+fmt(totalPagar);}else{msg+="\n📌 Total a pagar ao Nobre Café: "+fmt(totalPagar);}
+  msg+="\n\nPode acertar comigo quando receber. Obrigado!\nNobre Café";
   return msg;
 }
 
-var CATS=[{id:"prato",label:"Prato do Dia"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
+var CATS=[{id:"prato",label:"Pratos"},{id:"sopa",label:"Sopas e Caldos"},{id:"tortas",label:"Tortas"},{id:"salada",label:"Saladas e Omeletes"},{id:"lanches",label:"Lanches"},{id:"salgados",label:"Salgados"},{id:"sobremesa",label:"Sobremesas"},{id:"bebidas",label:"Bebidas"},{id:"drinks",label:"Drinks"},{id:"cerveja",label:"Cervejas"}];
 var DIAS=["Domingo","Segunda","Terca","Quarta","Quinta","Sexta","Sabado"];
 var HORARIOS_DEFAULT={0:{aberto:false,abre:"",fecha:""},1:{aberto:false,abre:"",fecha:""},2:{aberto:true,abre:"09:00",fecha:"18:30"},3:{aberto:true,abre:"09:00",fecha:"18:30"},4:{aberto:true,abre:"09:00",fecha:"18:30"},5:{aberto:true,abre:"09:00",fecha:"18:30"},6:{aberto:true,abre:"09:00",fecha:"18:30"}};
 var PRODS_DEFAULT=[
-{id:1,cat:"prato",name:"Escondidinho",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1574484284002-952d92456975?w=400",stock:8,active:true,desc:"Pure de mandioca com carne seca."},
-{id:2,cat:"prato",name:"Panqueca de Frango",price:45,tag:null,img:"https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400",stock:6,active:true,desc:"Panqueca artesanal."},
-{id:3,cat:"prato",name:"Risotto de Cogumelo",price:52,tag:"Premium",img:"https://images.unsplash.com/photo-1476124369162-f4978aba8e38?w=400",stock:5,active:true,desc:"Risotto cremoso com cogumelos frescos."},
-{id:4,cat:"prato",name:"Frango Grelhado",price:42,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=400",stock:10,active:true,desc:"Filé de frango grelhado."},
-{id:5,cat:"prato",name:"Bife Acebolado",price:55,tag:"Premium",img:"https://images.unsplash.com/photo-1555939594-58d7cb561341?w=400",stock:6,active:true,desc:"Bife macio com cebola caramelizada."},
-{id:6,cat:"sopa",name:"Sopa de Abóbora",price:18,tag:null,img:"https://images.unsplash.com/photo-1604627174524-f0a06a991e31?w=400",stock:12,active:true,desc:"Sopa cremosa com abóbora."},
-{id:7,cat:"sopa",name:"Caldo de Carne",price:16,tag:"Clássico",img:"https://images.unsplash.com/photo-1570000541384-b3b5f67f4b4e?w=400",stock:15,active:true,desc:"Caldo quente tradicional."},
-{id:8,cat:"tortas",name:"Torta de Frango",price:38,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:4,active:true,desc:"Massa artesanal."},
-{id:9,cat:"tortas",name:"Torta de Queijo",price:35,tag:null,img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400",stock:5,active:true,desc:"Queijo derretido e crocante."},
-{id:10,cat:"salada",name:"Salada Bistro",price:45,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",stock:6,active:true,desc:"Folhas frescas."},
-{id:11,cat:"salada",name:"Omeleta de Queijo",price:28,tag:null,img:"https://images.unsplash.com/photo-1589521471515-405fc36b9add?w=400",stock:8,active:true,desc:"Omeleta com queijo derretido."},
-{id:12,cat:"salada",name:"Salada de Rúcula",price:32,tag:"Vegetariano",img:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",stock:10,active:true,desc:"Rúcula, parmesão e cenoura."},
-{id:13,cat:"lanches",name:"Lanche de Frango",price:48,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:5,active:true,desc:"Frango grelhado."},
-{id:14,cat:"lanches",name:"Sanduíche de Presunto",price:22,tag:null,img:"https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400",stock:10,active:true,desc:"Presunto e queijo."},
-{id:15,cat:"lanches",name:"X-Burguer",price:32,tag:"Popular",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:8,active:true,desc:"Hambúrguer com queijo."},
-{id:16,cat:"salgados",name:"Pao de Queijo Waffle",price:12.90,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=400",stock:12,active:true,desc:"Crocante por fora."},
-{id:17,cat:"salgados",name:"Coxinha",price:8.50,tag:"Salgado",img:"https://images.unsplash.com/photo-1599599810694-b5ac4dd67fde?w=400",stock:20,active:true,desc:"Coxinha de frango."},
-{id:18,cat:"sobremesa",name:"Brigadeiro",price:6.50,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:15,active:true,desc:"Chocolate belga."},
-{id:19,cat:"sobremesa",name:"Pudim de Leite",price:10,tag:null,img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400",stock:10,active:true,desc:"Pudim cremoso."},
-{id:20,cat:"sobremesa",name:"Torta Chocolate",price:18,tag:"Premium",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400",stock:8,active:true,desc:"Bolo chocolate belga."},
-{id:21,cat:"bebidas",name:"Suco Natural",price:15,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Feito na hora."},
-{id:22,cat:"bebidas",name:"Café Expresso",price:6,tag:"Clássico",img:"https://images.unsplash.com/photo-1559056169-641ef2588d5b?w=400",stock:20,active:true,desc:"Café fresco."},
-{id:23,cat:"bebidas",name:"Leite Quente",price:8,tag:null,img:"https://images.unsplash.com/photo-1586985289688-cacf116dd28d?w=400",stock:15,active:true,desc:"Leite aquecido."},
-{id:24,cat:"drinks",name:"Gin e Tonica",price:32,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:10,active:true,desc:"Gin premium."},
-{id:25,cat:"drinks",name:"Mojito",price:28,tag:"Refrescante",img:"https://images.unsplash.com/photo-1556788335-13ecac842112?w=400",stock:8,active:true,desc:"Mojito tradicional."},
-{id:26,cat:"drinks",name:"Caipirinha",price:18,tag:"Clássico",img:"https://images.unsplash.com/photo-1556788335-13ecac842112?w=400",stock:12,active:true,desc:"Caipirinha de cachaça."},
-{id:27,cat:"cerveja",name:"Corona Extra",price:17,tag:"Mais Pedido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:15,active:true,desc:"Long neck."},
-{id:28,cat:"cerveja",name:"Brahma",price:15,tag:null,img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:20,active:true,desc:"Cerveja gelada."},
-{id:29,cat:"cerveja",name:"Heineken",price:18,tag:"Premium",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:12,active:true,desc:"Cerveja importada."}
+{id:1,cat:"prato",name:"Kibe Assado",price:45,custo:null,tag:"Especialidade",img:"https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400",stock:10,active:true,desc:"Kibe tradicional assado na hora."},
+{id:2,cat:"prato",name:"Risoto Brie com Parma",price:85,custo:null,tag:"Premium",img:"https://images.unsplash.com/photo-1476124369162-f4978aba8e38?w=400",stock:6,active:true,desc:"Risoto cremoso com brie e presunto de Parma."},
+{id:3,cat:"prato",name:"Risoto Pera com Gorgonzola",price:85,custo:null,tag:"Premium",img:"https://images.unsplash.com/photo-1476124369162-f4978aba8e38?w=400",stock:5,active:true,desc:"Risoto elegante com pera fresca e queijo gorgonzola."},
+{id:4,cat:"prato",name:"Ravioli Mussarela de Búfala",price:65,custo:null,tag:"Premium",img:"https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=400",stock:8,active:true,desc:"Ravioli fresco com mussarela de búfala e molho caseiro."},
+{id:5,cat:"sopa",name:"Sopa de Cebola",price:35,custo:null,tag:"Clássico",img:"https://images.unsplash.com/photo-1612621776367-ba0f6070fa5f?w=400",stock:15,active:true,desc:"Sopa francesa tradicional com cebola caramelizada."},
+{id:6,cat:"tortas",name:"Torta de Costela",price:45,custo:null,tag:"Especialidade",img:"https://images.unsplash.com/photo-1588195538326-c5b1e6f3ee5d?w=400",stock:6,active:true,desc:"Torta salgada com costela desfiada."},
+{id:7,cat:"tortas",name:"Torta de Frango",price:38,custo:null,tag:"Mais Vendido",img:"https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400",stock:8,active:true,desc:"Torta clássica de frango cremoso."},
+{id:8,cat:"tortas",name:"Torta de Pupunha",price:38,custo:null,tag:null,img:"https://images.unsplash.com/photo-1588195538326-c5b1e6f3ee5d?w=400",stock:7,active:true,desc:"Torta saudável com pupunha e vegetais."},
+{id:9,cat:"salada",name:"Salada Bistrô",price:45,custo:null,tag:"Mais Vendido",img:"https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400",stock:10,active:true,desc:"Salada da casa com ingredientes frescos selecionados."},
+{id:10,cat:"salada",name:"Omelete Francesa",price:29,custo:null,tag:null,img:"https://images.unsplash.com/photo-1589521471515-405fc36b9add?w=400",stock:12,active:true,desc:"Omelete francesa clássica com finas ervas."},
+{id:11,cat:"lanches",name:"Frango",price:48,custo:null,tag:"Mais Vendido",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:15,active:true,desc:"Suco de frango grelhado no pão francês."},
+{id:12,cat:"lanches",name:"Lanche de Abobrinha",price:42,custo:null,tag:null,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:8,active:true,desc:"Lanche vegetariano com abobrinha grelhada."},
+{id:13,cat:"lanches",name:"Pão na Chapa",price:18,custo:null,tag:"Rápido",img:"https://images.unsplash.com/photo-1571115764595-644467f3121c?w=400",stock:20,active:true,desc:"Pão francês quentinho na chapa."},
+{id:14,cat:"lanches",name:"Misto",price:32,custo:null,tag:null,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:12,active:true,desc:"Lanche misto com presunto e queijo na chapa."},
+{id:15,cat:"lanches",name:"Croque Monsieur",price:35,custo:null,tag:"Clássico",img:"https://images.unsplash.com/photo-1553909811-acf28ffdad8d?w=400",stock:10,active:true,desc:"Sanduíche francês com presunto e queijo gratinado."},
+{id:16,cat:"sobremesa",name:"Brigadeiro",price:6.50,custo:null,tag:"Rápido",img:"https://images.unsplash.com/photo-1558326567-98ae2405596b?w=400",stock:25,active:true,desc:"Brigadeiro tradicional."},
+{id:17,cat:"sobremesa",name:"Cookie",price:15,custo:null,tag:null,img:"https://images.unsplash.com/photo-1499636136210-6f4ee915583e?w=400",stock:15,active:true,desc:"Cookie caseiro de chocolate."},
+{id:18,cat:"sobremesa",name:"Brownie",price:15,custo:null,tag:null,img:"https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=400",stock:12,active:true,desc:"Brownie de chocolate belga."},
+{id:19,cat:"sobremesa",name:"Parfait de Frutas",price:28,custo:null,tag:"Premium",img:"https://images.unsplash.com/photo-1563805042-7684c019e157?w=400",stock:8,active:true,desc:"Parfait gelado com frutas da estação."},
+{id:20,cat:"sobremesa",name:"Torta de Limão",price:25,custo:null,tag:null,img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400",stock:6,active:true,desc:"Torta de limão azedinho com merengue."},
+{id:21,cat:"bebidas",name:"Coca-Cola",price:12,custo:null,tag:null,img:"https://images.unsplash.com/photo-1554866585-c4ef5ca6c547?w=400",stock:30,active:true,desc:"Refrigerante Coca-Cola gelado."},
+{id:22,cat:"bebidas",name:"Coca-Cola Zero",price:12,custo:null,tag:null,img:"https://images.unsplash.com/photo-1554866585-c4ef5ca6c547?w=400",stock:20,active:true,desc:"Coca-Cola Zero lata."},
+{id:23,cat:"bebidas",name:"Sprite lata 350 ml",price:12,custo:null,tag:null,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:25,active:true,desc:"Sprite refrescante."},
+{id:24,cat:"bebidas",name:"Smirnoff Ice",price:15,custo:null,tag:null,img:"https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400",stock:12,active:true,desc:"Bebida gelada Smirnoff Ice."},
+{id:25,cat:"bebidas",name:"Guaraná Antarctica lata 350 ml",price:12,custo:null,tag:null,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:30,active:true,desc:"Guaraná Antarctica gelado."},
+{id:26,cat:"bebidas",name:"Guaraná Antarctica Zero lata 350 ml",price:12,custo:null,tag:null,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",stock:15,active:true,desc:"Guaraná Zero sem açúcar."},
+{id:27,cat:"bebidas",name:"Água com Gás",price:6.85,custo:null,tag:"Rápido",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:40,active:true,desc:"Água mineral com gás."},
+{id:28,cat:"bebidas",name:"Suco Del Valle lata",price:9.90,custo:null,tag:null,img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:20,active:true,desc:"Suco Del Valle de frutas variadas."},
+{id:29,cat:"bebidas",name:"Chá Leão Limão",price:9.90,custo:null,tag:null,img:"https://images.unsplash.com/photo-1597318917662-2b51b3d37c4b?w=400",stock:15,active:true,desc:"Chá Leão sabor limão gelado."},
+{id:30,cat:"bebidas",name:"Energético",price:18,custo:null,tag:null,img:"https://images.unsplash.com/photo-1514432324607-2e2be62dbc45?w=400",stock:10,active:true,desc:"Bebida energética."},
+{id:31,cat:"bebidas",name:"Suco Natural",price:20,custo:null,tag:"Especialidade",img:"https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400",stock:10,active:true,desc:"Suco natural feito na hora com frutas frescas."},
+{id:32,cat:"drinks",name:"Gin e Tônica",price:32,custo:null,tag:"Clássico",img:"https://images.unsplash.com/photo-1551538827-9c037cb4f32a?w=400",stock:12,active:true,desc:"Gin premium com tônica e limão."},
+{id:33,cat:"drinks",name:"Caipirinha",price:32,custo:null,tag:"Clássico",img:"https://images.unsplash.com/photo-1556788335-13ecac842112?w=400",stock:10,active:true,desc:"Caipirinha com limão fresco e cachança."},
+{id:34,cat:"drinks",name:"Taça de Vinho",price:20,custo:null,tag:"Premium",img:"https://images.unsplash.com/photo-1510812431401-41d2cab2707d?w=400",stock:15,active:true,desc:"Vinho branco ou tinto selecionado."},
+{id:35,cat:"cerveja",name:"Corona Extra Long Neck",price:17,custo:null,tag:"Popular",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:20,active:true,desc:"Cerveja Corona Extra gelada."},
+{id:36,cat:"cerveja",name:"Heineken Long Neck",price:15,custo:null,tag:"Popular",img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:18,active:true,desc:"Cerveja Heineken importada."},
+{id:37,cat:"cerveja",name:"Stella Artois Long Neck",price:15,custo:null,tag:null,img:"https://images.unsplash.com/photo-1535958636474-b021ee887b13?w=400",stock:16,active:true,desc:"Cerveja Stella Artois premium."}
 ];
 var PROFS_DEFAULT=[
-{id:1,name:"Júnior Sant'Anna",active:true,telefone:"11987654321",desconto:15,tipo:"salao"},
-{id:2,name:"Jotha",active:true,telefone:"11987654322",desconto:15,tipo:"salao"},
-{id:3,name:"João",active:true,telefone:"11987654323",desconto:15,tipo:"salao"},
-{id:4,name:"Jéssica Rodilha",active:true,telefone:"11987654324",desconto:15,tipo:"salao"},
-{id:5,name:"Jacque",active:true,telefone:"11987654325",desconto:15,tipo:"salao"},
-{id:6,name:"Inez Menegon",active:true,telefone:"11987654326",desconto:15,tipo:"salao"},
-{id:7,name:"Giovana",active:true,telefone:"11987654327",desconto:15,tipo:"salao"},
-{id:8,name:"Fabrício Araújo",active:true,telefone:"11987654328",desconto:15,tipo:"salao"},
-{id:9,name:"Daniela",active:true,telefone:"11987654329",desconto:15,tipo:"salao"},
-{id:10,name:"Ariel",active:true,telefone:"11987654330",desconto:15,tipo:"salao"},
-{id:11,name:"Angela Teixeira",active:true,telefone:"11987654331",desconto:15,tipo:"salao"},
-{id:12,name:"Alessandra Martins",active:true,telefone:"11987654332",desconto:15,tipo:"salao"},
-{id:13,name:"Andreia Moreira",active:true,telefone:"11987654333",desconto:15,tipo:"salao"},
-{id:14,name:"Roseane Silva",active:true,telefone:"11987654334",desconto:15,tipo:"salao"},
-{id:15,name:"Viviane",active:true,telefone:"11987654335",desconto:15,tipo:"salao"},
-{id:16,name:"Nay",active:true,telefone:"11987654336",desconto:15,tipo:"salao"},
-{id:17,name:"Nicoly",active:true,telefone:"11987654337",desconto:15,tipo:"salao"},
-{id:18,name:"Cláudia Boldrin",active:true,telefone:"11987654338",desconto:15,tipo:"salao"},
-{id:19,name:"Chico",active:true,telefone:"11987654339",desconto:15,tipo:"salao"},
-{id:20,name:"Gerente",active:true,telefone:"11988888888",desconto:0,tipo:"bistro",pin:"",papel:"gerente",comissao:0},
-{id:21,name:"Atendente",active:true,telefone:"11988888889",desconto:0,tipo:"bistro",pin:"",papel:"atendente",comissao:5}
+{id:1,name:"Alessandra Martins",active:true,telefone:"11976661112",desconto:20,tipo:"salao"},
+{id:2,name:"Andreia Moreira",active:true,telefone:"11981285148",desconto:20,tipo:"salao"},
+{id:3,name:"Viviane",active:true,telefone:"11986033844",desconto:20,tipo:"salao"},
+{id:4,name:"Cláudia Boldrin",active:true,telefone:"11999723525",desconto:20,tipo:"salao"},
+{id:5,name:"Chico",active:true,telefone:"11941713972",desconto:20,tipo:"salao"},
+{id:6,name:"Angela Teixeira",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:7,name:"Nay",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:8,name:"Nicoly",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:9,name:"Júnior Sant'Anna",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:10,name:"Jotha",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:11,name:"João",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:12,name:"Jéssica Rodilha",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:13,name:"Jacque",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:14,name:"Inez Menegon",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:15,name:"Giovana",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:16,name:"Fabrício Araújo",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:17,name:"Daniela",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:18,name:"Ariel",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:19,name:"Roseane Silva",active:true,telefone:"",desconto:20,tipo:"salao"},
+{id:20,name:"Gerente",active:true,telefone:"",desconto:0,tipo:"gerente",pin:"",papel:"gerente",comissao:0},
+{id:21,name:"Atendente",active:true,telefone:"",desconto:0,tipo:"atendente",pin:"",papel:"atendente",comissao:5}
 ];
 
 function logEvent(tipo,entidade,entidadeId,dados){
@@ -810,7 +818,7 @@ function FiadoTab(props){
     CreditService.reminder(nome,total);
   }
   function marcarPago(nome){
-    if(!window.confirm("Marcar fiado de "+nome+" como acertado/pago ao Nobre Bistro?"))return;
+    if(!window.confirm("Marcar fiado de "+nome+" como acertado/pago ao Nobre Café?"))return;
     var n=orders.map(function(o){return (o.fiado&&o.profFiado===nome&&!o.fiadoPago)?Object.assign({},o,{fiadoPago:true,pagoEm:nowStr()}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);
     OrderService.syncManyFull(n.filter(function(o){return o.fiado&&o.profFiado===nome&&o.fiadoPago;}));
@@ -902,7 +910,7 @@ function QuinzenaTab(props){
     abrirWpp(p.telefone,buildFiadoResumo(p.name,p.fiadosQ,p.desconto));
   }
   function fecharQuinzena(){
-    if(!window.confirm("Fechar o acerto da quinzena e marcar os fiados como pagos ao Nobre Bistro?"))return;
+    if(!window.confirm("Fechar o acerto da quinzena e marcar os fiados como pagos ao Nobre Café?"))return;
     var ids=metricas.reduce(function(s,p){return s.concat(p.fiadosQ.map(function(o){return o.id;}));},[] );
     var n=orders.map(function(o){return ids.indexOf(o.id)>=0?Object.assign({},o,{fiadoPago:true,pagoEm:nowStr()}):o;});
     setOrders(n);sbSet("nb_bA_orders",n);setFechouHoje(true);
@@ -1251,7 +1259,7 @@ function HistoricoTab(props){
         )
       );}),
       profObj&&profObj.telefone&&h("button",{onClick:function(){
-        var msg="Oi "+selNome.split(" ")[0]+"! Resumo do fiado:\n\n"+getPLabel()+"\n\nTotal consumido: "+fmt(totalBruto)+"\nDesconto "+desc+"%: -"+fmt(descValor)+"\nTotal a pagar ao Nobre Bistro: "+fmt(liquido)+"\n\nNobre Bistro";
+        var msg="Oi "+selNome.split(" ")[0]+"! Resumo do fiado:\n\n"+getPLabel()+"\n\nTotal consumido: "+fmt(totalBruto)+"\nDesconto "+desc+"%: -"+fmt(descValor)+"\nTotal a pagar ao Nobre Café: "+fmt(liquido)+"\n\nNobre Café";
         abrirWpp(profObj.telefone,msg);
       },style:{width:"100%",marginTop:10,background:"#25D366",color:"#fff",border:"none",borderRadius:9,padding:"9px 0",fontSize:12,fontWeight:700,cursor:"pointer"}},"Enviar resumo WPP")
     );
@@ -1714,7 +1722,7 @@ function TabClientes(props){
       h("p",{style:{fontWeight:800,fontSize:13,margin:"0 0 4px"}},"Implementacao tecnica"),
       h("p",{style:{fontSize:11,color:"#888",margin:"0 0 11px"}},"4 passos para ativar no Vercel:"),
       [
-        ["1","manifest.json","Coloque na raiz. Define nome, icones e cores do app.",'{\n  "name": "Nobre Bistro",\n  "short_name": "Nobre",\n  "start_url": "/",\n  "display": "standalone",\n  "theme_color": "#8B1A1A",\n  "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]\n}'],
+        ["1","manifest.json","Coloque na raiz. Define nome, icones e cores do app.",'{\n  "name": "Nobre Café",\n  "short_name": "Nobre",\n  "start_url": "/",\n  "display": "standalone",\n  "theme_color": "#8B1A1A",\n  "icons": [{"src": "/icon-192.png", "sizes": "192x192"}]\n}'],
         ["2","sw.js","Service Worker — permite funcionar offline.",'const CACHE="nobre-v1";\nself.addEventListener("install",e=>{\n  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(["/"])));\n  self.skipWaiting();\n});\nself.addEventListener("fetch",e=>{\n  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));\n});'],
         ["3","index.html <head>","Conecta o manifest para iOS e Android.",'<link rel="manifest" href="/manifest.json"/>\n<meta name="theme-color" content="#8B1A1A"/>\n<meta name="apple-mobile-web-app-capable" content="yes"/>\n<link rel="apple-touch-icon" href="/icon-192.png"/>'],
         ["4","index.html <body>","Registra o Service Worker.",'<script>\n  if("serviceWorker" in navigator){\n    navigator.serviceWorker.register("/sw.js");\n  }\n<\/script>']
@@ -2184,7 +2192,7 @@ function TabErpCompras(){
   function compartilharLista(){
     var linhas=sugestoes.map(function(s){return "• "+s.ing.nome+": "+s.qtd.toFixed(2)+" "+s.ing.unidade+(s.custo>0?" (~"+fmt(s.custo)+")":"");}).join("\n");
     var total=sugestoes.reduce(function(a,s){return a+s.custo;},0);
-    abrirWpp("","🛒 *Lista de compras — Nobre Bistro*\n"+todayKey()+"\n\n"+linhas+"\n\n💰 Estimado: "+fmt(total));
+    abrirWpp("","🛒 *Lista de compras — Nobre Café*\n"+todayKey()+"\n\n"+linhas+"\n\n💰 Estimado: "+fmt(total));
   }
   function salvar(){var ingId=parseInt(form.ingrediente_id),qtd=parseFloat(form.quantidade),vun=parseFloat(form.valor_unitario);if(!ingId||!qtd||!vun){toast("Insumo, quantidade e valor sao obrigatorios",false);return;}var total=parseFloat(form.total_nf)||(qtd*vun);erpPost("compras",{fornecedor_id:parseInt(form.fornecedor_id)||null,data_compra:form.data_compra,numero_nf:form.numero_nf||null,total_nf:total,status:"pendente"}).then(function(res){var compraId=Array.isArray(res)?res[0].id:res.id;var ing=data.ings.find(function(i){return i.id===ingId;});return erpPost("compra_itens",{compra_id:compraId,ingrediente_id:ingId,descricao:ing?ing.nome:"Item",quantidade:qtd,unidade:ing?ing.unidade:"un",valor_unitario:vun,valor_total:qtd*vun});}).then(function(){setModal(false);setForm({fornecedor_id:"",data_compra:new Date().toISOString().slice(0,10),numero_nf:"",total_nf:"",ingrediente_id:"",quantidade:"",valor_unitario:""});toast("Compra registrada!");load();}).catch(function(e){toast(e.message,false);});}
   function avancar(c){var next=c.status==="pendente"?"conferida":"lancada";erpPatch("compras?id=eq."+c.id,{status:next}).then(function(){toast(next==="lancada"?"Lancada — estoque atualizado!":"Conferida.");load();}).catch(function(e){toast(e.message,false);});}
@@ -2812,7 +2820,7 @@ function App(){
   var cooking=orders.filter(function(o){return o.status==="em_curso";}).length;
 
   if(loading)return h("div",{style:{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12,background:C}},
-    h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:4,color:R,textTransform:"uppercase",fontWeight:400}},"Nobre Bistro"),
+    h("div",{style:{fontFamily:"Georgia,serif",fontSize:13,letterSpacing:4,color:R,textTransform:"uppercase",fontWeight:400}},"Nobre Café"),
     h("div",{style:{width:26,height:26,border:"2.5px solid "+B,borderTop:"2.5px solid "+R,borderRadius:"50%",animation:"spin .7s linear infinite"}})
   );
 
@@ -2902,7 +2910,7 @@ function App(){
   return h("div",{style:{background:BG,minHeight:"100vh",maxWidth:480,margin:"0 auto"}},
     h("div",{style:{background:R,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,zIndex:100}},
       h("div",null,
-        h("p",{style:{margin:0,color:"#fff",fontSize:14,fontWeight:900,fontFamily:"Georgia,serif",lineHeight:1.1}},"Nobre Bistro"),
+        h("p",{style:{margin:0,color:"#fff",fontSize:14,fontWeight:900,fontFamily:"Georgia,serif",lineHeight:1.1}},"Nobre Café"),
         operador&&h("p",{style:{margin:0,color:"rgba(255,255,255,.8)",fontSize:10,fontWeight:600}},"👤 "+operador)
       ),
       h("div",{style:{display:"flex",alignItems:"center",gap:7}},
@@ -3168,7 +3176,7 @@ function analisar(){
   var estStr=criticos.length>0?"Ingredientes criticos: "+criticos.map(function(i){return i.nome+"(atual:"+i.estoque_atual+"/min:"+i.estoque_minimo+")";}).join(", "):"Estoque: sem alertas criticos";
   var fiadoStr=fiadoAberto>0?"Fiado em aberto: R$ "+fmtN(fiadoAberto):"Fiado: zerado";
   var focoDesc={geral:"analise executiva completa respondendo: O que aconteceu? Por que? O que vai acontecer? O que fazer agora?",crescimento:"foco em crescimento de faturamento e ticket medio",cmv:"foco em rentabilidade, CMV e margem — compare ao alvo de 30%",clientes:"foco em retencao, fidelizacao e clientes sumidas",estoque:"foco em estoque critico, previsao de ruptura e recomendacoes de compra urgente"};
-  var prompt="Voce e o Sistema Operacional de IA do Nobre Bistro (bistro dentro de salao de beleza em Osasco/SP). Clientes sao mulheres em atendimento de beleza. Voce tem acesso a todos os modulos do sistema.\n\nDADOS REAIS DO SISTEMA (todos os modulos):\n- Pedidos totais (historico): "+done.length+"\n- Faturamento ultimos 30 dias: R$ "+fmtN(fat30)+"\n- Faturamento do mes atual: R$ "+fmtN(fatMes)+"\n- Ticket medio: R$ "+fmtN(ticket)+"\n- "+cmvStr+"\n- "+despStr+"\n- "+estStr+"\n- "+fiadoStr+"\n- Clientes sumidas +21 dias: "+sumidas.length+" (de "+clientes.length+" clientes unicos)\n\nVendas por dia da semana:\n"+byWD.join("\n")+"\n\nTop pratos (historico completo):\n"+top5str+"\n\nMODO: "+focoDesc[foco]+"\n\nESTRUTURE A RESPOSTA:\n## O que aconteceu\n[dados objetivos em 2-3 linhas]\n\n## Por que\n[causas raiz dos resultados com base nos dados]\n\n## O que vai acontecer\n[previsao baseada em tendencias dos dados]\n\n## O que fazer agora\n[5 acoes concretas, priorizadas, com numeros]\n\n## KPI prioritario\n[1 numero para focar esta semana e por que]\n\nMaximo 500 palavras. Seja direto, use os numeros reais, sem enrolacao.";
+  var prompt="Voce e o Sistema Operacional de IA do Nobre Café (bistro dentro de salao de beleza em Osasco/SP). Clientes sao mulheres em atendimento de beleza. Voce tem acesso a todos os modulos do sistema.\n\nDADOS REAIS DO SISTEMA (todos os modulos):\n- Pedidos totais (historico): "+done.length+"\n- Faturamento ultimos 30 dias: R$ "+fmtN(fat30)+"\n- Faturamento do mes atual: R$ "+fmtN(fatMes)+"\n- Ticket medio: R$ "+fmtN(ticket)+"\n- "+cmvStr+"\n- "+despStr+"\n- "+estStr+"\n- "+fiadoStr+"\n- Clientes sumidas +21 dias: "+sumidas.length+" (de "+clientes.length+" clientes unicos)\n\nVendas por dia da semana:\n"+byWD.join("\n")+"\n\nTop pratos (historico completo):\n"+top5str+"\n\nMODO: "+focoDesc[foco]+"\n\nESTRUTURE A RESPOSTA:\n## O que aconteceu\n[dados objetivos em 2-3 linhas]\n\n## Por que\n[causas raiz dos resultados com base nos dados]\n\n## O que vai acontecer\n[previsao baseada em tendencias dos dados]\n\n## O que fazer agora\n[5 acoes concretas, priorizadas, com numeros]\n\n## KPI prioritario\n[1 numero para focar esta semana e por que]\n\nMaximo 500 palavras. Seja direto, use os numeros reais, sem enrolacao.";
   fetch(SBU+"/functions/v1/consultor-ia",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1200,messages:[{role:"user",content:prompt}]})})
   .then(function(r){return r.json();})
   .then(function(data){if(data.error)throw new Error(data.error.message);setAnalise(data.content&&data.content[0]?data.content[0].text:"");setGerando(false);})
@@ -3333,7 +3341,7 @@ function TabCentroIA(){
       const prodMap={};done.forEach(function(o){(o.items||[]).forEach(function(i){if(!prodMap[i.name])prodMap[i.name]={qty:0,total:0};prodMap[i.name].qty+=Number(i.qty||1);prodMap[i.name].total+=Number(i.price||0)*Number(i.qty||1);});});
       const top5=Object.entries(prodMap).sort(function(a,b){return b[1].total-a[1].total;}).slice(0,5).map(function(e,i){return (i+1)+'. '+e[0]+': '+e[1].qty+'un R$'+e[1].total.toFixed(0);}).join(' | ');
       const evStr=evs.slice(0,10).map(function(e){return e.event_type+' '+ft(e.created_at);}).join('\n');
-      const prompt='Voce e o Sistema Operacional de IA do Nobre Bistro. Integre dados de TODOS os modulos e faca uma analise completa.\n\nDADOS INTEGRADOS DE TODOS OS MODULOS:\n[VENDAS] Pedidos historico: '+done.length+' | Fat 30d: R$'+fat30.toFixed(0)+' | Fat mes: R$'+fatMes.toFixed(0)+' | Ticket: R$'+ticket.toFixed(2)+'\n[CMV] '+(cmvPct!==null?'CMV: '+cmvPct.toFixed(1)+'% (alvo 30%)':'Sem fichas tecnicas')+'\n[ESTOQUE] Criticos: '+(criticos.length?criticos.map(function(i){return i.nome;}).join(', '):'Nenhum')+'\n[FIADO] Em aberto: R$'+fiadoAberto.toFixed(0)+'\n[TOP PRATOS] '+top5+'\n[EVENTOS RECENTES]\n'+evStr+'\n\nRESPONDA AS 4 PERGUNTAS FUNDAMENTAIS:\n## O que aconteceu?\n## Por que aconteceu?\n## O que provavelmente acontecera?\n## O que devemos fazer agora?\n\nSeja o CEO da operacao. Maximo 500 palavras. Numeros reais. Acoes concretas.';
+      const prompt='Voce e o Sistema Operacional de IA do Nobre Café. Integre dados de TODOS os modulos e faca uma analise completa.\n\nDADOS INTEGRADOS DE TODOS OS MODULOS:\n[VENDAS] Pedidos historico: '+done.length+' | Fat 30d: R$'+fat30.toFixed(0)+' | Fat mes: R$'+fatMes.toFixed(0)+' | Ticket: R$'+ticket.toFixed(2)+'\n[CMV] '+(cmvPct!==null?'CMV: '+cmvPct.toFixed(1)+'% (alvo 30%)':'Sem fichas tecnicas')+'\n[ESTOQUE] Criticos: '+(criticos.length?criticos.map(function(i){return i.nome;}).join(', '):'Nenhum')+'\n[FIADO] Em aberto: R$'+fiadoAberto.toFixed(0)+'\n[TOP PRATOS] '+top5+'\n[EVENTOS RECENTES]\n'+evStr+'\n\nRESPONDA AS 4 PERGUNTAS FUNDAMENTAIS:\n## O que aconteceu?\n## Por que aconteceu?\n## O que provavelmente acontecera?\n## O que devemos fazer agora?\n\nSeja o CEO da operacao. Maximo 500 palavras. Numeros reais. Acoes concretas.';
       const res=await fetch(SBU+'/functions/v1/consultor-ia',{method:'POST',headers:{'Content-Type':'application/json','apikey':SBK},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
       const data=await res.json();
       if(data.error)throw new Error(data.error.message);
@@ -4025,7 +4033,7 @@ function TabProprietario(props){
     var cmvStr=cmvPct!==null?"CMV: "+cmvPct.toFixed(1)+"% (alvo <=30%)":"CMV: sem fichas tecnicas";
     var despStr=despMes>0?"Despesas/mes: "+fmtP(despMes)+" | Lucro: "+fmtP(lucroMes):"Despesas: nao cadastradas";
     var estStr=criticos.length>0?"Criticos: "+criticos.map(function(i){return i.nome;}).join(", "):"Estoque ok";
-    var prompt="Voce e o Diretor Geral de IA do Nobre Bistro (bistro em salao de beleza, Osasco/SP). Analise o negocio e responda as 4 perguntas fundamentais.\n\nDADOS REAIS (todos os modulos integrados):\n- Pedidos historico: "+done.length+" | Faturamento 30d: "+fmtP(fat30)+" | Faturamento mes: "+fmtP(receitaMes)+"\n- Ticket medio: "+fmtP(ticket)+" | Ticket medio mes: "+pmMes+"\n- "+cmvStr+" | "+despStr+"\n- Estoque: "+estStr+"\n- Fiado em aberto: "+fmtP(totalFiado)+" ("+fiadoAberto.length+" pedidos)\n- Clientes sumidas +21 dias: "+sumidas+"\n- Pedidos hoje: "+todayOrds.length+" | Receita hoje: "+fmtP(receitaHoje)+"\n\nRESPONDA AS 4 PERGUNTAS:\n\n## O que aconteceu?\n[status atual do negocio em 2-3 linhas com numeros]\n\n## Por que aconteceu?\n[analise das causas com base nos dados]\n\n## O que provavelmente acontecera?\n[previsao para proximos 7-14 dias]\n\n## O que devemos fazer agora?\n[3-5 acoes priorizadas, cada uma com impacto estimado]\n\nMaximo 400 palavras. Seja um diretor executivo, nao um assistente.";
+    var prompt="Voce e o Diretor Geral de IA do Nobre Café (bistro em salao de beleza, Osasco/SP). Analise o negocio e responda as 4 perguntas fundamentais.\n\nDADOS REAIS (todos os modulos integrados):\n- Pedidos historico: "+done.length+" | Faturamento 30d: "+fmtP(fat30)+" | Faturamento mes: "+fmtP(receitaMes)+"\n- Ticket medio: "+fmtP(ticket)+" | Ticket medio mes: "+pmMes+"\n- "+cmvStr+" | "+despStr+"\n- Estoque: "+estStr+"\n- Fiado em aberto: "+fmtP(totalFiado)+" ("+fiadoAberto.length+" pedidos)\n- Clientes sumidas +21 dias: "+sumidas+"\n- Pedidos hoje: "+todayOrds.length+" | Receita hoje: "+fmtP(receitaHoje)+"\n\nRESPONDA AS 4 PERGUNTAS:\n\n## O que aconteceu?\n[status atual do negocio em 2-3 linhas com numeros]\n\n## Por que aconteceu?\n[analise das causas com base nos dados]\n\n## O que provavelmente acontecera?\n[previsao para proximos 7-14 dias]\n\n## O que devemos fazer agora?\n[3-5 acoes priorizadas, cada uma com impacto estimado]\n\nMaximo 400 palavras. Seja um diretor executivo, nao um assistente.";
     fetch(SBU+"/functions/v1/consultor-ia",{method:"POST",headers:{"Content-Type":"application/json","apikey":SBK},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})})
     .then(function(r){return r.json();})
     .then(function(data){if(data.error)throw new Error(data.error.message);setIaResposta(data.content&&data.content[0]?data.content[0].text:"");setIaGerando(false);})
@@ -4168,7 +4176,7 @@ function TabComissoes(props){
           h("div",{style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#888",marginBottom:3}},h("span",null,"Meta "+(per==="hoje"?"do dia":per==="tudo"?"diária":"do período")+": "+fmt(alvo)),h("span",{style:{fontWeight:800,color:bateu?"#16a34a":"#888"}},bateu?"Bateu! 🎉":pc.toFixed(0)+"%")),
           h("div",{style:{background:"#f0f0f0",borderRadius:5,height:7,overflow:"hidden"}},h("div",{style:{height:"100%",width:pc+"%",background:bateu?"#16a34a":R,borderRadius:5}}))
         );})(),
-        v.telefone&&v.comissao>0&&h("button",{onClick:function(){var msg="Oi "+v.nome.split(" ")[0]+"! Sua comissão ("+PER.filter(function(x){return x[0]===per;})[0][1]+"):\n\nVendas: "+fmt(v.total)+"\nComissão "+v.pct+"%: "+fmt(v.comissao)+"\n\nNobre Bistro";abrirWpp(v.telefone,msg);},style:{width:"100%",background:"#25D366",color:"#fff",border:"none",borderRadius:8,padding:"8px 0",fontSize:11,fontWeight:700,cursor:"pointer"}},"Enviar comissão no WhatsApp")
+        v.telefone&&v.comissao>0&&h("button",{onClick:function(){var msg="Oi "+v.nome.split(" ")[0]+"! Sua comissão ("+PER.filter(function(x){return x[0]===per;})[0][1]+"):\n\nVendas: "+fmt(v.total)+"\nComissão "+v.pct+"%: "+fmt(v.comissao)+"\n\nNobre Café";abrirWpp(v.telefone,msg);},style:{width:"100%",background:"#25D366",color:"#fff",border:"none",borderRadius:8,padding:"8px 0",fontSize:11,fontWeight:700,cursor:"pointer"}},"Enviar comissão no WhatsApp")
       );
     }),
     h("p",{style:{fontSize:10,color:"#bbb",textAlign:"center",margin:"10px 0 0"}},"A comissão de cada pessoa é definida na aba Pessoas (Equipe).")
