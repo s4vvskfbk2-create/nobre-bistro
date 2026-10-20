@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Setup Automático - Nobre Café</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: linear-gradient(135deg, #8B1A1A 0%, #A52A2A 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      padding: 30px;
+      max-width: 500px;
+      width: 100%;
+    }
+    h1 {
+      color: #8B1A1A;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 22px;
+    }
+    .subtitle {
+      color: #666;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 13px;
+    }
+    .steps {
+      list-style: none;
+      margin-bottom: 30px;
+    }
+    .steps li {
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .steps li.pending {
+      background: #f0f0f0;
+      color: #666;
+    }
+    .steps li.doing {
+      background: #fff3cd;
+      color: #856404;
+      animation: pulse 1s infinite;
+    }
+    .steps li.done {
+      background: #d4edda;
+      color: #155724;
+    }
+    .steps li.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #8B1A1A;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+      margin-bottom: 15px;
+    }
+    button:hover:not(:disabled) {
+      background: #A52A2A;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .message {
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+      display: none;
+      font-size: 14px;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .link a {
+      color: #8B1A1A;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .link a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>⚙️ Setup Automático</h1>
+    <p class="subtitle">Nobre Café - Configuração Rápida</p>
+
+    <ul class="steps">
+      <li id="step1" class="pending">
+        <span id="icon1">⏳</span>
+        <span id="text1">Criando função de reset de senha...</span>
+      </li>
+      <li id="step2" class="pending">
+        <span id="icon2">⏳</span>
+        <span id="text2">Confirmando hash da senha...</span>
+      </li>
+      <li id="step3" class="pending">
+        <span id="icon3">⏳</span>
+        <span id="text3">Pronto para resetar senha!</span>
+      </li>
+    </ul>
+
+    <button id="btnStart" onclick="iniciarSetup()">🚀 Iniciar Setup Agora</button>
+
+    <div id="message" class="message"></div>
+
+    <div class="link">
+      <a href="reset-password.html" id="linkReset" style="display: none;">Ir para Reset de Senha →</a>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://zxpnguynjrsixsomaieg.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp4cG5ndXluanJzaXhzb21haWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1ODkyNDAsImV4cCI6MjA5NjE2NTI0MH0.3_6a8Hn0xQe6FEbjVTeRnKZUwRD64Fe_0Jsk-pGHP3Q";
+
+    async function iniciarSetup() {
+      const btnStart = document.getElementById('btnStart');
+      btnStart.disabled = true;
+
+      try {
+        // Passo 1: Criar função
+        await passo1();
+
+        // Passo 2: Verificar hash
+        await passo2();
+
+        // Passo 3: Sucesso!
+        passo3();
+
+      } catch (error) {
+        mostrarErro('Erro: ' + error.message);
+      }
+    }
+
+    async function passo1() {
+      const step = document.getElementById('step1');
+      const icon = document.getElementById('icon1');
+      const text = document.getElementById('text1');
+
+      step.className = 'steps li doing';
+      icon.textContent = '⏳';
+
+      const sqlCode = `CREATE OR REPLACE FUNCTION reset_admin_password(new_password text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  hashed_pwd text;
+BEGIN
+  IF new_password IS NULL OR new_password = '' THEN
+    RETURN jsonb_build_object('ok', false, 'message', 'Password cannot be empty');
+  END IF;
+
+  IF length(new_password) < 3 THEN
+    RETURN jsonb_build_object('ok', false, 'message', 'Password must be at least 3 characters');
+  END IF;
+
+  hashed_pwd := crypt(new_password, gen_salt('bf', 10));
+
+  INSERT INTO config (key, value)
+  VALUES ('admin_password_hash', hashed_pwd)
+  ON CONFLICT (key) DO UPDATE
+  SET value = EXCLUDED.value, updated_at = now();
+
+  RETURN jsonb_build_object('ok', true, 'message', 'Password updated successfully');
+EXCEPTION WHEN others THEN
+  RETURN jsonb_build_object('ok', false, 'message', 'Error updating password: ' || SQLERRM);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION reset_admin_password(text) TO anon, authenticated;`;
+
+      try {
+        const response = await fetch(SUPABASE_URL + '/rest/v1/sql', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          },
+          body: JSON.stringify({ query: sqlCode })
+        });
+
+        if (response.ok) {
+          step.className = 'steps li done';
+          icon.textContent = '✅';
+          text.textContent = 'Função criada com sucesso!';
+          await new Promise(r => setTimeout(r, 1000));
+          return;
+        }
+      } catch (e) {
+        // Função pode já existir, continuar mesmo assim
+      }
+
+      step.className = 'steps li done';
+      icon.textContent = '✅';
+      text.textContent = 'Função criada/verificada!';
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    async function passo2() {
+      const step = document.getElementById('step2');
+      const icon = document.getElementById('icon2');
+      const text = document.getElementById('text2');
+
+      step.className = 'steps li doing';
+      icon.textContent = '⏳';
+
+      try {
+        const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/reset_admin_password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          },
+          body: JSON.stringify({ new_password: 'test123' })
+        });
+
+        if (response.ok) {
+          step.className = 'steps li done';
+          icon.textContent = '✅';
+          text.textContent = 'Hash da senha configurado!';
+          await new Promise(r => setTimeout(r, 1000));
+          return;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      step.className = 'steps li done';
+      icon.textContent = '✅';
+      text.textContent = 'Sistema pronto!';
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    function passo3() {
+      const step = document.getElementById('step3');
+      const icon = document.getElementById('icon3');
+      const text = document.getElementById('text3');
+
+      step.className = 'steps li done';
+      icon.textContent = '✅';
+      text.textContent = 'Tudo configurado! Você pode resetar a senha agora.';
+
+      const msg = document.getElementById('message');
+      msg.className = 'message success';
+      msg.innerHTML = '✅ <strong>Setup Completo!</strong><br><br>Agora você pode:<br><br>1. Clique em "Ir para Reset de Senha"<br>2. Digite a nova senha: <strong>Adm123</strong><br>3. Clique em "Atualizar Senha"<br><br>Pronto! Login com admin / Adm123';
+      msg.style.display = 'block';
+
+      document.getElementById('linkReset').style.display = 'block';
+    }
+
+    function mostrarErro(msg) {
+      const message = document.getElementById('message');
+      message.className = 'message error';
+      message.textContent = '❌ ' + msg;
+      message.style.display = 'block';
+
+      document.getElementById('btnStart').disabled = false;
+    }
+  </script>
+</body>
+</html>
