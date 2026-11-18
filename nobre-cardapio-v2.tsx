@@ -1,17 +1,26 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 
 // ═══════════════════════════════════════════════════
-// NOBRE BISTRÔ — CARDÁPIO DIGITAL v2
-// Design moderno: hero animado, carrossel de destaques,
-// categorias com ícone, cards imersivos, modal premium
+// NOBRE BISTRÔ — CARDÁPIO DIGITAL v3
+// Premium mobile-first: hero elegante, tipografia refinada,
+// cores sofisticadas OKLCH, spacing generoso, interações suaves
 // ═══════════════════════════════════════════════════
 
-const R = "#8B1A1A";
-const GOLD = "#C9A84C";
+// OKLCH Premium Palette (accessible, sophisticated)
+const BRAND_PRIMARY = "oklch(0.42 0.14 20)"; // Deep burgundy
+const BRAND_LIGHT = "oklch(0.98 0.015 40)"; // Off-white warm
+const BG_SURFACE = "oklch(0.98 0.012 40)"; // Subtle warm surface
+const TEXT_PRIMARY = "oklch(0.15 0.02 40)"; // Deep ink
+const TEXT_MUTED = "oklch(0.55 0.015 40)"; // Soft gray
+const ACCENT_GOLD = "oklch(0.72 0.12 50)"; // Warm gold
+const BORDER_SUBTLE = "oklch(0.92 0.01 40)"; // Barely visible
+
+const R = BRAND_PRIMARY;
+const GOLD = ACCENT_GOLD;
 const WPP_NUMBER = "";
-const CREAM = "#faf8f5";
-const DARK = "#1a1108";
-const BORDER = "#ede9e3";
+const CREAM = BG_SURFACE;
+const DARK = TEXT_PRIMARY;
+const BORDER = BORDER_SUBTLE;
 
 const fmt = (v) => "R$ " + Number(v||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -110,14 +119,14 @@ function HeroCarousel({destaques}) {
       </div>
     ))}
 
-    {/* Conteúdo do slide */}
-    <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"0 20px 20px"}}>
-      {p.tag&&<div style={{display:"inline-flex",alignItems:"center",gap:5,background:p.tagColor,borderRadius:20,padding:"3px 10px",marginBottom:7}}>
-        <span style={{fontSize:10,fontWeight:800,color:"#fff",letterSpacing:.4}}>{p.tag}</span>
+    {/* Conteúdo do slide — tipografia premium */}
+    <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"0 20px 24px",background:"linear-gradient(to top, rgba(0,0,0,.7) 0%, rgba(0,0,0,.2) 100%)"}}>
+      {p.tag&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:"rgba(255,255,255,.12)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,.18)",borderRadius:28,padding:"4px 12px",marginBottom:10}}>
+        <span style={{fontSize:11,fontWeight:600,color:"rgba(255,255,255,.95)",letterSpacing:.3}}>{p.tag}</span>
       </div>}
-      <h2 style={{margin:"0 0 4px",fontSize:22,fontWeight:900,color:"#fff",letterSpacing:-.3,textShadow:"0 2px 8px rgba(0,0,0,.4)",fontFamily:"Georgia,serif"}}>{p.name}</h2>
-      <p style={{margin:"0 0 10px",fontSize:12,color:"rgba(255,255,255,.75)",lineHeight:1.4,maxWidth:280}}>{p.desc}</p>
-      <span style={{fontFamily:"Georgia,serif",fontSize:20,fontWeight:700,color:GOLD}}>{fmt(p.price)}</span>
+      <h2 style={{margin:"0 0 6px",fontSize:28,fontWeight:900,color:"#fff",letterSpacing:-.4,textShadow:"0 2px 12px rgba(0,0,0,.5)",fontFamily:"Nunito,sans-serif",lineHeight:1.1}}>{p.name}</h2>
+      <p style={{margin:"0 0 12px",fontSize:13,color:"rgba(255,255,255,.85)",lineHeight:1.5,maxWidth:300,fontWeight:500}}>{p.desc}</p>
+      <span style={{fontFamily:"Nunito,sans-serif",fontSize:24,fontWeight:800,color:GOLD,letterSpacing:-.2}}>{fmt(p.price)}</span>
     </div>
 
     {/* Indicadores */}
@@ -159,33 +168,31 @@ function ProductCard({p, onTap}) {
     onTouchStart={()=>setPressed(true)}
     onTouchEnd={()=>setPressed(false)}
     style={{
-      display:"flex",alignItems:"flex-start",gap:12,
-      padding:"14px 0",borderBottom:"1px solid "+BORDER,
+      display:"flex",alignItems:"flex-start",gap:14,
+      padding:"16px 0",borderBottom:"1px solid "+BORDER,
       cursor:esg?"default":"pointer",
-      opacity:esg?.55:1,
-      transform:pressed?"scale(.985)":"scale(1)",
-      transition:"transform .12s",
+      opacity:esg?.6:1,
+      transform:pressed?"scale(.98)":"scale(1)",
+      transition:"transform 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
     }}>
 
-    {/* Texto */}
+    {/* Texto — hierarquia refinada */}
     <div style={{flex:1,minWidth:0}}>
-      {esg&&<span style={{display:"inline-block",background:"#fee2e2",color:"#b91c1c",fontSize:9,fontWeight:800,padding:"2px 7px",borderRadius:18,marginBottom:5,letterSpacing:.3}}>ESGOTADO</span>}
-      {!esg&&p.tag&&<span style={{display:"inline-block",background:p.tagColor,color:"#fff",fontSize:9,fontWeight:800,padding:"2px 8px",borderRadius:18,marginBottom:5,letterSpacing:.3}}>{p.tag}</span>}
-      <p style={{margin:0,fontWeight:800,fontSize:14,color:DARK,lineHeight:1.25,letterSpacing:-.1}}>{p.name}</p>
-      {p.desc&&<p style={{margin:"4px 0 0",fontSize:12,color:"#999",lineHeight:1.45,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{p.desc}</p>}
-      <div style={{display:"flex",alignItems:"center",gap:8,marginTop:7}}>
-        <span style={{fontWeight:900,fontSize:15,color:esg?"#ccc":DARK,fontFamily:"Georgia,serif"}}>{fmt(p.price)}</span>
-        {!esg&&p.stock>0&&p.stock<=p.minStock&&<span style={{fontSize:9,fontWeight:700,color:"#f59e0b",background:"#fffbeb",border:"1px solid #fde68a",padding:"1px 6px",borderRadius:18}}>⚠️ {p.stock} un.</span>}
+      {esg&&<span style={{display:"inline-block",background:"rgba(220,38,38,0.12)",color:"#991b1b",fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:20,marginBottom:6,letterSpacing:.2}}>Esgotado</span>}
+      <p style={{margin:0,fontWeight:800,fontSize:15,color:DARK,lineHeight:1.3,letterSpacing:-.15}}>{p.name}</p>
+      {p.desc&&<p style={{margin:"5px 0 0",fontSize:13,color:TEXT_MUTED,lineHeight:1.5,overflow:"hidden",display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical"}}>{p.desc}</p>}
+      <div style={{display:"flex",alignItems:"center",gap:10,marginTop:9}}>
+        <span style={{fontWeight:900,fontSize:16,color:esg?TEXT_MUTED:DARK}}>{fmt(p.price)}</span>
+        {!esg&&p.stock>0&&p.stock<=p.minStock&&<span style={{fontSize:10,fontWeight:600,color:"#d97706",background:"rgba(217,119,6,0.08)",border:"1px solid rgba(217,119,6,0.2)",padding:"2px 7px",borderRadius:20}}>⚠️ {p.stock}</span>}
       </div>
     </div>
 
-    {/* Foto */}
+    {/* Foto — framing premium */}
     <div style={{position:"relative",flexShrink:0}}>
-      <div style={{width:106,height:84,borderRadius:13,overflow:"hidden",boxShadow:"0 2px 12px rgba(0,0,0,.1)"}}>
-        <img src={p.img} alt={p.name} style={{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(70%)":""}} loading="lazy"/>
-        {!esg&&<div style={{position:"absolute",inset:0,borderRadius:13,background:"linear-gradient(135deg,transparent 60%,rgba(139,26,26,.08))"}}/>}
+      <div style={{width:110,height:88,borderRadius:14,overflow:"hidden",boxShadow:"0 4px 12px rgba(0,0,0,0.08)",background:"#f5f5f5"}}>
+        <img src={p.img} alt={p.name} style={{width:"100%",height:"100%",objectFit:"cover",filter:esg?"grayscale(80%)":"",opacity:esg?0.6:1,transition:"all 0.3s ease"}} loading="lazy"/>
       </div>
-      {!esg&&<button onClick={e=>{e.stopPropagation();onTap(p);}} style={{position:"absolute",bottom:-9,right:6,width:30,height:30,borderRadius:"50%",background:R,border:"2.5px solid #fff",color:"#fff",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,boxShadow:"0 3px 10px "+R+"60",fontWeight:300}}>+</button>}
+      {!esg&&<button onClick={e=>{e.stopPropagation();onTap(p);}} style={{position:"absolute",bottom:-10,right:8,width:32,height:32,borderRadius:"50%",background:R,border:"2.5px solid #fff",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,boxShadow:"0 4px 12px "+R+"50",fontWeight:600,transition:"transform 0.2s ease"}}>+</button>}
     </div>
   </div>;
 }
@@ -211,32 +218,32 @@ function ProductModal({p, onClose, onAdd}) {
         </div>
       </div>
 
-      {/* Conteúdo */}
-      <div style={{padding:"16px 20px 30px"}}>
-        <h2 style={{margin:"0 0 6px",fontSize:19,fontWeight:900,color:DARK,fontFamily:"Georgia,serif",letterSpacing:-.3}}>{p.name}</h2>
-        {p.desc&&<p style={{margin:"0 0 14px",fontSize:13,color:"#777",lineHeight:1.6}}>{p.desc}</p>}
+      {/* Conteúdo — refinado */}
+      <div style={{padding:"20px 20px 28px"}}>
+        <h2 style={{margin:"0 0 8px",fontSize:20,fontWeight:900,color:DARK,fontFamily:"Nunito,sans-serif",letterSpacing:-.3,lineHeight:1.2}}>{p.name}</h2>
+        {p.desc&&<p style={{margin:"0 0 16px",fontSize:13,color:TEXT_MUTED,lineHeight:1.6}}>{p.desc}</p>}
 
         {!esg&&<>
           <textarea value={obs} onChange={e=>setObs(e.target.value)}
-            placeholder="Alguma observação? (ex: sem cebola...)"
+            placeholder="Alguma observação especial?"
             rows={2}
-            style={{width:"100%",border:"1.5px solid "+BORDER,borderRadius:12,padding:"10px 13px",fontSize:13,resize:"none",outline:"none",boxSizing:"border-box",fontFamily:"inherit",background:CREAM,marginBottom:14,color:DARK}}/>
+            style={{width:"100%",border:"1.5px solid "+BORDER,borderRadius:13,padding:"11px 13px",fontSize:13,resize:"none",outline:"none",boxSizing:"border-box",fontFamily:"inherit",background:CREAM,marginBottom:16,color:DARK,transition:"border 0.2s"}}/>
 
           <div style={{display:"flex",alignItems:"center",gap:12}}>
-            {/* Qty */}
-            <div style={{display:"flex",alignItems:"center",gap:0,border:"1.5px solid "+BORDER,borderRadius:25,overflow:"hidden",flexShrink:0}}>
-              <button onClick={()=>setQty(Math.max(1,qty-1))} style={{width:36,height:36,border:"none",background:"#fff",color:DARK,fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:300}}>−</button>
-              <span style={{fontSize:15,fontWeight:800,minWidth:28,textAlign:"center",color:DARK}}>{qty}</span>
-              <button onClick={()=>setQty(Math.min(max,qty+1))} style={{width:36,height:36,border:"none",background:"#fff",color:DARK,fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:300}}>+</button>
+            {/* Qty — interação suave */}
+            <div style={{display:"flex",alignItems:"center",gap:0,border:"1.5px solid "+BORDER,borderRadius:28,overflow:"hidden",flexShrink:0,background:"#fff"}}>
+              <button onClick={()=>setQty(Math.max(1,qty-1))} style={{width:40,height:40,border:"none",background:"transparent",color:DARK,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:600,transition:"background 0.2s"}}>−</button>
+              <span style={{fontSize:16,fontWeight:800,minWidth:32,textAlign:"center",color:DARK}}>{qty}</span>
+              <button onClick={()=>setQty(Math.min(max,qty+1))} style={{width:40,height:40,border:"none",background:"transparent",color:DARK,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:600,transition:"background 0.2s"}}>+</button>
             </div>
-            {/* Add btn */}
-            <button onClick={()=>onAdd(p,qty,obs)} style={{flex:1,background:R,color:"#fff",border:"none",borderRadius:25,padding:"12px 0",fontSize:14,fontWeight:800,cursor:"pointer",letterSpacing:-.1}}>
+            {/* Add btn — premium */}
+            <button onClick={()=>onAdd(p,qty,obs)} style={{flex:1,background:R,color:"#fff",border:"none",borderRadius:28,padding:"12px 0",fontSize:14,fontWeight:800,cursor:"pointer",letterSpacing:-.1,transition:"transform 0.15s ease, box-shadow 0.15s ease",boxShadow:"0 2px 8px "+R+"40"}}>
               Adicionar · {fmt(p.price*qty)}
             </button>
           </div>
-          {p.stock>0&&p.stock<=5&&<p style={{textAlign:"center",fontSize:11,color:"#f59e0b",fontWeight:700,marginTop:9}}>⚠️ Apenas {p.stock} restante{p.stock>1?"s":""}</p>}
+          {p.stock>0&&p.stock<=5&&<p style={{textAlign:"center",fontSize:12,color:"#d97706",fontWeight:600,marginTop:10}}>⚠️ Apenas {p.stock} restante{p.stock>1?"s":""}</p>}
         </>}
-        {esg&&<div style={{textAlign:"center",padding:"16px 0",color:"#b91c1c",fontWeight:700,fontSize:15}}>Item esgotado no momento</div>}
+        {esg&&<div style={{textAlign:"center",padding:"20px 0",color:"#991b1b",fontWeight:700,fontSize:15}}>Item esgotado no momento</div>}
       </div>
     </div>
   </div>;
@@ -514,12 +521,12 @@ export default function App() {
       <span style={{fontSize:13,fontWeight:700,color:"#fff"}}>Adicionado ao pedido</span>
     </div>}
 
-    {/* Botão do carrinho */}
-    {cart.count>0&&<div style={{position:"fixed",bottom:20,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}}>
-      <button onClick={()=>setShowCart(true)} style={{width:"100%",background:R,color:"#fff",border:"none",borderRadius:20,padding:"15px 22px",fontSize:15,fontWeight:900,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 8px 28px "+R+"55"}}>
-        <div style={{background:"rgba(255,255,255,.2)",borderRadius:10,padding:"2px 10px",fontSize:13,fontWeight:800}}>{cart.count}</div>
-        <span style={{letterSpacing:-.1}}>Ver pedido</span>
-        <span style={{fontFamily:"Georgia,serif",fontSize:16,fontWeight:700}}>{fmt(cart.total)}</span>
+    {/* Botão do carrinho — premium e suave */}
+    {cart.count>0&&<div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}}>
+      <button onClick={()=>setShowCart(true)} style={{width:"100%",background:R,color:"#fff",border:"none",borderRadius:28,padding:"14px 20px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 10px 32px "+R+"45",transition:"transform 0.2s ease, box-shadow 0.2s ease",letterSpacing:-.05}}>
+        <div style={{background:"rgba(255,255,255,.18)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,.2)",borderRadius:18,padding:"4px 10px",fontSize:12,fontWeight:800}}>{cart.count}</div>
+        <span>Ver pedido</span>
+        <span style={{fontSize:15,fontWeight:900}}>{fmt(cart.total)}</span>
       </button>
     </div>}
 
