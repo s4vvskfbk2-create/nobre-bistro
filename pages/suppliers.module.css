@@ -1,0 +1,137 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Nunito', -apple-system, sans-serif;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 32px;
+  color: oklch(0.15 0.02 40);
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+
+.header p {
+  font-size: 16px;
+  color: oklch(0.55 0.015 40);
+  margin: 0;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.summary_card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid oklch(0.92 0.01 40);
+  text-align: center;
+}
+
+.summary_value {
+  font-size: 24px;
+  font-weight: 700;
+  color: oklch(0.42 0.14 20);
+  margin-bottom: 8px;
+}
+
+.summary_label {
+  font-size: 12px;
+  color: oklch(0.55 0.015 40);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.suppliers_list {
+  margin-bottom: 40px;
+}
+
+.suppliers_list h2 {
+  font-size: 20px;
+  color: oklch(0.15 0.02 40);
+  margin: 0 0 20px;
+  font-weight: 600;
+}
+
+.supplier_card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1.5px solid oklch(0.92 0.01 40);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.supplier_info h3 {
+  margin: 0 0 8px;
+  color: oklch(0.15 0.02 40);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.supplier_meta {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: oklch(0.55 0.015 40);
+}
+
+.supplier_actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.spent {
+  font-weight: 700;
+  color: oklch(0.42 0.14 20);
+  font-size: 16px;
+}
+
+.btn {
+  background: oklch(0.42 0.14 20);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+  transition: opacity 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+.import_section {
+  background: oklch(0.98 0.012 40);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1.5px solid oklch(0.92 0.01 40);
+}
+
+.import_section h2 {
+  margin: 0 0 8px;
+  color: oklch(0.15 0.02 40);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.import_section p {
+  margin: 0;
+  color: oklch(0.55 0.015 40);
+  font-size: 14px;
+}
