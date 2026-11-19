@@ -523,11 +523,19 @@ export default function App() {
 
     {/* Botão do carrinho — premium e suave */}
     {cart.count>0&&<div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}}>
-      <button onClick={()=>setShowCart(true)} style={{width:"100%",background:R,color:"#fff",border:"none",borderRadius:28,padding:"14px 20px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 10px 32px "+R+"45",transition:"transform 0.2s ease, box-shadow 0.2s ease",letterSpacing:-.05}}>
+      <button onClick={()=>setShowCart(true)} style={{width:"100%",background:R,color:"#fff",border:"none",borderRadius:28,padding:"14px 20px",fontSize:14,fontWeight:800,cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center",boxShadow:"0 10px 32px "+R+"45",transition:"transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease",letterSpacing:-.05}} onMouseEnter={e=>e.currentTarget.style.background="#8b1538"} onMouseLeave={e=>e.currentTarget.style.background=R}>
         <div style={{background:"rgba(255,255,255,.18)",backdropFilter:"blur(8px)",border:"1px solid rgba(255,255,255,.2)",borderRadius:18,padding:"4px 10px",fontSize:12,fontWeight:800}}>{cart.count}</div>
-        <span>Ver pedido</span>
+        <span style={{fontWeight:900,fontSize:16}}>🛒 FINALIZE SEU PEDIDO</span>
         <span style={{fontSize:15,fontWeight:900}}>{fmt(cart.total)}</span>
       </button>
+    </div>}
+
+    {/* CTA Grande quando carrinho está vazio */}
+    {cart.count===0&&<div style={{position:"fixed",bottom:24,left:"50%",transform:"translateX(-50%)",zIndex:90,width:"calc(100% - 32px)",maxWidth:448}}>
+      <div style={{textAlign:"center",background:"#fff5f5",border:"2px solid "+R,borderRadius:28,padding:"16px 20px",animation:"pulse 2s infinite"}}>
+        <p style={{margin:"0 0 8px",fontSize:11,fontWeight:700,color:"#888",textTransform:"uppercase",letterSpacing:.5}}>👇 Escolha seus itens acima 👆</p>
+        <p style={{margin:0,fontSize:16,fontWeight:900,color:R}}>FINALIZE SEU PEDIDO</p>
+      </div>
     </div>}
 
     {/* Modal produto */}
